@@ -1,0 +1,16 @@
+include: package:flutter_lints/flutter.yaml
+
+linter:
+  rules:
+    avoid_print: true
+    prefer_const_constructors: true
+    prefer_const_literals_to_create_immutables: true
+    always_use_package_imports: true
+    annotate_overrides: true
+    avoid_unnecessary_containers: true
+    unnecessary_this: true
+    use_full_hex_values_for_flutter_colors: true
+    sized_box_for_whitespace: true
+    prefer_final_fields: true
+    avoid_empty_else: true
+    curly_braces_in_flow_control_structures: true
