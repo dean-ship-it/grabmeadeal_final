@@ -19,6 +19,7 @@ class DealsScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    // Sort newest first
     final sortedDeals = [...deals]..sort((a, b) => b.date.compareTo(a.date));
 
     return Scaffold(
@@ -31,15 +32,20 @@ class DealsScreen extends StatelessWidget {
       ),
       body: Column(
         children: [
+          // Search bar
           Padding(
             padding: const EdgeInsets.all(8.0),
             child: CustomSearchBar(
               results: sortedDeals,
               wishlistIds: wishlistIds,
               onWishlistToggle: onWishlistToggle,
-              onSearch: (query) {},
+              onSearch: (query) {
+                // TODO: implement your search/filter logic here
+              },
             ),
           ),
+
+          // Deals list
           Expanded(
             child: ListView.builder(
               padding: const EdgeInsets.symmetric(horizontal: 8.0),

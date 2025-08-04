@@ -63,21 +63,29 @@ class _MyAppState extends State<MyApp> {
     return MaterialApp(
       title: 'Grab Me A Deal',
       debugShowCheckedModeBanner: false,
-
-      // Home screen:
-      home: DealsScreen(
-        deals: _allDeals,
-        wishlistIds: _wishlistIds,
-        onWishlistToggle: _handleWishlistToggle,
-      ),
-
-      // All named routes handled here:
+      initialRoute: '/',
+      routes: {
+        // Static routes
+        '/': (ctx) => DealsScreen(
+              deals: _allDeals,
+              wishlistIds: _wishlistIds,
+              onWishlistToggle: _handleWishlistToggle,
+            ),
+        '/categories': (ctx) => CategoriesScreen(
+              categories: _categories,
+              onCategoryTap: _handleCategoryTap,
+            ),
+      },
       onGenerateRoute: (settings) {
         switch (settings.name) {
           case '/deal-detail':
             final deal = settings.arguments as Deal;
             return MaterialPageRoute(
-              builder: (_) => DealDetailScreen(deal: deal),
+              builder: (_) => DealDetailScreen(
+                deal: deal,
+                isInWishlist: _wishlistIds.contains(deal.id),
+                onWishlistToggle: _handleWishlistToggle,
+              ),
             );
 
           case '/category-deals':
@@ -100,21 +108,20 @@ class _MyAppState extends State<MyApp> {
               ),
             );
 
-          case '/categories':
-            return MaterialPageRoute(
-              builder: (_) => CategoriesScreen(
-                categories: _categories,
-                onCategoryTap: _handleCategoryTap,
-              ),
-            );
-
           case '/notifications':
             return MaterialPageRoute(
               builder: (_) => NotificationsScreen(),
             );
 
+          // Fallback to home if route is unknown
           default:
-            return null;
+            return MaterialPageRoute(
+              builder: (_) => DealsScreen(
+                deals: _allDeals,
+                wishlistIds: _wishlistIds,
+                onWishlistToggle: _handleWishlistToggle,
+              ),
+            );
         }
       },
     );

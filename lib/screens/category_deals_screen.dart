@@ -1,4 +1,5 @@
 // lib/screens/category_deals_screen.dart
+
 import 'package:flutter/material.dart';
 import 'package:grabmeadeal_final/models/deal.dart';
 import 'package:grabmeadeal_final/widgets/deal_card.dart';
@@ -19,23 +20,29 @@ class CategoryDealsScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final filteredDeals = deals.where((deal) => deal.category == category).toList();
+    // Filter deals for this category
+    final filteredDeals = deals
+        .where((deal) => deal.category == category)
+        .toList()
+      ..sort((a, b) => b.date.compareTo(a.date)); // optional: sort by date
 
     return Scaffold(
       appBar: AppBar(
         title: Text(category),
       ),
-      body: ListView.builder(
-        itemCount: filteredDeals.length,
-        itemBuilder: (context, index) {
-          final deal = filteredDeals[index];
-          return DealCard(
-            deal: deal,
-            isInWishlist: wishlistIds.contains(deal.id),
-            onWishlistToggle: onWishlistToggle,
-          );
-        },
-      ),
+      body: filteredDeals.isEmpty
+          ? const Center(child: Text('No deals in this category.'))
+          : ListView.builder(
+              itemCount: filteredDeals.length,
+              itemBuilder: (ctx, i) {
+                final deal = filteredDeals[i];
+                return DealCard(
+                  deal: deal,
+                  isInWishlist: wishlistIds.contains(deal.id),
+                  onWishlistToggle: onWishlistToggle,
+                );
+              },
+            ),
     );
   }
 }
