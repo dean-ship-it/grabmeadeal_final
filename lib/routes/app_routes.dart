@@ -1,96 +1,62 @@
-// lib/routes/app_routes.dart
 import 'package:flutter/material.dart';
+
 import 'package:grabmeadeal_final/models/deal.dart';
+import 'package:grabmeadeal_final/models/category.dart';
+
 import 'package:grabmeadeal_final/screens/deals_screen.dart';
-import 'package:grabmeadeal_final/screens/wishlist_screen.dart';
 import 'package:grabmeadeal_final/screens/categories_screen.dart';
-import 'package:grabmeadeal_final/screens/deal_detail_screen.dart';
 import 'package:grabmeadeal_final/screens/category_deals_screen.dart';
+import 'package:grabmeadeal_final/screens/deal_detail_screen.dart';
+import 'package:grabmeadeal_final/screens/wishlist_screen.dart';
 import 'package:grabmeadeal_final/screens/search_results_screen.dart';
 import 'package:grabmeadeal_final/screens/notifications_screen.dart';
 
 class AppRoutes {
+  static const String home          = '/';
+  static const String deals         = '/deals';
+  static const String categories    = '/categories';
+  static const String categoryDeals = '/category-deals';
+  static const String dealDetail    = '/deal-detail';
+  static const String wishlist      = '/wishlist';
+  static const String searchResults = '/search-results';
+  static const String notifications = '/notifications';
+
   static Route<dynamic> generateRoute(RouteSettings settings) {
-    final args = settings.arguments;
-
     switch (settings.name) {
-      case '/':
+      case home:
+      case deals:
+        return MaterialPageRoute(builder: (_) => const DealsScreen());
+
+      case categories:
+        return MaterialPageRoute(builder: (_) => const CategoriesScreen());
+
+      case categoryDeals:
+        final category = settings.arguments as Category?;
         return MaterialPageRoute(
-          builder: (_) => DealsScreen(
-            deals: const [],
-            wishlistIds: const <String>{},
-            onWishlistToggle: (deal) {}, allDeals: const [], categories: const [], wishlistDeals: const [],
-          ),
+          builder: (_) => CategoryDealsScreen(category: category!),
         );
 
-      case '/wishlist':
+      case dealDetail:
+        final deal = settings.arguments as Deal?;
         return MaterialPageRoute(
-          builder: (_) => WishlistScreen(
-            wishlistDeals: const [],
-            onWishlistToggle: (deal) {}, wishlistIds: null,
-          ),
+          builder: (_) => DealDetailScreen(deal: deal!),
         );
 
-      case '/categories':
+      case wishlist:
+        return MaterialPageRoute(builder: (_) => const WishlistScreen());
+
+      case searchResults:
+        final query = settings.arguments as String?;
         return MaterialPageRoute(
-          builder: (_) => CategoriesScreen(
-            categories: const [],
-            deals: const [],
-            wishlistIds: const <String>{},
-            onWishlistToggle: (deal) {},
-          ),
+          builder: (_) => SearchResultsScreen(query: query!),
         );
 
-      case '/dealDetail':
-        if (args is Deal) {
-          return MaterialPageRoute(
-            builder: (_) => DealDetailScreen(deal: args),
-          );
-        }
-        return _errorRoute();
-
-      case '/categoryDeals':
-        if (args is Map<String, dynamic>) {
-          return MaterialPageRoute(
-            builder: (_) => CategoryDealsScreen(
-              category: args['category'] ?? '',
-              deals: args['deals'] ?? <Deal>[],
-              wishlistIds: Set<String>.from(args['wishlistIds'] ?? <String>[]),
-              onWishlistToggle: args['onWishlistToggle'] ?? (Deal _) {},
-            ),
-          );
-        }
-        return _errorRoute();
-
-      case '/searchResults':
-        if (args is Map<String, dynamic>) {
-          return MaterialPageRoute(
-            builder: (_) => SearchResultsScreen(
-              searchQuery: args['searchQuery'] ?? '',
-              results: args['results'] ?? <Deal>[],
-              wishlistIds: Set<String>.from(args['wishlistIds'] ?? <String>[]),
-              onWishlistToggle: args['onWishlistToggle'] ?? (Deal _) {},
-            ),
-          );
-        }
-        return _errorRoute();
-
-      case '/notifications':
-        return MaterialPageRoute(
-          builder: (_) => const NotificationsScreen(),
-        );
+      case notifications:
+        return MaterialPageRoute(builder: (_) => const NotificationsScreen());
 
       default:
-        return _errorRoute();
+        // fallback to home if route not found
+        return MaterialPageRoute(builder: (_) => const DealsScreen());
     }
-  }
-
-  static Route<dynamic> _errorRoute() {
-    return MaterialPageRoute(
-      builder: (_) => Scaffold(
-        appBar: AppBar(title: const Text('Error')),
-        body: const Center(child: Text('Page not found')),
-      ),
-    );
   }
 }
