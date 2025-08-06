@@ -2,78 +2,64 @@
 
 import 'package:flutter/material.dart';
 import 'package:grabmeadeal_final/models/deal.dart';
-import 'package:url_launcher/url_launcher.dart';
 
 class DealDetailScreen extends StatelessWidget {
   final Deal deal;
-  final bool isInWishlist;
-  final void Function(Deal) onWishlistToggle;
 
-  const DealDetailScreen({
-    Key? key,
-    required this.deal,
-    required this.isInWishlist,
-    required this.onWishlistToggle,
-  }) : super(key: key);
-
-  Future<void> _launchURL(BuildContext context) async {
-    final uri = Uri.parse(deal.link);
-    if (await canLaunchUrl(uri)) {
-      await launchUrl(uri, mode: LaunchMode.externalApplication);
-    } else {
-      // ignore: use_build_context_synchronously
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Could not open link')),
-      );
-    }
-  }
+  const DealDetailScreen({super.key, required this.deal});
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
         title: Text(deal.title),
-        actions: [
-          IconButton(
-            icon: Icon(
-              isInWishlist ? Icons.favorite : Icons.favorite_border,
-            ),
-            onPressed: () => onWishlistToggle(deal),
-          ),
-        ],
+        backgroundColor: Colors.white,
+        foregroundColor: Colors.black87,
+        elevation: 2,
       ),
       body: SingleChildScrollView(
-        child: Padding(
-          padding: const EdgeInsets.all(16.0),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              if (deal.imageUrl.isNotEmpty)
-                Image.network(
+        padding: const EdgeInsets.all(16),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            if (deal.imageUrl.isNotEmpty)
+              ClipRRect(
+                borderRadius: BorderRadius.circular(10),
+                child: Image.network(
                   deal.imageUrl,
-                  width: double.infinity,
                   fit: BoxFit.cover,
+                  width: double.infinity,
+                  height: 250,
                 ),
-              const SizedBox(height: 16),
-              Text(
-                deal.title,
-                style: Theme.of(context).textTheme.headline6,
               ),
-              if (deal.price != null) ...[
-                const SizedBox(height: 8),
-                Text(
-                  '\$${deal.price}',
-                  style: Theme.of(context).textTheme.subtitle1,
-                ),
-              ],
-              const SizedBox(height: 16),
-              ElevatedButton.icon(
-                icon: const Icon(Icons.open_in_new),
-                label: const Text('View Deal'),
-                onPressed: () => _launchURL(context),
+            const SizedBox(height: 16),
+            Text(
+              deal.title,
+              style: Theme.of(context).textTheme.headline6?.copyWith(
+                    fontWeight: FontWeight.bold,
+                  ),
+            ),
+            const SizedBox(height: 8),
+            Text(
+              'Vendor: ${deal.vendor}',
+              style: Theme.of(context).textTheme.subtitle1,
+            ),
+            const SizedBox(height: 8),
+            Text(
+              'Price: \$${deal.price.toStringAsFixed(2)}',
+              style: const TextStyle(
+                color: Colors.green,
+                fontWeight: FontWeight.bold,
               ),
-            ],
-          ),
+            ),
+            const SizedBox(height: 16),
+            const Divider(),
+            const SizedBox(height: 8),
+            Text(
+              deal.description,
+              style: const TextStyle(fontSize: 16),
+            ),
+          ],
         ),
       ),
     );

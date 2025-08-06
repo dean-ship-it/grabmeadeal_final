@@ -19,7 +19,7 @@ class AppRoutes {
           builder: (_) => DealsScreen(
             deals: const [],
             wishlistIds: const <String>{},
-            onWishlistToggle: (deal) {}, allDeals: const [], categories: const [], wishlistDeals: const [],
+            onWishlistToggle: (deal) {}, allDeals: const [], categories: const [], wishlistDeals: const [], onTap: (Deal deal) {  },
           ),
         );
 
@@ -27,7 +27,7 @@ class AppRoutes {
         return MaterialPageRoute(
           builder: (_) => WishlistScreen(
             wishlistDeals: const [],
-            onWishlistToggle: (deal) {}, wishlistIds: null,
+            onWishlistToggle: (deal) {}, wishlistIds: null, onTap: (Deal deal) {  },
           ),
         );
 
@@ -37,14 +37,14 @@ class AppRoutes {
             categories: const [],
             deals: const [],
             wishlistIds: const <String>{},
-            onWishlistToggle: (deal) {},
+            onWishlistToggle: (deal) {}, onCategoryTap: (Category ) {  },
           ),
         );
 
       case '/dealDetail':
         if (args is Deal) {
           return MaterialPageRoute(
-            builder: (_) => DealDetailScreen(deal: args),
+            builder: (_) => DealDetailScreen(deal: args, isInWishlist: null,, onWishlistToggle: (Deal ) {  },),
           );
         }
         return _errorRoute();
@@ -56,7 +56,7 @@ class AppRoutes {
               category: args['category'] ?? '',
               deals: args['deals'] ?? <Deal>[],
               wishlistIds: Set<String>.from(args['wishlistIds'] ?? <String>[]),
-              onWishlistToggle: args['onWishlistToggle'] ?? (Deal _) {},
+              onWishlistToggle: args['onWishlistToggle'] ?? (Deal _) {}, onTap: (Deal ) {  },
             ),
           );
         }

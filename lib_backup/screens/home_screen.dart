@@ -26,7 +26,7 @@ class HomeScreen extends StatelessWidget {
       wishlistDeals: wishlistDeals,
       wishlistIds: wishlistIds,
       categories: categories,
-      onWishlistToggle: onWishlistToggle, allDeals: [],
+      onWishlistToggle: onWishlistToggle, allDeals: const [], onCategoryTap: (Category ) {  },
     );
   }
 }

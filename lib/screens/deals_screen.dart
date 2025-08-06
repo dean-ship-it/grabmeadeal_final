@@ -9,17 +9,18 @@ class DealsScreen extends StatelessWidget {
   final List<Deal> deals;
   final Set<String> wishlistIds;
   final void Function(Deal) onWishlistToggle;
+  final VoidCallback onTap;
 
   const DealsScreen({
     super.key,
     required this.deals,
     required this.wishlistIds,
     required this.onWishlistToggle,
+    required this.onTap,
   });
 
   @override
   Widget build(BuildContext context) {
-    // Sort newest first
     final sortedDeals = [...deals]..sort((a, b) => b.date.compareTo(a.date));
 
     return Scaffold(
@@ -32,20 +33,15 @@ class DealsScreen extends StatelessWidget {
       ),
       body: Column(
         children: [
-          // Search bar
           Padding(
             padding: const EdgeInsets.all(8.0),
             child: CustomSearchBar(
               results: sortedDeals,
               wishlistIds: wishlistIds,
               onWishlistToggle: onWishlistToggle,
-              onSearch: (query) {
-                // TODO: implement your search/filter logic here
-              },
+              onSearch: (query) {},
             ),
           ),
-
-          // Deals list
           Expanded(
             child: ListView.builder(
               padding: const EdgeInsets.symmetric(horizontal: 8.0),
@@ -55,7 +51,8 @@ class DealsScreen extends StatelessWidget {
                 return DealCard(
                   deal: deal,
                   isInWishlist: wishlistIds.contains(deal.id),
-                  onWishlistToggle: onWishlistToggle,
+                  onWishlistToggle: () => onWishlistToggle(deal),
+                  onTap: onTap,
                 );
               },
             ),

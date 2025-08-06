@@ -37,18 +37,18 @@ class _MainTabControllerState extends State<MainTabController> {
         deals: widget.deals,
         wishlistIds: widget.wishlistIds,
         onWishlistToggle: widget.onWishlistToggle,
-        allDeals: widget.allDeals, categories: const [], wishlistDeals: const [],
+        allDeals: widget.allDeals, categories: const [], wishlistDeals: const [], onTap: (Deal deal) {  },
       ),
       WishlistScreen(
         wishlistDeals: widget.wishlistDeals,
         wishlistIds: widget.wishlistIds,
-        onWishlistToggle: widget.onWishlistToggle,
+        onWishlistToggle: widget.onWishlistToggle, onTap: (Deal deal) {  },
       ),
       CategoriesScreen(
         categories: widget.categories,
         deals: widget.deals,
         wishlistIds: widget.wishlistIds,
-        onWishlistToggle: widget.onWishlistToggle,
+        onWishlistToggle: widget.onWishlistToggle, onCategoryTap: (Category ) {  },
       ),
     ];
 

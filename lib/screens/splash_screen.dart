@@ -1,24 +1,26 @@
 import 'package:flutter/material.dart';
+import 'package:firebase_auth/firebase_auth.dart';
+import 'package:grabmeadeal_final/screens/home_screen.dart';
+import 'package:grabmeadeal_final/screens/auth_screen.dart';
 import 'package:grabmeadeal_final/models/deal.dart';
 import 'package:grabmeadeal_final/models/category.dart';
-import 'package:grabmeadeal_final/screens/main_tab_controller.dart';
 
 class SplashScreen extends StatefulWidget {
-  final List<Deal> deals;
+  final List<Deal> allDeals;
+  final List<Category> categories;
   final List<Deal> wishlistDeals;
   final Set<String> wishlistIds;
-  final List<Category> categories;
-  final List<Deal> allDeals;
   final void Function(Deal) onWishlistToggle;
+  final void Function(Category) onCategoryTap;
 
   const SplashScreen({
     super.key,
-    required this.deals,
+    required this.allDeals,
+    required this.categories,
     required this.wishlistDeals,
     required this.wishlistIds,
-    required this.categories,
-    required this.allDeals,
     required this.onWishlistToggle,
+    required this.onCategoryTap,
   });
 
   @override
@@ -29,27 +31,43 @@ class _SplashScreenState extends State<SplashScreen> {
   @override
   void initState() {
     super.initState();
-    Future.delayed(const Duration(seconds: 2), () {
+    _checkAuth();
+  }
+
+  Future<void> _checkAuth() async {
+    await Future.delayed(const Duration(seconds: 2));
+
+    if (!mounted) return;
+
+    final user = FirebaseAuth.instance.currentUser;
+    if (user != null) {
       Navigator.of(context).pushReplacement(
         MaterialPageRoute(
-          builder: (context) => MainTabController(
-            deals: widget.deals,
+          builder: (_) => HomeScreen(
+            allDeals: widget.allDeals,
+            categories: widget.categories,
             wishlistDeals: widget.wishlistDeals,
             wishlistIds: widget.wishlistIds,
-            categories: widget.categories,
-            allDeals: widget.allDeals,
             onWishlistToggle: widget.onWishlistToggle,
+            onCategoryTap: widget.onCategoryTap,
           ),
         ),
       );
-    });
+    } else {
+      Navigator.of(context).pushReplacement(
+        MaterialPageRoute(builder: (_) => const AuthScreen()),
+      );
+    }
   }
 
   @override
   Widget build(BuildContext context) {
     return const Scaffold(
       body: Center(
-        child: CircularProgressIndicator(),
+        child: Text(
+          'Grab Me A Deal',
+          style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
+        ),
       ),
     );
   }

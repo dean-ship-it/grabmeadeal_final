@@ -69,11 +69,11 @@ class _MyAppState extends State<MyApp> {
         '/': (ctx) => DealsScreen(
               deals: _allDeals,
               wishlistIds: _wishlistIds,
-              onWishlistToggle: _handleWishlistToggle,
+              onWishlistToggle: _handleWishlistToggle, onTap: (Deal deal) {  }, allDeals: [], categories: [], wishlistDeals: [],
             ),
         '/categories': (ctx) => CategoriesScreen(
               categories: _categories,
-              onCategoryTap: _handleCategoryTap,
+              onCategoryTap: _handleCategoryTap, deals: [], wishlistIds: null, onWishlistToggle: (Deal p1) {  },
             ),
       },
       onGenerateRoute: (settings) {
@@ -95,7 +95,7 @@ class _MyAppState extends State<MyApp> {
                 category: categoryName,
                 deals: _allDeals,
                 wishlistIds: _wishlistIds,
-                onWishlistToggle: _handleWishlistToggle,
+                onWishlistToggle: _handleWishlistToggle, onTap: (Deal ) {  },
               ),
             );
 
@@ -104,13 +104,13 @@ class _MyAppState extends State<MyApp> {
               builder: (_) => WishlistScreen(
                 wishlistDeals: _wishlistDeals,
                 wishlistIds: _wishlistIds,
-                onWishlistToggle: _handleWishlistToggle,
+                onWishlistToggle: _handleWishlistToggle, onTap: (Deal deal) {  },
               ),
             );
 
           case '/notifications':
             return MaterialPageRoute(
-              builder: (_) => NotificationsScreen(),
+              builder: (_) => const NotificationsScreen(),
             );
 
           // Fallback to home if route is unknown
@@ -119,7 +119,7 @@ class _MyAppState extends State<MyApp> {
               builder: (_) => DealsScreen(
                 deals: _allDeals,
                 wishlistIds: _wishlistIds,
-                onWishlistToggle: _handleWishlistToggle,
+                onWishlistToggle: _handleWishlistToggle, onTap: (Deal deal) {  }, allDeals: [], categories: [], wishlistDeals: [],
               ),
             );
         }

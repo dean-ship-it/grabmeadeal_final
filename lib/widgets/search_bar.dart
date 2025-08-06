@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:grabmeadeal_final/models/deal.dart';
 import 'package:grabmeadeal_final/screens/search_results_screen.dart';
-import 'package:grabmeadeal_final/models/deal.dart';
 
 class CustomSearchBar extends StatefulWidget {
   final List<Deal> results;
@@ -12,7 +11,7 @@ class CustomSearchBar extends StatefulWidget {
     super.key,
     required this.results,
     required this.wishlistIds,
-    required this.onWishlistToggle,
+    required this.onWishlistToggle, required Null Function(dynamic query) onSearch,
   });
 
   @override

@@ -38,7 +38,7 @@ class _SplashScreenState extends State<SplashScreen> {
             wishlistIds: widget.wishlistIds,
             categories: widget.categories,
             allDeals: widget.allDeals,
-            onWishlistToggle: widget.onWishlistToggle,
+            onWishlistToggle: widget.onWishlistToggle, onCategoryTap: (Category ) {  },
           ),
         ),
       );

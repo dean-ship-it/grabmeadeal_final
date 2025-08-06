@@ -8,6 +8,10 @@ class WishlistProvider extends ChangeNotifier {
   Set<String> get wishlistIds => _wishlistIds;
   List<Deal> get wishlistDeals => _wishlistDeals;
 
+  get ids => null;
+
+  get toggleDeal => null;
+
   void toggleWishlist(Deal deal) {
     if (_wishlistIds.contains(deal.id)) {
       _wishlistIds.remove(deal.id);
