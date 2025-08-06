@@ -1,98 +1,76 @@
-// lib/routes/app_routes.dart
-
 import 'package:flutter/material.dart';
-import 'package:provider/provider.dart';
-
-import 'package:grabmeadeal_final/providers/deals_provider.dart';
-import 'package:grabmeadeal_final/providers/wishlist_provider.dart';
-
+import 'package:grabmeadeal_final/models/category.dart';
 import 'package:grabmeadeal_final/models/deal.dart';
-
-import 'package:grabmeadeal_final/screens/deals_screen.dart';
-import 'package:grabmeadeal_final/screens/deal_detail_screen.dart';
+import 'package:grabmeadeal_final/screens/admin_upload_screen.dart';
+import 'package:grabmeadeal_final/screens/categories_screen.dart';
 import 'package:grabmeadeal_final/screens/category_deals_screen.dart';
-import 'package:grabmeadeal_final/screens/search_results_screen.dart';
-import 'package:grabmeadeal_final/screens/wishlist_screen.dart';
+import 'package:grabmeadeal_final/screens/deal_detail_screen.dart';
+import 'package:grabmeadeal_final/screens/deals_screen.dart';
 import 'package:grabmeadeal_final/screens/notifications_screen.dart';
+import 'package:grabmeadeal_final/screens/search_results_screen.dart';
+import 'package:grabmeadeal_final/screens/splash_screen.dart';
+import 'package:grabmeadeal_final/screens/wishlist_screen.dart';
 
 class AppRoutes {
-  static String notifications;
+  static const String home = '/';
+  static const String deals = '/deals';
+  static const String wishlist = '/wishlist';
+  static const String categories = '/categories';
+  static const String categoryDeals = '/category-deals';
+  static const String dealDetail = '/deal-detail';
+  static const String adminUpload = '/admin-upload';
+  static const String notifications = '/notifications';
+  static const String searchResults = '/search-results';
+  static const String splash = '/splash';
+  static const String signup = '/signup'; // Placeholder
 
-  static Route<dynamic>? onGenerateRoute(RouteSettings settings) {
-    switch (settings.name) {
-      case '/':
-        return MaterialPageRoute(builder: (ctx) {
-          final dealsProv = ctx.watch<DealsProvider>();
-          final wishlistProv = ctx.watch<WishlistProvider>();
-          return DealsScreen(
-            deals: dealsProv.deals,
-            wishlistIds: wishlistProv.ids,
-            onWishlistToggle: wishlistProv.toggleDeal, onTap: (Deal deal) {  }, allDeals: [], categories: [], wishlistDeals: [],
-          );
-        });
-
-      case '/deal_detail':
-        final deal = settings.arguments as Deal;
-        return MaterialPageRoute(builder: (ctx) {
-          final wishlistProv = ctx.watch<WishlistProvider>();
-          return DealDetailScreen(
-            deal: deal,
-            isInWishlist: wishlistProv.ids.contains(deal.id),
-            onWishlistToggle: wishlistProv.toggleDeal,
-          );
-        });
-
-      case '/category_deals':
-        final category = settings.arguments as String;
-        return MaterialPageRoute(builder: (ctx) {
-          final dealsProv = ctx.watch<DealsProvider>();
-          final wishlistProv = ctx.watch<WishlistProvider>();
-          return CategoryDealsScreen(
-            category: category,
-            deals: dealsProv.deals,
-            wishlistIds: wishlistProv.ids,
-            onWishlistToggle: wishlistProv.toggleDeal, onTap: (Deal ) {  },
-          );
-        });
-
-      case '/search_results':
-        final query = settings.arguments as String;
-        return MaterialPageRoute(builder: (ctx) {
-          final dealsProv = ctx.watch<DealsProvider>();
-          final wishlistProv = ctx.watch<WishlistProvider>();
-          final results = dealsProv.deals
-              .where((d) => d.title.toLowerCase().contains(query.toLowerCase()))
-              .toList();
-          return SearchResultsScreen(
-            results: results,
-            searchQuery: query,
-            wishlistIds: wishlistProv.ids,
-            onWishlistToggle: wishlistProv.toggleDeal,
-          );
-        });
-
-      case '/wishlist':
-        return MaterialPageRoute(builder: (ctx) {
-          final wishlistProv = ctx.watch<WishlistProvider>();
-          return WishlistScreen(
-            wishlistDeals: wishlistProv.wishlistDeals,
-            wishlistIds: wishlistProv.ids,
-            onWishlistToggle: wishlistProv.toggleDeal, onTap: (Deal deal) {  },
-          );
-        });
-
-      case '/notifications':
-        return MaterialPageRoute(
-          builder: (_) => NotificationsScreen(),
-        );
-
-      default:
-        // Fallback for undefined routes
-        return MaterialPageRoute(
-          builder: (_) => Scaffold(
-            body: Center(child: Text('No route defined for ${settings.name}')),
+  static Map<String, Widget Function(BuildContext)> routes = {
+    home: (context) => SplashScreen(
+          wishlistDeals: const [],
+          wishlistIds: const {},
+          onWishlistToggle: (Deal deal) {},
+        ),
+    deals: (context) => DealsScreen(
+          deals: const [],
+          wishlistIds: const {},
+          onWishlistToggle: (Deal deal) {},
+          onSearch: (String query) {},
+        ),
+    wishlist: (context) => WishlistScreen(
+          wishlistDeals: const [],
+          onWishlistToggle: (Deal deal) {},
+        ),
+    categories: (context) => CategoriesScreen(
+          categories: const [],
+        ),
+    categoryDeals: (context) => CategoryDealsScreen(
+          category: const Category(id: '0', name: 'Default'),
+          deals: const [],
+          wishlistIds: const {},
+          onWishlistToggle: (Deal deal) {},
+        ),
+    dealDetail: (context) => DealDetailScreen(
+          deal: Deal(
+            id: '0',
+            title: 'Sample Deal',
+            description: 'Sample description',
+            price: 0.0,
+            imageUrl: '',
+            vendor: 'Vendor',
+            category: 'Category',
+            date: DateTime.now(),
           ),
-        );
-    }
-  }
+          onWishlistToggle: (Deal deal) {},
+        ),
+    adminUpload: (context) => AdminUploadScreen(
+          allDeals: const [],
+        ),
+    notifications: (context) => const NotificationsScreen(),
+    searchResults: (context) => SearchResultsScreen(
+          deals: const [],
+          wishlistIds: const {},
+          onWishlistToggle: (Deal deal) {},
+        ),
+    signup: (context) => const Placeholder(), // Replace with real SignupScreen
+  };
 }

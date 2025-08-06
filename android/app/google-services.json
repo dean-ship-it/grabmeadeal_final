@@ -1,0 +1,126 @@
+{
+  "project_info": {
+    "project_number": "346101400207",
+    "project_id": "grab-me-a-deal-e69ae",
+    "storage_bucket": "grab-me-a-deal-e69ae.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:346101400207:android:53070dda4f9711f539a6fa",
+        "android_client_info": {
+          "package_name": "com.example.grabmeadeal_app"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "346101400207-pm0ndh1gjaihqeiavmlkjlbimeodj56d.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.example.grabmeadeal_app",
+            "certificate_hash": "7c5a079a1733392076f0362a07f14c2c90cd2f17"
+          }
+        },
+        {
+          "client_id": "346101400207-mkuik5t72ccodkbu0b7fslbuje9afc9n.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCgTqCMMvek-N1dNns_DZwro6DuhdEAHz8"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "346101400207-acj3t3ldi560kfpkvotrddledcetcqnj.apps.googleusercontent.com",
+              "client_type": 3
+            },
+            {
+              "client_id": "346101400207-r3neqtaiqurkellkvv1l1p1q5gnjc5n5.apps.googleusercontent.com",
+              "client_type": 2,
+              "ios_info": {
+                "bundle_id": "com.example.grabmeadealClean"
+              }
+            }
+          ]
+        }
+      }
+    },
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:346101400207:android:3b7cba3462fcd19239a6fa",
+        "android_client_info": {
+          "package_name": "com.example.grabmeadeal_clean"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "346101400207-mkuik5t72ccodkbu0b7fslbuje9afc9n.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCgTqCMMvek-N1dNns_DZwro6DuhdEAHz8"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "346101400207-acj3t3ldi560kfpkvotrddledcetcqnj.apps.googleusercontent.com",
+              "client_type": 3
+            },
+            {
+              "client_id": "346101400207-r3neqtaiqurkellkvv1l1p1q5gnjc5n5.apps.googleusercontent.com",
+              "client_type": 2,
+              "ios_info": {
+                "bundle_id": "com.example.grabmeadealClean"
+              }
+            }
+          ]
+        }
+      }
+    },
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:346101400207:android:27e56f791c1e5db239a6fa",
+        "android_client_info": {
+          "package_name": "com.example.grabmeadeal_final"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "346101400207-mkuik5t72ccodkbu0b7fslbuje9afc9n.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCgTqCMMvek-N1dNns_DZwro6DuhdEAHz8"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "346101400207-acj3t3ldi560kfpkvotrddledcetcqnj.apps.googleusercontent.com",
+              "client_type": 3
+            },
+            {
+              "client_id": "346101400207-r3neqtaiqurkellkvv1l1p1q5gnjc5n5.apps.googleusercontent.com",
+              "client_type": 2,
+              "ios_info": {
+                "bundle_id": "com.example.grabmeadealClean"
+              }
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

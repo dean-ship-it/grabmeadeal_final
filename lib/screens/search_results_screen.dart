@@ -6,14 +6,12 @@ class SearchResultsScreen extends StatelessWidget {
   final List<Deal> results;
   final Set<String> wishlistIds;
   final void Function(Deal) onWishlistToggle;
-  final VoidCallback onTap;
 
   const SearchResultsScreen({
     super.key,
     required this.results,
     required this.wishlistIds,
     required this.onWishlistToggle,
-    required this.onTap,
   });
 
   @override
@@ -21,10 +19,6 @@ class SearchResultsScreen extends StatelessWidget {
     return Scaffold(
       appBar: AppBar(
         title: const Text('Search Results'),
-        centerTitle: true,
-        elevation: 2,
-        backgroundColor: Colors.white,
-        foregroundColor: Colors.black87,
       ),
       body: results.isEmpty
           ? const Center(child: Text('No results found.'))
@@ -35,8 +29,10 @@ class SearchResultsScreen extends StatelessWidget {
                 return DealCard(
                   deal: deal,
                   isInWishlist: wishlistIds.contains(deal.id),
+                  onTap: () {
+                    // TODO: Add navigation to deal detail if needed
+                  },
                   onWishlistToggle: () => onWishlistToggle(deal),
-                  onTap: onTap,
                 );
               },
             ),

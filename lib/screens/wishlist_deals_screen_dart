@@ -18,19 +18,11 @@ class WishlistDealsScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text(
-          'Your Wishlist Deals',
-          style: TextStyle(fontSize: 18),
-        ),
-        backgroundColor: Colors.green.shade700,
+        title: const Text('My Wishlist'),
+        centerTitle: true,
       ),
       body: wishlistDeals.isEmpty
-          ? const Center(
-              child: Text(
-                'No wishlist deals available.',
-                style: TextStyle(fontSize: 16, fontWeight: FontWeight.w500),
-              ),
-            )
+          ? const Center(child: Text('Your wishlist is empty.'))
           : ListView.builder(
               itemCount: wishlistDeals.length,
               itemBuilder: (context, index) {
@@ -39,7 +31,11 @@ class WishlistDealsScreen extends StatelessWidget {
                   deal: deal,
                   isInWishlist: wishlistIds.contains(deal.id),
                   onTap: () {
-                    // TODO: Navigate to deal detail
+                    Navigator.pushNamed(
+                      context,
+                      '/deal-detail',
+                      arguments: deal,
+                    );
                   },
                   onWishlistToggle: () => onWishlistToggle(deal),
                 );

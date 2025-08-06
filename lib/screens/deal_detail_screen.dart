@@ -1,63 +1,64 @@
-// lib/screens/deal_detail_screen.dart
-
 import 'package:flutter/material.dart';
 import 'package:grabmeadeal_final/models/deal.dart';
 
 class DealDetailScreen extends StatelessWidget {
   final Deal deal;
+  final bool isInWishlist;
+  final void Function(Deal) onWishlistToggle;
 
-  const DealDetailScreen({super.key, required this.deal});
+  const DealDetailScreen({
+    Key? key,
+    required this.deal,
+    required this.isInWishlist,
+    required this.onWishlistToggle,
+  }) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
         title: Text(deal.title),
-        backgroundColor: Colors.white,
-        foregroundColor: Colors.black87,
-        elevation: 2,
+        actions: [
+          IconButton(
+            icon: Icon(
+              isInWishlist ? Icons.favorite : Icons.favorite_border,
+              color: isInWishlist ? Colors.red : null,
+            ),
+            onPressed: () => onWishlistToggle(deal),
+          )
+        ],
       ),
-      body: SingleChildScrollView(
-        padding: const EdgeInsets.all(16),
+      body: Padding(
+        padding: const EdgeInsets.all(16.0),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            if (deal.imageUrl.isNotEmpty)
-              ClipRRect(
-                borderRadius: BorderRadius.circular(10),
-                child: Image.network(
-                  deal.imageUrl,
-                  fit: BoxFit.cover,
-                  width: double.infinity,
-                  height: 250,
-                ),
-              ),
+            Image.network(deal.imageUrl, height: 200),
             const SizedBox(height: 16),
             Text(
               deal.title,
-              style: Theme.of(context).textTheme.headline6?.copyWith(
-                    fontWeight: FontWeight.bold,
-                  ),
+              style: const TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
             ),
-            const SizedBox(height: 8),
-            Text(
-              'Vendor: ${deal.vendor}',
-              style: Theme.of(context).textTheme.subtitle1,
-            ),
-            const SizedBox(height: 8),
-            Text(
-              'Price: \$${deal.price.toStringAsFixed(2)}',
-              style: const TextStyle(
-                color: Colors.green,
-                fontWeight: FontWeight.bold,
-              ),
-            ),
-            const SizedBox(height: 16),
-            const Divider(),
             const SizedBox(height: 8),
             Text(
               deal.description,
               style: const TextStyle(fontSize: 16),
+            ),
+            const SizedBox(height: 16),
+            Text('Price: \$${deal.price.toStringAsFixed(2)}'),
+            const SizedBox(height: 8),
+            Text('Vendor: ${deal.vendor}'),
+            const SizedBox(height: 8),
+            if (deal.location != null)
+              Text('Location: ${deal.location!}'),
+            const SizedBox(height: 8),
+            Text('Category: ${deal.category}'),
+            const SizedBox(height: 16),
+            ElevatedButton(
+              onPressed: () {
+                // Link out to the deal (future)
+              },
+              child: const Text('View Deal'),
             ),
           ],
         ),

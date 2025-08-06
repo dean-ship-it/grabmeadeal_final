@@ -5,13 +5,15 @@ import 'package:grabmeadeal_final/screens/search_results_screen.dart';
 class CustomSearchBar extends StatefulWidget {
   final List<Deal> results;
   final Set<String> wishlistIds;
-  final Function(Deal) onWishlistToggle;
+  final void Function(Deal) onWishlistToggle;
+  final void Function(String) onSearch;
 
   const CustomSearchBar({
     super.key,
     required this.results,
     required this.wishlistIds,
-    required this.onWishlistToggle, required Null Function(dynamic query) onSearch,
+    required this.onWishlistToggle,
+    required this.onSearch,
   });
 
   @override
@@ -21,45 +23,42 @@ class CustomSearchBar extends StatefulWidget {
 class _CustomSearchBarState extends State<CustomSearchBar> {
   final TextEditingController _controller = TextEditingController();
 
-  void _submitSearch() {
+  void _handleSearch() {
     final query = _controller.text.trim();
-    if (query.isEmpty) return;
-
-    Navigator.push(
-      context,
-      MaterialPageRoute(
-        builder: (context) => SearchResultsScreen(
-          searchQuery: query,
-          results: widget.results,
-          wishlistIds: widget.wishlistIds,
-          onWishlistToggle: widget.onWishlistToggle,
+    if (query.isNotEmpty) {
+      widget.onSearch(query);
+      Navigator.push(
+        context,
+        MaterialPageRoute(
+          builder: (_) => SearchResultsScreen(
+            searchQuery: query,
+            results: widget.results,
+            wishlistIds: widget.wishlistIds,
+            onWishlistToggle: widget.onWishlistToggle,
+          ),
         ),
-      ),
-    );
+      );
+    }
   }
 
   @override
   Widget build(BuildContext context) {
     return Padding(
-      padding: const EdgeInsets.all(16),
+      padding: const EdgeInsets.all(12),
       child: TextField(
         controller: _controller,
-        onSubmitted: (_) => _submitSearch(),
-        textInputAction: TextInputAction.search,
         decoration: InputDecoration(
-          hintText: 'Search for deals...',
+          hintText: 'Search deals...',
           prefixIcon: const Icon(Icons.search),
           suffixIcon: IconButton(
             icon: const Icon(Icons.arrow_forward),
-            onPressed: _submitSearch,
+            onPressed: _handleSearch,
           ),
           border: OutlineInputBorder(
             borderRadius: BorderRadius.circular(12),
-            borderSide: const BorderSide(color: Colors.grey),
           ),
-          filled: true,
-          fillColor: Colors.white,
         ),
+        onSubmitted: (_) => _handleSearch(),
       ),
     );
   }
