@@ -12,7 +12,7 @@ class DealCard extends StatelessWidget {
     required this.deal,
     required this.isInWishlist,
     required this.onTap,
-    required this.onWishlistToggle,
+    required this.onWishlistToggle, required Null Function(), required Null Function(), required Null Function()   ,
   });
 
   @override

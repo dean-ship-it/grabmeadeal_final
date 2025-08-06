@@ -1,42 +1,66 @@
+// lib/screens/auth_screen.dart
+
 import 'package:flutter/material.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 
 class AuthScreen extends StatefulWidget {
-  const AuthScreen({Key? key}) : super(key: key);
+  const AuthScreen({super.key});
 
   @override
-  _AuthScreenState createState() => _AuthScreenState();
+  State<AuthScreen> createState() => _AuthScreenState();
 }
 
 class _AuthScreenState extends State<AuthScreen> {
-  final GoogleSignIn _googleSignIn = GoogleSignIn();
+  bool _isSigningIn = false;
 
-  Future<void> _handleSignIn() async {
+  Future<void> _signInWithGoogle() async {
+    setState(() {
+      _isSigningIn = true;
+    });
+
     try {
-      final GoogleSignInAccount? account = await _googleSignIn.signIn();
-      if (account == null) {
-        // The user canceled the sign-in
-        return;
+      final GoogleSignInAccount? googleUser = await GoogleSignIn().signIn();
+
+      if (googleUser == null) {
+        setState(() {
+          _isSigningIn = false;
+        });
+        return; // User canceled
       }
 
+      final GoogleSignInAuthentication googleAuth = await googleUser.authentication;
+      final credential = GoogleAuthProvider.credential(
+        accessToken: googleAuth.accessToken,
+        idToken: googleAuth.idToken,
+      );
 
-      // Use auth.accessToken and auth.idToken if needed
-      // You can now authenticate with Firebase using these tokens
-      debugPrint('Signed in: ${account.email}');
-    } catch (error) {
-      debugPrint('Error signing in: $error');
+      await FirebaseAuth.instance.signInWithCredential(credential);
+    } catch (e) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Sign-in failed: $e')),
+      );
+    } finally {
+      if (mounted) {
+        setState(() {
+          _isSigningIn = false;
+        });
+      }
     }
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text('Sign In')),
+      backgroundColor: Colors.grey[50],
       body: Center(
-        child: ElevatedButton(
-          onPressed: _handleSignIn,
-          child: const Text('Sign in with Google'),
-        ),
+        child: _isSigningIn
+            ? const CircularProgressIndicator()
+            : ElevatedButton.icon(
+                onPressed: _signInWithGoogle,
+                icon: const Icon(Icons.login),
+                label: const Text('Sign in with Google'),
+              ),
       ),
     );
   }

@@ -1,96 +1,98 @@
 // lib/routes/app_routes.dart
+
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
+
+import 'package:grabmeadeal_final/providers/deals_provider.dart';
+import 'package:grabmeadeal_final/providers/wishlist_provider.dart';
+
 import 'package:grabmeadeal_final/models/deal.dart';
+
 import 'package:grabmeadeal_final/screens/deals_screen.dart';
-import 'package:grabmeadeal_final/screens/wishlist_screen.dart';
-import 'package:grabmeadeal_final/screens/categories_screen.dart';
 import 'package:grabmeadeal_final/screens/deal_detail_screen.dart';
 import 'package:grabmeadeal_final/screens/category_deals_screen.dart';
 import 'package:grabmeadeal_final/screens/search_results_screen.dart';
+import 'package:grabmeadeal_final/screens/wishlist_screen.dart';
 import 'package:grabmeadeal_final/screens/notifications_screen.dart';
 
 class AppRoutes {
-  static Route<dynamic> generateRoute(RouteSettings settings) {
-    final args = settings.arguments;
+  static String notifications;
 
+  static Route<dynamic>? onGenerateRoute(RouteSettings settings) {
     switch (settings.name) {
       case '/':
-        return MaterialPageRoute(
-          builder: (_) => DealsScreen(
-            deals: const [],
-            wishlistIds: const <String>{},
-            onWishlistToggle: (deal) {}, allDeals: const [], categories: const [], wishlistDeals: const [],
-          ),
-        );
+        return MaterialPageRoute(builder: (ctx) {
+          final dealsProv = ctx.watch<DealsProvider>();
+          final wishlistProv = ctx.watch<WishlistProvider>();
+          return DealsScreen(
+            deals: dealsProv.deals,
+            wishlistIds: wishlistProv.ids,
+            onWishlistToggle: wishlistProv.toggleDeal, onTap: (Deal deal) {  }, allDeals: [], categories: [], wishlistDeals: [],
+          );
+        });
+
+      case '/deal_detail':
+        final deal = settings.arguments as Deal;
+        return MaterialPageRoute(builder: (ctx) {
+          final wishlistProv = ctx.watch<WishlistProvider>();
+          return DealDetailScreen(
+            deal: deal,
+            isInWishlist: wishlistProv.ids.contains(deal.id),
+            onWishlistToggle: wishlistProv.toggleDeal,
+          );
+        });
+
+      case '/category_deals':
+        final category = settings.arguments as String;
+        return MaterialPageRoute(builder: (ctx) {
+          final dealsProv = ctx.watch<DealsProvider>();
+          final wishlistProv = ctx.watch<WishlistProvider>();
+          return CategoryDealsScreen(
+            category: category,
+            deals: dealsProv.deals,
+            wishlistIds: wishlistProv.ids,
+            onWishlistToggle: wishlistProv.toggleDeal, onTap: (Deal ) {  },
+          );
+        });
+
+      case '/search_results':
+        final query = settings.arguments as String;
+        return MaterialPageRoute(builder: (ctx) {
+          final dealsProv = ctx.watch<DealsProvider>();
+          final wishlistProv = ctx.watch<WishlistProvider>();
+          final results = dealsProv.deals
+              .where((d) => d.title.toLowerCase().contains(query.toLowerCase()))
+              .toList();
+          return SearchResultsScreen(
+            results: results,
+            searchQuery: query,
+            wishlistIds: wishlistProv.ids,
+            onWishlistToggle: wishlistProv.toggleDeal,
+          );
+        });
 
       case '/wishlist':
-        return MaterialPageRoute(
-          builder: (_) => WishlistScreen(
-            wishlistDeals: const [],
-            onWishlistToggle: (deal) {}, wishlistIds: null,
-          ),
-        );
-
-      case '/categories':
-        return MaterialPageRoute(
-          builder: (_) => CategoriesScreen(
-            categories: const [],
-            deals: const [],
-            wishlistIds: const <String>{},
-            onWishlistToggle: (deal) {},
-          ),
-        );
-
-      case '/dealDetail':
-        if (args is Deal) {
-          return MaterialPageRoute(
-            builder: (_) => DealDetailScreen(deal: args),
+        return MaterialPageRoute(builder: (ctx) {
+          final wishlistProv = ctx.watch<WishlistProvider>();
+          return WishlistScreen(
+            wishlistDeals: wishlistProv.wishlistDeals,
+            wishlistIds: wishlistProv.ids,
+            onWishlistToggle: wishlistProv.toggleDeal, onTap: (Deal deal) {  },
           );
-        }
-        return _errorRoute();
-
-      case '/categoryDeals':
-        if (args is Map<String, dynamic>) {
-          return MaterialPageRoute(
-            builder: (_) => CategoryDealsScreen(
-              category: args['category'] ?? '',
-              deals: args['deals'] ?? <Deal>[],
-              wishlistIds: Set<String>.from(args['wishlistIds'] ?? <String>[]),
-              onWishlistToggle: args['onWishlistToggle'] ?? (Deal _) {},
-            ),
-          );
-        }
-        return _errorRoute();
-
-      case '/searchResults':
-        if (args is Map<String, dynamic>) {
-          return MaterialPageRoute(
-            builder: (_) => SearchResultsScreen(
-              searchQuery: args['searchQuery'] ?? '',
-              results: args['results'] ?? <Deal>[],
-              wishlistIds: Set<String>.from(args['wishlistIds'] ?? <String>[]),
-              onWishlistToggle: args['onWishlistToggle'] ?? (Deal _) {},
-            ),
-          );
-        }
-        return _errorRoute();
+        });
 
       case '/notifications':
         return MaterialPageRoute(
-          builder: (_) => const NotificationsScreen(),
+          builder: (_) => NotificationsScreen(),
         );
 
       default:
-        return _errorRoute();
+        // Fallback for undefined routes
+        return MaterialPageRoute(
+          builder: (_) => Scaffold(
+            body: Center(child: Text('No route defined for ${settings.name}')),
+          ),
+        );
     }
-  }
-
-  static Route<dynamic> _errorRoute() {
-    return MaterialPageRoute(
-      builder: (_) => Scaffold(
-        appBar: AppBar(title: const Text('Error')),
-        body: const Center(child: Text('Page not found')),
-      ),
-    );
   }
 }

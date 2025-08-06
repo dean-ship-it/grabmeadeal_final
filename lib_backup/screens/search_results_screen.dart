@@ -43,7 +43,7 @@ class SearchResultsScreen extends StatelessWidget {
                 return DealCard(
                   deal: deal,
                   isInWishlist: isInWishlist,
-                  onWishlistToggle: onWishlistToggle,
+                  onWishlistToggle: onWishlistToggle, onTap: () {  },
                 );
               },
             ),

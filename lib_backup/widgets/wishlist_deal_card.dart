@@ -8,11 +8,11 @@ class WishlistDealCard extends StatelessWidget {
   final String? vendor;
 
   const WishlistDealCard({
-    Key? key,
+    super.key,
     required this.title,
     required this.imageUrl,
     required this.vendor,
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context) {

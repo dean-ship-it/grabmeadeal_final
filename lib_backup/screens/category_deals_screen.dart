@@ -32,7 +32,7 @@ class CategoryDealsScreen extends StatelessWidget {
           return DealCard(
             deal: deal,
             isInWishlist: wishlistIds.contains(deal.id),
-            onWishlistToggle: onWishlistToggle,
+            onWishlistToggle: onWishlistToggle, onTap: () {  },
           );
         },
       ),

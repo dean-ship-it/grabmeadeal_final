@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:grabmeadeal_final/models/deal.dart';
 import 'package:grabmeadeal_final/screens/search_results_screen.dart';
-import 'package:grabmeadeal_final/models/deal.dart';
 
 class CustomSearchBar extends StatefulWidget {
   final List<Deal> results;

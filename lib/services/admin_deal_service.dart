@@ -14,3 +14,7 @@ class AdminDealService {
     }
   }
 }
+
+mixin AdminDeal {
+  Object? toMap() {}
+}

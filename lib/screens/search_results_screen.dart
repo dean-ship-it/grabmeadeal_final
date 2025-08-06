@@ -6,44 +6,37 @@ class SearchResultsScreen extends StatelessWidget {
   final List<Deal> results;
   final Set<String> wishlistIds;
   final void Function(Deal) onWishlistToggle;
+  final VoidCallback onTap;
 
   const SearchResultsScreen({
     super.key,
     required this.results,
     required this.wishlistIds,
-    required this.onWishlistToggle, required String searchQuery,
+    required this.onWishlistToggle,
+    required this.onTap,
   });
 
   @override
   Widget build(BuildContext context) {
-    final sortedResults = [...results]
-      ..sort((a, b) => (b.date).compareTo(a.date));
-
     return Scaffold(
       appBar: AppBar(
         title: const Text('Search Results'),
+        centerTitle: true,
+        elevation: 2,
         backgroundColor: Colors.white,
         foregroundColor: Colors.black87,
-        elevation: 1,
       ),
-      body: sortedResults.isEmpty
-          ? const Center(
-              child: Text(
-                'No deals found.',
-                style: TextStyle(fontSize: 18, color: Colors.grey),
-              ),
-            )
+      body: results.isEmpty
+          ? const Center(child: Text('No results found.'))
           : ListView.builder(
-              padding: const EdgeInsets.symmetric(horizontal: 8.0, vertical: 12),
-              itemCount: sortedResults.length,
+              itemCount: results.length,
               itemBuilder: (context, index) {
-                final deal = sortedResults[index];
-                final isInWishlist = wishlistIds.contains(deal.id);
-
+                final deal = results[index];
                 return DealCard(
                   deal: deal,
-                  isInWishlist: isInWishlist,
-                  onWishlistToggle: onWishlistToggle,
+                  isInWishlist: wishlistIds.contains(deal.id),
+                  onWishlistToggle: () => onWishlistToggle(deal),
+                  onTap: onTap,
                 );
               },
             ),

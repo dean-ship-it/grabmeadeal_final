@@ -9,12 +9,14 @@ class DealsScreen extends StatelessWidget {
   final List<Deal> deals;
   final Set<String> wishlistIds;
   final void Function(Deal) onWishlistToggle;
+  final VoidCallback onTap;
 
   const DealsScreen({
     super.key,
     required this.deals,
     required this.wishlistIds,
     required this.onWishlistToggle,
+    required this.onTap,
   });
 
   @override
@@ -49,7 +51,8 @@ class DealsScreen extends StatelessWidget {
                 return DealCard(
                   deal: deal,
                   isInWishlist: wishlistIds.contains(deal.id),
-                  onWishlistToggle: onWishlistToggle,
+                  onWishlistToggle: () => onWishlistToggle(deal),
+                  onTap: onTap,
                 );
               },
             ),

@@ -10,13 +10,14 @@ class ForgotPasswordScreen extends StatefulWidget {
 
 class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
   final _emailController = TextEditingController();
-  bool _isLoading = false;
-  String? _message;
+  final _formKey = GlobalKey<FormState>();
+  bool _isSending = false;
 
   Future<void> _resetPassword() async {
+    if (!_formKey.currentState!.validate()) return;
+
     setState(() {
-      _isLoading = true;
-      _message = null;
+      _isSending = true;
     });
 
     try {
@@ -25,56 +26,61 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
       );
 
       if (!mounted) return;
-
-      setState(() {
-        _message = 'Password reset email sent!';
-      });
-
-      if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Check your email to reset your password.')),
+        const SnackBar(content: Text('Password reset email sent')),
       );
     } on FirebaseAuthException catch (e) {
       if (!mounted) return;
-      setState(() {
-        _message = e.message ?? 'An error occurred';
-      });
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text(e.message ?? 'Error sending reset email')),
+      );
     } finally {
-      if (!mounted) return;
       setState(() {
-        _isLoading = false;
+        _isSending = false;
       });
     }
   }
 
   @override
+  void dispose() {
+    _emailController.dispose();
+    super.dispose();
+  }
+
+  @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text('Forgot Password')),
+      appBar: AppBar(
+        title: const Text('Forgot Password'),
+      ),
       body: Padding(
-        padding: const EdgeInsets.all(24),
-        child: Column(
-          children: [
-            const SizedBox(height: 40),
-            const Text('Enter your email to reset your password'),
-            const SizedBox(height: 20),
-            TextField(
-              controller: _emailController,
-              decoration: const InputDecoration(labelText: 'Email'),
-            ),
-            const SizedBox(height: 20),
-            ElevatedButton(
-              onPressed: _isLoading ? null : _resetPassword,
-              child: _isLoading
-                  ? const CircularProgressIndicator()
-                  : const Text('Reset Password'),
-            ),
-            if (_message != null)
-              Padding(
-                padding: const EdgeInsets.only(top: 20),
-                child: Text(_message!),
+        padding: const EdgeInsets.all(16.0),
+        child: Form(
+          key: _formKey,
+          child: Column(
+            children: [
+              TextFormField(
+                controller: _emailController,
+                keyboardType: TextInputType.emailAddress,
+                decoration: const InputDecoration(
+                  labelText: 'Email Address',
+                ),
+                validator: (value) {
+                  if (value == null || value.trim().isEmpty) {
+                    return 'Please enter your email address';
+                  }
+                  return null;
+                },
               ),
-          ],
+              const SizedBox(height: 24),
+              ElevatedButton(
+                onPressed: _isSending ? null : _resetPassword,
+                child: _isSending
+                    ? const CircularProgressIndicator()
+                    : const Text('Send Reset Email'),
+              ),
+            ],
+          ),
         ),
       ),
     );

@@ -1,5 +1,3 @@
-// lib/main.dart
-
 import 'package:flutter/material.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:grabmeadeal_final/firebase_options.dart';
@@ -22,6 +20,7 @@ void main() async {
 
 class MyApp extends StatefulWidget {
   const MyApp({super.key});
+
   @override
   State<MyApp> createState() => _MyAppState();
 }
@@ -35,7 +34,7 @@ class _MyAppState extends State<MyApp> {
   @override
   void initState() {
     super.initState();
-    // TODO: load _allDeals & _categories from Firestore here
+    // TODO: Load data from Firestore or mock here
   }
 
   void _handleWishlistToggle(Deal deal) {
@@ -50,11 +49,27 @@ class _MyAppState extends State<MyApp> {
     });
   }
 
-  void _handleCategoryTap(String categoryName) {
-    Navigator.pushNamed(
+  void _handleDealTap(Deal deal) {
+    Navigator.push(
       context,
-      '/category-deals',
-      arguments: categoryName,
+      MaterialPageRoute(
+        builder: (_) => DealDetailScreen(deal: deal, isInWishlist: null,, onWishlistToggle: (Deal ) {  },),
+      ),
+    );
+  }
+
+  void _handleCategoryTap(Category category) {
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (_) => CategoryDealsScreen(
+          category: category.name,
+          deals: _allDeals,
+          wishlistIds: _wishlistIds,
+          onWishlistToggle: _handleWishlistToggle,
+          onTap: _handleDealTap,
+        ),
+      ),
     );
   }
 
@@ -63,59 +78,24 @@ class _MyAppState extends State<MyApp> {
     return MaterialApp(
       title: 'Grab Me A Deal',
       debugShowCheckedModeBanner: false,
-
-      // Home screen:
       home: DealsScreen(
         deals: _allDeals,
         wishlistIds: _wishlistIds,
         onWishlistToggle: _handleWishlistToggle,
+        onTap: _handleDealTap, allDeals: [], categories: [], wishlistDeals: [],
       ),
-
-      // All named routes handled here:
-      onGenerateRoute: (settings) {
-        switch (settings.name) {
-          case '/deal-detail':
-            final deal = settings.arguments as Deal;
-            return MaterialPageRoute(
-              builder: (_) => DealDetailScreen(deal: deal),
-            );
-
-          case '/category-deals':
-            final categoryName = settings.arguments as String;
-            return MaterialPageRoute(
-              builder: (_) => CategoryDealsScreen(
-                category: categoryName,
-                deals: _allDeals,
-                wishlistIds: _wishlistIds,
-                onWishlistToggle: _handleWishlistToggle,
-              ),
-            );
-
-          case '/wishlist':
-            return MaterialPageRoute(
-              builder: (_) => WishlistScreen(
-                wishlistDeals: _wishlistDeals,
-                wishlistIds: _wishlistIds,
-                onWishlistToggle: _handleWishlistToggle,
-              ),
-            );
-
-          case '/categories':
-            return MaterialPageRoute(
-              builder: (_) => CategoriesScreen(
-                categories: _categories,
-                onCategoryTap: _handleCategoryTap,
-              ),
-            );
-
-          case '/notifications':
-            return MaterialPageRoute(
-              builder: (_) => NotificationsScreen(),
-            );
-
-          default:
-            return null;
-        }
+      routes: {
+        '/wishlist': (_) => WishlistScreen(
+              wishlistDeals: _wishlistDeals,
+              wishlistIds: _wishlistIds,
+              onWishlistToggle: _handleWishlistToggle,
+              onTap: _handleDealTap,
+            ),
+        '/categories': (_) => CategoriesScreen(
+              categories: _categories,
+              onCategoryTap: _handleCategoryTap, deals: [], wishlistIds: null, onWishlistToggle: (Deal p1) {  },
+            ),
+        '/notifications': (_) => const NotificationsScreen(),
       },
     );
   }

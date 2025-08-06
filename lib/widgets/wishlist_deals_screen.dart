@@ -23,7 +23,7 @@ class WishlistDealsScreen extends StatelessWidget {
         return DealCard(
           deal: deal,
           isInWishlist: wishlistIds.contains(deal.id),
-          onWishlistToggle: wishlistProvider.toggleWishlist,
+          onWishlistToggle: wishlistProvider.toggleWishlist, onTap: () {  },
         );
       },
     );

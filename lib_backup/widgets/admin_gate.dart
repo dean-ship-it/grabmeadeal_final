@@ -28,7 +28,7 @@ class AdminGate extends StatelessWidget {
         deals: deals,
         allDeals: allDeals,
         wishlistIds: wishlistIds,
-        onWishlistToggle: onWishlistToggle, categories: [], wishlistDeals: [],
+        onWishlistToggle: onWishlistToggle, categories: const [], wishlistDeals: const [], onTap: (Deal deal) {  },
       );
     }
   }

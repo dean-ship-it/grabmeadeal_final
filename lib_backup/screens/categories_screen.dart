@@ -9,10 +9,10 @@ class CategoriesScreen extends StatelessWidget {
   final void Function(Category) onCategoryTap;
 
   const CategoriesScreen({
-    Key? key,
+    super.key,
     required this.categories,
     required this.onCategoryTap,
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context) {
