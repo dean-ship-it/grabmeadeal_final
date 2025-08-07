@@ -1,7 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'firebase_options.dart';
-import 'screens/splash_screen.dart'; // Or your starting screen
+import 'theme/app_theme.dart';
+import 'screens/splash_screen.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -19,11 +20,8 @@ class GrabMeADealApp extends StatelessWidget {
     return MaterialApp(
       title: 'Grab Me A Deal',
       debugShowCheckedModeBanner: false,
-      theme: ThemeData(
-        useMaterial3: true,
-        colorSchemeSeed: Colors.blue,
-      ),
-      home: const SplashScreen(), // Adjust based on your flow
+      theme: AppTheme.themeData,
+      home: const SplashScreen(),
     );
   }
 }

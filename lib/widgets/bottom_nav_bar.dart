@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:grabmeadeal_final/theme/app_theme.dart';
 
 class BottomNavBar extends StatelessWidget {
   final int currentIndex;
@@ -15,8 +16,9 @@ class BottomNavBar extends StatelessWidget {
     return BottomNavigationBar(
       currentIndex: currentIndex,
       onTap: onTap,
-      selectedItemColor: Colors.blueAccent,
-      unselectedItemColor: Colors.grey,
+      selectedItemColor: AppTheme.primaryBlue,
+      unselectedItemColor: Colors.grey[600],
+      backgroundColor: Colors.white,
       type: BottomNavigationBarType.fixed,
       items: const [
         BottomNavigationBarItem(
@@ -24,12 +26,12 @@ class BottomNavBar extends StatelessWidget {
           label: 'Deals',
         ),
         BottomNavigationBarItem(
-          icon: Icon(Icons.category),
-          label: 'Categories',
-        ),
-        BottomNavigationBarItem(
           icon: Icon(Icons.favorite),
           label: 'Wishlist',
+        ),
+        BottomNavigationBarItem(
+          icon: Icon(Icons.category),
+          label: 'Categories',
         ),
         BottomNavigationBarItem(
           icon: Icon(Icons.person),

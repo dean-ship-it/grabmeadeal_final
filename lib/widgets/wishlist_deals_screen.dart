@@ -18,11 +18,15 @@ class WishlistDealsScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('My Wishlist'),
-        centerTitle: true,
+        title: const Text('Your Wishlist'),
       ),
       body: wishlistDeals.isEmpty
-          ? const Center(child: Text('Your wishlist is empty.'))
+          ? const Center(
+              child: Text(
+                'No items in your wishlist yet.',
+                style: TextStyle(fontSize: 16),
+              ),
+            )
           : ListView.builder(
               itemCount: wishlistDeals.length,
               itemBuilder: (context, index) {
@@ -34,7 +38,7 @@ class WishlistDealsScreen extends StatelessWidget {
                     Navigator.pushNamed(
                       context,
                       '/deal-detail',
-                      arguments: deal,
+                      arguments: {'deal': deal, 'isInWishlist': true},
                     );
                   },
                   onWishlistToggle: () => onWishlistToggle(deal),

@@ -2,29 +2,24 @@ import 'package:flutter/material.dart';
 import 'package:grabmeadeal_final/services/notification_service.dart';
 
 class NotificationsScreen extends StatelessWidget {
-  final String id;
-
-  const NotificationsScreen({
-    super.key,
-    required this.id,
-  });
+  const NotificationsScreen({super.key});
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Notifications'),
+        title: const Text('Notifications Test'),
       ),
       body: Center(
         child: ElevatedButton(
           onPressed: () {
-            NotificationService.showNotification(
-              id: id,
-              title: 'Deal Nearby!',
-              body: 'You’re close to a store with a wishlist deal.',
+            NotificationService().showNotification(
+              id: 1,
+              title: 'Test Notification',
+              body: 'This is a local push test!',
             );
           },
-          child: const Text('Test Notification'),
+          child: const Text('Send Test Notification'),
         ),
       ),
     );

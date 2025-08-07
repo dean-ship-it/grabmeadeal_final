@@ -1,0 +1,26 @@
+# Grab Me A Deal
+
+🚀 Grab Me A Deal is your personal savings engine — surfacing the best deals across local and national retailers with wishlist tracking, geofenced push alerts, and affiliate deal matching.
+
+## 🌟 Features
+
+- 🔐 Firebase Authentication (Google Sign-In)
+- 📦 Cloud Firestore integration
+- ❤️ Wishlist deal tracking
+- 🛍️ Category filtering and search
+- 📍 Geofencing-based push notifications
+- 📱 Android-ready with Firebase Hosting for web expansion
+
+## 🔧 Tech Stack
+
+- Flutter 3.32.8 • Dart 3.8.1
+- Firebase Auth • Firestore • Firebase Cloud Functions
+- GitHub CI/CD (optional)
+- Google Maps + Geolocator + Local Notifications
+
+## 🚀 Getting Started
+
+```bash
+flutter pub get
+flutterfire configure
+flutter run

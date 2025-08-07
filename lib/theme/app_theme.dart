@@ -1,50 +1,35 @@
 import 'package:flutter/material.dart';
 
 class AppTheme {
-  static ThemeData get lightTheme {
+  static const Color primaryBlue = Color(0xFF0075c9);
+  static const Color lightBlue = Color(0xFF5BBEFF);
+  static const Color deepBlue = Color(0xFF004a8D);
+  static const Color limeGreen = Color(0xFFa6ce39);
+  static const Color oliveGreen = Color(0xFF7a9a01);
+
+  static ThemeData get theme {
     return ThemeData(
       useMaterial3: true,
-      brightness: Brightness.light,
-      primaryColor: const Color(0xFF0075c9),
+      colorScheme: ColorScheme.fromSeed(
+        seedColor: primaryBlue,
+        primary: primaryBlue,
+        secondary: limeGreen,
+      ),
       scaffoldBackgroundColor: Colors.white,
       appBarTheme: const AppBarTheme(
-        backgroundColor: Colors.white,
-        foregroundColor: Colors.black,
-        elevation: 1,
-        centerTitle: true,
+        backgroundColor: primaryBlue,
+        foregroundColor: Colors.white,
       ),
-      cardTheme: CardThemeData(
-        elevation: 2,
-        margin: const EdgeInsets.symmetric(vertical: 6, horizontal: 8),
+      cardTheme: const CardTheme(
+        margin: EdgeInsets.all(8),
+        elevation: 4,
         shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(12),
+          borderRadius: BorderRadius.all(Radius.circular(12)),
         ),
-        color: Colors.white,
-      ),
-      inputDecorationTheme: InputDecorationTheme(
-        filled: true,
-        fillColor: Colors.grey[100],
-        contentPadding: const EdgeInsets.symmetric(vertical: 12, horizontal: 16),
-        border: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(12),
-          borderSide: BorderSide.none,
-        ),
-        hintStyle: const TextStyle(color: Colors.grey),
-      ),
-      iconTheme: const IconThemeData(
-        color: Colors.blueAccent,
-      ),
-      bottomNavigationBarTheme: const BottomNavigationBarThemeData(
-        selectedItemColor: Color(0xFF0075c9),
-        unselectedItemColor: Colors.grey,
-        backgroundColor: Colors.white,
-        type: BottomNavigationBarType.fixed,
-        elevation: 8,
       ),
       textTheme: const TextTheme(
-        bodyMedium: TextStyle(fontSize: 14),
-        bodyLarge: TextStyle(fontSize: 16),
         titleLarge: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+        bodyMedium: TextStyle(fontSize: 16),
       ),
     );
   }

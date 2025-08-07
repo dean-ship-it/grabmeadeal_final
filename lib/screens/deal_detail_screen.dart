@@ -1,64 +1,85 @@
 import 'package:flutter/material.dart';
 import 'package:grabmeadeal_final/models/deal.dart';
+import 'package:cached_network_image/cached_network_image.dart';
+import 'package:grabmeadeal_final/theme/app_theme.dart';
 
 class DealDetailScreen extends StatelessWidget {
   final Deal deal;
-  final bool isInWishlist;
-  final void Function(Deal) onWishlistToggle;
 
-  const DealDetailScreen({
-    Key? key,
-    required this.deal,
-    required this.isInWishlist,
-    required this.onWishlistToggle,
-  }) : super(key: key);
+  const DealDetailScreen({Key? key, required this.deal}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
         title: Text(deal.title),
-        actions: [
-          IconButton(
-            icon: Icon(
-              isInWishlist ? Icons.favorite : Icons.favorite_border,
-              color: isInWishlist ? Colors.red : null,
-            ),
-            onPressed: () => onWishlistToggle(deal),
-          )
-        ],
+        backgroundColor: AppTheme.primaryBlue,
       ),
-      body: Padding(
-        padding: const EdgeInsets.all(16.0),
+      body: SingleChildScrollView(
+        padding: const EdgeInsets.all(16),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Image.network(deal.imageUrl, height: 200),
-            const SizedBox(height: 16),
+            if (deal.imageUrl.isNotEmpty)
+              Center(
+                child: CachedNetworkImage(
+                  imageUrl: deal.imageUrl,
+                  placeholder: (context, url) =>
+                      const CircularProgressIndicator(),
+                  errorWidget: (context, url, error) =>
+                      const Icon(Icons.error),
+                  height: 220,
+                  fit: BoxFit.cover,
+                ),
+              ),
+            const SizedBox(height: 20),
             Text(
               deal.title,
-              style: const TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
+              style: Theme.of(context).textTheme.headlineMedium?.copyWith(
+                    fontWeight: FontWeight.bold,
+                    color: Colors.black87,
+                  ),
+            ),
+            const SizedBox(height: 12),
+            Text(
+              'Vendor: ${deal.vendor}',
+              style: Theme.of(context).textTheme.titleMedium,
             ),
             const SizedBox(height: 8),
             Text(
-              deal.description,
-              style: const TextStyle(fontSize: 16),
+              'Category: ${deal.category}',
+              style: Theme.of(context).textTheme.titleMedium,
+            ),
+            const SizedBox(height: 8),
+            Text(
+              'Price: ${deal.price}',
+              style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                    color: AppTheme.limeGreen,
+                    fontWeight: FontWeight.bold,
+                  ),
             ),
             const SizedBox(height: 16),
-            Text('Price: \$${deal.price.toStringAsFixed(2)}'),
-            const SizedBox(height: 8),
-            Text('Vendor: ${deal.vendor}'),
-            const SizedBox(height: 8),
-            if (deal.location != null)
-              Text('Location: ${deal.location!}'),
-            const SizedBox(height: 8),
-            Text('Category: ${deal.category}'),
-            const SizedBox(height: 16),
-            ElevatedButton(
-              onPressed: () {
-                // Link out to the deal (future)
-              },
-              child: const Text('View Deal'),
+            Text(
+              deal.description,
+              style: Theme.of(context).textTheme.bodyLarge,
+            ),
+            const SizedBox(height: 30),
+            Center(
+              child: ElevatedButton.icon(
+                onPressed: () {
+                  // TODO: Launch URL to purchase
+                },
+                icon: const Icon(Icons.shopping_cart_checkout),
+                label: const Text('Buy Now'),
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: AppTheme.limeGreen,
+                  foregroundColor: Colors.white,
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 32,
+                    vertical: 16,
+                  ),
+                ),
+              ),
             ),
           ],
         ),

@@ -1,9 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:grabmeadeal_final/models/category.dart';
 import 'package:grabmeadeal_final/models/deal.dart';
-import 'package:grabmeadeal_final/screens/admin_upload_screen.dart';
-import 'package:grabmeadeal_final/screens/categories_screen.dart';
 import 'package:grabmeadeal_final/screens/category_deals_screen.dart';
+import 'package:grabmeadeal_final/screens/categories_screen.dart';
 import 'package:grabmeadeal_final/screens/deal_detail_screen.dart';
 import 'package:grabmeadeal_final/screens/deals_screen.dart';
 import 'package:grabmeadeal_final/screens/notifications_screen.dart';
@@ -12,65 +11,73 @@ import 'package:grabmeadeal_final/screens/splash_screen.dart';
 import 'package:grabmeadeal_final/screens/wishlist_screen.dart';
 
 class AppRoutes {
-  static const String home = '/';
+  static const String splash = '/';
   static const String deals = '/deals';
   static const String wishlist = '/wishlist';
   static const String categories = '/categories';
   static const String categoryDeals = '/category-deals';
   static const String dealDetail = '/deal-detail';
-  static const String adminUpload = '/admin-upload';
   static const String notifications = '/notifications';
   static const String searchResults = '/search-results';
-  static const String splash = '/splash';
-  static const String signup = '/signup'; // Placeholder
 
-  static Map<String, Widget Function(BuildContext)> routes = {
-    home: (context) => SplashScreen(
-          wishlistDeals: const [],
-          wishlistIds: const {},
-          onWishlistToggle: (Deal deal) {},
-        ),
-    deals: (context) => DealsScreen(
-          deals: const [],
-          wishlistIds: const {},
-          onWishlistToggle: (Deal deal) {},
-          onSearch: (String query) {},
-        ),
-    wishlist: (context) => WishlistScreen(
-          wishlistDeals: const [],
-          onWishlistToggle: (Deal deal) {},
-        ),
-    categories: (context) => CategoriesScreen(
-          categories: const [],
-        ),
-    categoryDeals: (context) => CategoryDealsScreen(
-          category: const Category(id: '0', name: 'Default'),
-          deals: const [],
-          wishlistIds: const {},
-          onWishlistToggle: (Deal deal) {},
-        ),
-    dealDetail: (context) => DealDetailScreen(
-          deal: Deal(
-            id: '0',
-            title: 'Sample Deal',
-            description: 'Sample description',
-            price: 0.0,
-            imageUrl: '',
-            vendor: 'Vendor',
-            category: 'Category',
-            date: DateTime.now(),
+  static Map<String, WidgetBuilder> routes({
+    required List<Deal> deals,
+    required List<Deal> wishlistDeals,
+    required Set<String> wishlistIds, // Use Set<String>
+    required List<Category> categories,
+    required void Function(Deal) onWishlistToggle,
+  }) {
+    return {
+      splash: (BuildContext context) => SplashScreen(
+            wishlistDeals: wishlistDeals,
+            wishlistIds: wishlistIds,
+            onWishlistToggle: onWishlistToggle,
           ),
-          onWishlistToggle: (Deal deal) {},
-        ),
-    adminUpload: (context) => AdminUploadScreen(
-          allDeals: const [],
-        ),
-    notifications: (context) => const NotificationsScreen(),
-    searchResults: (context) => SearchResultsScreen(
-          deals: const [],
-          wishlistIds: const {},
-          onWishlistToggle: (Deal deal) {},
-        ),
-    signup: (context) => const Placeholder(), // Replace with real SignupScreen
-  };
+      deals: (BuildContext context) => DealsScreen(
+            deals: deals,
+            wishlistDeals: wishlistDeals,
+            wishlistIds: wishlistIds,
+            onWishlistToggle: onWishlistToggle,
+          ),
+      wishlist: (BuildContext context) => WishlistScreen(
+            wishlistDeals: wishlistDeals,
+            wishlistIds: wishlistIds,
+            onWishlistToggle: onWishlistToggle,
+          ),
+      categories: (BuildContext context) => CategoriesScreen(
+            categories: categories,
+            onWishlistToggle: onWishlistToggle,
+            wishlistDeals: wishlistDeals,
+            wishlistIds: wishlistIds,
+          ),
+      categoryDeals: (BuildContext context) => CategoryDealsScreen(
+            category: Category(id: '0', title: 'Default'), // Use correct property name
+            wishlistDeals: wishlistDeals,
+            wishlistIds: wishlistIds,
+            onWishlistToggle: onWishlistToggle,
+          ),
+      dealDetail: (BuildContext context) => DealDetailScreen(
+            deal: Deal(
+              id: '0',
+              title: 'Sample Deal',
+              description: 'This is a placeholder deal.',
+              imageUrl: '',
+              price: 0.0,
+              originalPrice: 0.0,
+              vendor: 'Placeholder',
+              categoryId: '0',
+              date: DateTime.now(),
+              isInWishlist: false,
+            ),
+            onWishlistToggle: onWishlistToggle,
+          ),
+      notifications: (BuildContext context) => NotificationsScreen(id: 1),
+      searchResults: (BuildContext context) => SearchResultsScreen(
+            deals: deals,
+            wishlistDeals: wishlistDeals,
+            wishlistIds: wishlistIds,
+            onWishlistToggle: onWishlistToggle,
+          ),
+    };
+  }
 }
