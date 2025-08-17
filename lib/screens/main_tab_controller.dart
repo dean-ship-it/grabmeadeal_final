@@ -1,7 +1,4 @@
-// lib/screens/main_tab_controller.dart
-
 import 'package:flutter/material.dart';
-import 'package:grabmeadeal_final/models/category.dart';
 import 'package:grabmeadeal_final/models/deal.dart';
 import 'package:grabmeadeal_final/screens/deals_screen.dart';
 import 'package:grabmeadeal_final/screens/wishlist_screen.dart';
@@ -9,20 +6,14 @@ import 'package:grabmeadeal_final/screens/categories_screen.dart';
 
 class MainTabController extends StatefulWidget {
   final List<Deal> deals;
-  final List<Deal> wishlistDeals;
   final Set<String> wishlistIds;
-  final List<Category> categories;
-  final void Function(Deal) onWishlistToggle;
-  final void Function(Category) onCategoryTap;
+  final Function(Deal) onWishlistToggle;
 
   const MainTabController({
     super.key,
     required this.deals,
-    required this.wishlistDeals,
     required this.wishlistIds,
-    required this.categories,
     required this.onWishlistToggle,
-    required this.onCategoryTap, required List allDeals,
   });
 
   @override
@@ -34,20 +25,25 @@ class _MainTabControllerState extends State<MainTabController> {
 
   @override
   Widget build(BuildContext context) {
+    final wishlistDeals = widget.deals
+        .where((deal) => widget.wishlistIds.contains(deal.id))
+        .toList();
+
     final screens = [
       DealsScreen(
         deals: widget.deals,
         wishlistIds: widget.wishlistIds,
-        onWishlistToggle: widget.onWishlistToggle, onTap: (Deal deal) {  }, allDeals: [], categories: [], wishlistDeals: [],
+        onWishlistToggle: widget.onWishlistToggle,
       ),
       WishlistScreen(
-        wishlistDeals: widget.wishlistDeals,
+        wishlistDeals: wishlistDeals,
         wishlistIds: widget.wishlistIds,
-        onWishlistToggle: widget.onWishlistToggle, onTap: (Deal deal) {  },
+        onWishlistToggle: widget.onWishlistToggle,
       ),
       CategoriesScreen(
-        categories: widget.categories,
-        onCategoryTap: widget.onCategoryTap, deals: [], wishlistIds: null, onWishlistToggle: (Deal p1) {  },
+        deals: widget.deals,
+        wishlistIds: widget.wishlistIds,
+        onWishlistToggle: widget.onWishlistToggle,
       ),
     ];
 
@@ -55,8 +51,6 @@ class _MainTabControllerState extends State<MainTabController> {
       body: screens[_currentIndex],
       bottomNavigationBar: BottomNavigationBar(
         currentIndex: _currentIndex,
-        selectedItemColor: Colors.blue,
-        unselectedItemColor: Colors.grey,
         onTap: (index) => setState(() => _currentIndex = index),
         items: const [
           BottomNavigationBarItem(

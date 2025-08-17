@@ -3,7 +3,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:grabmeadeal_final/models/deal.dart';
 
 class DealService {
-  final _dealsRef = FirebaseFirestore.instance.collection('deals');
+  final CollectionReference<Map<String, dynamic>> _dealsRef = FirebaseFirestore.instance.collection('deals');
 
   Future<void> addDeal({
     required String title,
@@ -16,7 +16,7 @@ class DealService {
     required String link,
     required DateTime date,
   }) async {
-    final newDeal = Deal(
+    final Deal newDeal = Deal(
       id: '',
       title: title,
       description: description,
@@ -33,7 +33,7 @@ class DealService {
   }
 
   Future<List> fetchAllDeals() async {
-    final querySnapshot = await _dealsRef.get();
-    return querySnapshot.docs.map((doc) => Deal.fromFirestore(doc)).toList();
+    final QuerySnapshot<Map<String, dynamic>> querySnapshot = await _dealsRef.get();
+    return querySnapshot.docs.map((QueryDocumentSnapshot<Map<String, dynamic>> doc) => Deal.fromFirestore(doc)).toList();
   }
 }

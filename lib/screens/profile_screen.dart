@@ -1,54 +1,84 @@
 import 'package:flutter/material.dart';
-import 'package:firebase_auth/firebase_auth.dart';
 
 class ProfileScreen extends StatelessWidget {
   const ProfileScreen({super.key});
 
   @override
   Widget build(BuildContext context) {
-    final user = FirebaseAuth.instance.currentUser;
-
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Profile'),
-        centerTitle: true,
-        elevation: 2,
-        backgroundColor: Colors.white,
-        foregroundColor: Colors.black87,
+        title: const Text(
+          "Profile",
+          style: TextStyle(fontWeight: FontWeight.bold),
+        ),
       ),
-      body: Padding(
+      body: ListView(
         padding: const EdgeInsets.all(16.0),
-        child: user == null
-            ? const Center(child: Text("No user logged in."))
-            : Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  const Text(
-                    "User Info",
-                    style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
-                  ),
-                  const SizedBox(height: 16),
-                  Text("Name: ${user.displayName ?? 'N/A'}"),
-                  const SizedBox(height: 8),
-                  Text("Email: ${user.email ?? 'N/A'}"),
-                  const SizedBox(height: 8),
-                  Text("UID: ${user.uid}"),
-                  const Spacer(),
-                  Center(
-                    child: ElevatedButton(
-                      onPressed: () async {
-                        await FirebaseAuth.instance.signOut();
-                        Navigator.of(context).pushReplacementNamed('/');
-                      },
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: Colors.red,
-                        foregroundColor: Colors.white,
-                      ),
-                      child: const Text('Sign Out'),
-                    ),
-                  )
-                ],
-              ),
+        children: [
+          // Profile Header
+          const CircleAvatar(
+            radius: 50,
+            backgroundImage: AssetImage("assets/images/profile_placeholder.png"),
+          ),
+          const SizedBox(height: 12),
+          const Center(
+            child: Text(
+              "Guest User",
+              style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+            ),
+          ),
+          const SizedBox(height: 20),
+
+          // Options
+          Card(
+            child: ListTile(
+              leading: const Icon(Icons.favorite, color: Colors.redAccent),
+              title: const Text("Wishlist"),
+              subtitle: const Text("View and manage your saved deals"),
+              onTap: () {
+                Navigator.pushNamed(context, '/wishlist');
+              },
+            ),
+          ),
+          Card(
+            child: ListTile(
+              leading: const Icon(Icons.notifications, color: Colors.blueAccent),
+              title: const Text("Notifications"),
+              subtitle: const Text("Manage your alerts and preferences"),
+              onTap: () {
+                Navigator.pushNamed(context, '/notifications');
+              },
+            ),
+          ),
+          Card(
+            child: ListTile(
+              leading: const Icon(Icons.settings, color: Colors.grey),
+              title: const Text("Settings"),
+              subtitle: const Text("App preferences and account settings"),
+              onTap: () {
+                // Placeholder for settings
+              },
+            ),
+          ),
+          const SizedBox(height: 20),
+
+          // Logout Button
+          ElevatedButton.icon(
+            style: ElevatedButton.styleFrom(
+              backgroundColor: Colors.redAccent,
+              foregroundColor: Colors.white,
+              minimumSize: const Size(double.infinity, 48),
+            ),
+            icon: const Icon(Icons.logout),
+            label: const Text("Log Out"),
+            onPressed: () {
+              // Placeholder: Add logout functionality
+              ScaffoldMessenger.of(context).showSnackBar(
+                const SnackBar(content: Text("Logged out (placeholder)")),
+              );
+            },
+          ),
+        ],
       ),
     );
   }

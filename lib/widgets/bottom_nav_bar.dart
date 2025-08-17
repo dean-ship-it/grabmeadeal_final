@@ -1,26 +1,38 @@
 import 'package:flutter/material.dart';
+import '../routes/app_routes.dart';
 
 class BottomNavBar extends StatelessWidget {
   final int currentIndex;
-  final void Function(int) onTap;
+  final Function(int) onTap;
+  final String userId;
 
   const BottomNavBar({
     super.key,
     required this.currentIndex,
     required this.onTap,
+    required this.userId,
   });
 
   @override
   Widget build(BuildContext context) {
     return BottomNavigationBar(
-      currentIndex: currentIndex,
-      onTap: onTap,
-      selectedItemColor: Colors.blueAccent,
-      unselectedItemColor: Colors.grey,
       type: BottomNavigationBarType.fixed,
+      currentIndex: currentIndex,
+      onTap: (index) {
+        if (index == 2) {
+          // Wishlist Deals tab
+          Navigator.pushNamed(
+            context,
+            AppRoutes.wishlistDeals,
+            arguments: {'userId': userId},
+          );
+        } else {
+          onTap(index);
+        }
+      },
       items: const [
         BottomNavigationBarItem(
-          icon: Icon(Icons.local_offer),
+          icon: Icon(Icons.home),
           label: 'Deals',
         ),
         BottomNavigationBarItem(

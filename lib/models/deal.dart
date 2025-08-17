@@ -1,69 +1,72 @@
-// lib/models/deal.dart
-
 import 'package:cloud_firestore/cloud_firestore.dart';
 
 class Deal {
   final String id;
   final String title;
   final String description;
-  final double price;
-  final double originalPrice;
-  final String imageUrl;
-  final String vendor;
-  final String link;
   final String category;
-  final double? latitude;
-  final double? longitude;
-  final DateTime date;
+  final String subcategory;
+  final String vendor;
+  final double price;
+  final double? originalPrice;
+  final String imageUrl;
+  final List<String> keywords;
+  final DateTime createdAt;
 
   Deal({
     required this.id,
     required this.title,
     required this.description,
-    required this.price,
-    required this.originalPrice,
-    required this.imageUrl,
-    required this.vendor,
-    required this.link,
     required this.category,
-    this.latitude,
-    this.longitude,
-    required this.date,
+    required this.subcategory,
+    required this.vendor,
+    required this.price,
+    this.originalPrice,
+    required this.imageUrl,
+    required this.keywords,
+    required this.createdAt,
   });
 
-  /// Creates a Deal from a Firestore document.
-  factory Deal.fromFirestore(DocumentSnapshot<Map<String, dynamic>> doc) {
-    final data = doc.data() ?? {};
+  /// Factory method to build from Firestore JSON
+  factory Deal.fromJson(Map<String, dynamic> json, String id) {
     return Deal(
-      id: doc.id,
-      title: data['title'] as String? ?? '',
-      description: data['description'] as String? ?? '',
-      price: (data['price'] as num?)?.toDouble() ?? 0.0,
-      originalPrice: (data['originalPrice'] as num?)?.toDouble() ?? 0.0,
-      imageUrl: data['imageUrl'] as String? ?? '',
-      vendor: data['vendor'] as String? ?? '',
-      link: data['link'] as String? ?? '',
-      category: data['category'] as String? ?? '',
-      latitude: (data['latitude'] as num?)?.toDouble(),
-      longitude: (data['longitude'] as num?)?.toDouble(),
-      date: (data['date'] as Timestamp?)?.toDate() ?? DateTime.now(),
+      id: id,
+      title: json['title'] ?? '',
+      description: json['description'] ?? '',
+      category: json['category'] ?? '',
+      subcategory: json['subcategory'] ?? '',
+      vendor: json['vendor'] ?? '',
+      price: (json['price'] is int)
+          ? (json['price'] as int).toDouble()
+          : (json['price'] ?? 0.0).toDouble(),
+      originalPrice: json['originalPrice'] != null
+          ? (json['originalPrice'] is int)
+              ? (json['originalPrice'] as int).toDouble()
+              : (json['originalPrice'] as num).toDouble()
+          : null,
+      imageUrl: json['imageUrl'] ?? '',
+      keywords: (json['keywords'] != null)
+          ? List<String>.from(json['keywords'])
+          : [],
+      createdAt: (json['createdAt'] is Timestamp)
+          ? (json['createdAt'] as Timestamp).toDate()
+          : DateTime.tryParse(json['createdAt'] ?? '') ?? DateTime.now(),
     );
   }
 
-  /// Converts this Deal into a map for uploading.
-  Map<String, dynamic> toMap() {
+  /// Convert to JSON for Firestore
+  Map<String, dynamic> toJson() {
     return {
       'title': title,
       'description': description,
+      'category': category,
+      'subcategory': subcategory,
+      'vendor': vendor,
       'price': price,
       'originalPrice': originalPrice,
       'imageUrl': imageUrl,
-      'vendor': vendor,
-      'link': link,
-      'category': category,
-      'latitude': latitude,
-      'longitude': longitude,
-      'date': Timestamp.fromDate(date),
+      'keywords': keywords.map((k) => k.toLowerCase()).toList(),
+      'createdAt': Timestamp.fromDate(createdAt),
     };
   }
 }

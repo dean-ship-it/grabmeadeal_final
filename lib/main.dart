@@ -1,129 +1,58 @@
 // lib/main.dart
 
 import 'package:flutter/material.dart';
-import 'package:firebase_core/firebase_core.dart';
-import 'package:grabmeadeal_final/firebase_options.dart';
-import 'package:grabmeadeal_final/models/deal.dart';
-import 'package:grabmeadeal_final/models/category.dart';
-import 'package:grabmeadeal_final/screens/deals_screen.dart';
-import 'package:grabmeadeal_final/screens/deal_detail_screen.dart';
-import 'package:grabmeadeal_final/screens/category_deals_screen.dart';
-import 'package:grabmeadeal_final/screens/wishlist_screen.dart';
-import 'package:grabmeadeal_final/screens/categories_screen.dart';
-import 'package:grabmeadeal_final/screens/notifications_screen.dart';
+import 'package:grabmeadeal_final/services/notification_service.dart';
+import 'package:grabmeadeal_final/services/location_handler.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
-  await Firebase.initializeApp(
-    options: DefaultFirebaseOptions.currentPlatform,
-  );
+
+  // Initialize notifications first
+  await NotificationService().initialize();
+
+  // Initialize location/geofence logic
+  final locationHandler = LocationHandler();
+  await locationHandler.initialize();
+
   runApp(const MyApp());
 }
 
-class MyApp extends StatefulWidget {
+class MyApp extends StatelessWidget {
   const MyApp({super.key});
-  @override
-  State<MyApp> createState() => _MyAppState();
-}
-
-class _MyAppState extends State<MyApp> {
-  final List<Deal> _allDeals = [];
-  final List<Deal> _wishlistDeals = [];
-  final Set<String> _wishlistIds = {};
-  final List<Category> _categories = [];
-
-  @override
-  void initState() {
-    super.initState();
-    // TODO: load _allDeals & _categories from Firestore here
-  }
-
-  void _handleWishlistToggle(Deal deal) {
-    setState(() {
-      if (_wishlistIds.contains(deal.id)) {
-        _wishlistIds.remove(deal.id);
-        _wishlistDeals.removeWhere((d) => d.id == deal.id);
-      } else {
-        _wishlistIds.add(deal.id);
-        _wishlistDeals.add(deal);
-      }
-    });
-  }
-
-  void _handleCategoryTap(Category category) {
-    Navigator.pushNamed(
-      context,
-      '/category-deals',
-      arguments: category.name,
-    );
-  }
 
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
       title: 'Grab Me A Deal',
-      debugShowCheckedModeBanner: false,
-      initialRoute: '/',
-      routes: {
-        // Static routes
-        '/': (ctx) => DealsScreen(
-              deals: _allDeals,
-              wishlistIds: _wishlistIds,
-              onWishlistToggle: _handleWishlistToggle, onTap: (Deal deal) {  }, allDeals: [], categories: [], wishlistDeals: [],
-            ),
-        '/categories': (ctx) => CategoriesScreen(
-              categories: _categories,
-              onCategoryTap: _handleCategoryTap, deals: [], wishlistIds: null, onWishlistToggle: (Deal p1) {  },
-            ),
-      },
-      onGenerateRoute: (settings) {
-        switch (settings.name) {
-          case '/deal-detail':
-            final deal = settings.arguments as Deal;
-            return MaterialPageRoute(
-              builder: (_) => DealDetailScreen(
-                deal: deal,
-                isInWishlist: _wishlistIds.contains(deal.id),
-                onWishlistToggle: _handleWishlistToggle,
-              ),
-            );
+      theme: ThemeData(
+        colorScheme: ColorScheme.fromSeed(seedColor: Colors.blue),
+        useMaterial3: true,
+      ),
+      home: const HomeScreen(),
+    );
+  }
+}
 
-          case '/category-deals':
-            final categoryName = settings.arguments as String;
-            return MaterialPageRoute(
-              builder: (_) => CategoryDealsScreen(
-                category: categoryName,
-                deals: _allDeals,
-                wishlistIds: _wishlistIds,
-                onWishlistToggle: _handleWishlistToggle, onTap: (Deal ) {  },
-              ),
-            );
+class HomeScreen extends StatelessWidget {
+  const HomeScreen({super.key});
 
-          case '/wishlist':
-            return MaterialPageRoute(
-              builder: (_) => WishlistScreen(
-                wishlistDeals: _wishlistDeals,
-                wishlistIds: _wishlistIds,
-                onWishlistToggle: _handleWishlistToggle, onTap: (Deal deal) {  },
-              ),
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(
+        title: const Text("Grab Me A Deal"),
+      ),
+      body: Center(
+        child: ElevatedButton(
+          onPressed: () {
+            NotificationService().showNotification(
+              title: "Test Notification",
+              body: "This is a test push from HomeScreen",
             );
-
-          case '/notifications':
-            return MaterialPageRoute(
-              builder: (_) => const NotificationsScreen(),
-            );
-
-          // Fallback to home if route is unknown
-          default:
-            return MaterialPageRoute(
-              builder: (_) => DealsScreen(
-                deals: _allDeals,
-                wishlistIds: _wishlistIds,
-                onWishlistToggle: _handleWishlistToggle, onTap: (Deal deal) {  }, allDeals: [], categories: [], wishlistDeals: [],
-              ),
-            );
-        }
-      },
+          },
+          child: const Text("Send Test Notification"),
+        ),
+      ),
     );
   }
 }

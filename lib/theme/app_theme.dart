@@ -1,50 +1,34 @@
 import 'package:flutter/material.dart';
 
 class AppTheme {
-  static ThemeData get lightTheme {
+  // Define a primary color you can reference statically
+  static const Color primaryBlue = Color(0xFF0075C9); // From your palette
+
+  static ThemeData get themeData {
     return ThemeData(
       useMaterial3: true,
-      brightness: Brightness.light,
-      primaryColor: const Color(0xFF0075c9),
+      colorScheme: ColorScheme.fromSeed(seedColor: primaryBlue),
       scaffoldBackgroundColor: Colors.white,
       appBarTheme: const AppBarTheme(
         backgroundColor: Colors.white,
         foregroundColor: Colors.black,
-        elevation: 1,
-        centerTitle: true,
-      ),
-      cardTheme: CardThemeData(
-        elevation: 2,
-        margin: const EdgeInsets.symmetric(vertical: 6, horizontal: 8),
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(12),
+        elevation: 0,
+        titleTextStyle: TextStyle(
+          fontSize: 20,
+          fontWeight: FontWeight.bold,
+          color: Colors.black,
         ),
-        color: Colors.white,
-      ),
-      inputDecorationTheme: InputDecorationTheme(
-        filled: true,
-        fillColor: Colors.grey[100],
-        contentPadding: const EdgeInsets.symmetric(vertical: 12, horizontal: 16),
-        border: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(12),
-          borderSide: BorderSide.none,
-        ),
-        hintStyle: const TextStyle(color: Colors.grey),
-      ),
-      iconTheme: const IconThemeData(
-        color: Colors.blueAccent,
-      ),
-      bottomNavigationBarTheme: const BottomNavigationBarThemeData(
-        selectedItemColor: Color(0xFF0075c9),
-        unselectedItemColor: Colors.grey,
-        backgroundColor: Colors.white,
-        type: BottomNavigationBarType.fixed,
-        elevation: 8,
       ),
       textTheme: const TextTheme(
-        bodyMedium: TextStyle(fontSize: 14),
-        bodyLarge: TextStyle(fontSize: 16),
-        titleLarge: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+        bodyLarge: TextStyle(fontSize: 16, color: Colors.black87),
+        bodyMedium: TextStyle(fontSize: 14, color: Colors.black54),
+      ),
+      cardTheme: const CardThemeData(
+        elevation: 3,
+        margin: EdgeInsets.all(8),
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.all(Radius.circular(12)),
+        ),
       ),
     );
   }

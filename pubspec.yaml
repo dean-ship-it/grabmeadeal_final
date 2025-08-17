@@ -1,49 +1,52 @@
 name: grabmeadeal_final
-description: A personal savings engine for finding and tracking deals.
-publish_to: 'none'
-
+description: A new Flutter project for deal discovery and wishlist management.
+publish_to: "none"
 version: 1.0.0+1
 
 environment:
-  sdk: '>=3.3.0 <4.0.0'
+  sdk: ">=3.8.0 <4.0.0"
 
 dependencies:
   flutter:
     sdk: flutter
 
-  # Firebase Core & Services
-  firebase_core: ^2.32.0
-  firebase_auth: ^4.20.0
-  cloud_firestore: ^4.17.5
+  # Firebase
+  firebase_core: ^4.0.0
+  firebase_auth: ^6.0.1
+  cloud_firestore: ^6.0.0
+  firebase_messaging: ^16.0.0
 
-  # Google Sign-In
-  google_sign_in: ^6.3.0
+  # Location & Notifications
+  geolocator: ^14.0.2
+  flutter_local_notifications: ^19.4.0
 
-  # Location & Geofencing
-  geolocator: ^11.1.0
-  flutter_local_notifications: ^17.2.4
+  # Serialization
+  json_annotation: ^4.9.0
 
-  # UI Components
-  cached_network_image: ^3.4.0
-  fl_chart: ^0.66.2
+  # UI & State Management
+  provider: ^6.1.2
+  cached_network_image: ^3.4.1
+  flutter_svg: ^2.2.0
+  url_launcher: ^6.3.1
+  intl: ^0.20.2
 
-  # Utility
-  provider: ^6.1.1
-  url_launcher: ^6.1.14
-  intl: ^0.18.1
-  shared_preferences: ^2.2.2
+  # Charts & Visualization
+  fl_chart: ^1.0.0
 
-  # Flutter essentials
-  cupertino_icons: ^1.0.6
+  # Icons
+  cupertino_icons: ^1.0.8
 
 dev_dependencies:
   flutter_test:
     sdk: flutter
-  flutter_lints: ^3.0.2
+  flutter_lints: ^6.0.0
+  build_runner: ^2.4.13
+  json_serializable: ^6.9.3
 
 flutter:
   uses-material-design: true
 
   assets:
-    - assets/logo/
     - assets/images/
+    - assets/icons/
+    - assets/sounds/

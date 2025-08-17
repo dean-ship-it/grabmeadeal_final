@@ -1,6 +1,5 @@
-// lib/screens/admin_upload_screen.dart
-import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 
 class AdminUploadScreen extends StatefulWidget {
   const AdminUploadScreen({super.key});
@@ -10,101 +9,111 @@ class AdminUploadScreen extends StatefulWidget {
 }
 
 class _AdminUploadScreenState extends State<AdminUploadScreen> {
-  final _formKey = GlobalKey<FormState>();
-  final _titleController = TextEditingController();
-  final _descriptionController = TextEditingController();
-  final _priceController = TextEditingController();
-  final _originalPriceController = TextEditingController();
-  final _imageUrlController = TextEditingController();
-  final _vendorController = TextEditingController();
-  final _categoryController = TextEditingController();
-  final _linkController = TextEditingController();
+  final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
+  final TextEditingController _titleController = TextEditingController();
+  final TextEditingController _descriptionController = TextEditingController();
+  final TextEditingController _priceController = TextEditingController();
+  final TextEditingController _vendorController = TextEditingController();
+  final TextEditingController _imageUrlController = TextEditingController();
+  final TextEditingController _categoryController = TextEditingController();
+  final TextEditingController _linkController = TextEditingController();
 
-  bool _isLoading = false;
+  Future<void> uploadDeal() async {
+    if (_formKey.currentState!.validate()) {
+      try {
+        await FirebaseFirestore.instance.collection('deals').add(<String, dynamic>{
+          'title': _titleController.text,
+          'description': _descriptionController.text,
+          'price': double.tryParse(_priceController.text) ?? 0.0,
+          'vendor': _vendorController.text,
+          'imageUrl': _imageUrlController.text,
+          'category': _categoryController.text,
+          'link': _linkController.text,
+          'date': Timestamp.now(),
+        });
 
-  Future<void> _uploadDeal() async {
-    if (!_formKey.currentState!.validate()) return;
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Deal uploaded successfully')),
+        );
 
-    setState(() => _isLoading = true);
-
-    try {
-      final newDeal = {
-        'title': _titleController.text,
-        'description': _descriptionController.text,
-        'price': double.tryParse(_priceController.text) ?? 0.0,
-        'originalPrice': double.tryParse(_originalPriceController.text) ?? 0.0,
-        'imageUrl': _imageUrlController.text,
-        'vendor': _vendorController.text,
-        'category': _categoryController.text,
-        'link': _linkController.text,
-        'date': Timestamp.now(),
-      };
-
-      await FirebaseFirestore.instance.collection('deals').add(newDeal);
-
-      if (!mounted) return;
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Deal uploaded successfully')),
-      );
-
-      _formKey.currentState!.reset();
-      _titleController.clear();
-      _descriptionController.clear();
-      _priceController.clear();
-      _originalPriceController.clear();
-      _imageUrlController.clear();
-      _vendorController.clear();
-      _categoryController.clear();
-      _linkController.clear();
-    } catch (e) {
-      if (!mounted) return;
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Upload failed: $e')),
-      );
-    } finally {
-      setState(() => _isLoading = false);
+        _titleController.clear();
+        _descriptionController.clear();
+        _priceController.clear();
+        _vendorController.clear();
+        _imageUrlController.clear();
+        _categoryController.clear();
+        _linkController.clear();
+      } catch (e) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Upload failed: $e')),
+        );
+      }
     }
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text('Admin Deal Upload')),
+      appBar: AppBar(
+        title: const Text('Upload New Deal'),
+      ),
       body: Padding(
-        padding: const EdgeInsets.all(16),
+        padding: const EdgeInsets.all(16.0),
         child: Form(
           key: _formKey,
           child: ListView(
-            children: [
-              _buildField(_titleController, 'Title'),
-              _buildField(_descriptionController, 'Description'),
-              _buildField(_priceController, 'Price'),
-              _buildField(_originalPriceController, 'Original Price'),
-              _buildField(_imageUrlController, 'Image URL'),
-              _buildField(_vendorController, 'Vendor'),
-              _buildField(_categoryController, 'Category'),
-              _buildField(_linkController, 'Link'),
-              const SizedBox(height: 20),
+            children: <Widget>[
+              TextFormField(
+                controller: _titleController,
+                decoration: const InputDecoration(labelText: 'Title'),
+                validator: (String? value) =>
+                    value == null || value.isEmpty ? 'Enter title' : null,
+              ),
+              TextFormField(
+                controller: _descriptionController,
+                decoration: const InputDecoration(labelText: 'Description'),
+                validator: (String? value) =>
+                    value == null || value.isEmpty ? 'Enter description' : null,
+              ),
+              TextFormField(
+                controller: _priceController,
+                decoration: const InputDecoration(labelText: 'Price'),
+                keyboardType: TextInputType.number,
+                validator: (String? value) =>
+                    value == null || value.isEmpty ? 'Enter price' : null,
+              ),
+              TextFormField(
+                controller: _vendorController,
+                decoration: const InputDecoration(labelText: 'Vendor'),
+                validator: (String? value) =>
+                    value == null || value.isEmpty ? 'Enter vendor' : null,
+              ),
+              TextFormField(
+                controller: _imageUrlController,
+                decoration: const InputDecoration(labelText: 'Image URL'),
+                validator: (String? value) =>
+                    value == null || value.isEmpty ? 'Enter image URL' : null,
+              ),
+              TextFormField(
+                controller: _categoryController,
+                decoration: const InputDecoration(labelText: 'Category'),
+                validator: (String? value) =>
+                    value == null || value.isEmpty ? 'Enter category' : null,
+              ),
+              TextFormField(
+                controller: _linkController,
+                decoration: const InputDecoration(labelText: 'Link'),
+                validator: (String? value) =>
+                    value == null || value.isEmpty ? 'Enter link' : null,
+              ),
+              const SizedBox(height: 24),
               ElevatedButton(
-                onPressed: _isLoading ? null : _uploadDeal,
-                child: _isLoading
-                    ? const CircularProgressIndicator()
-                    : const Text('Upload Deal'),
+                onPressed: uploadDeal,
+                child: const Text('Upload Deal'),
               ),
             ],
           ),
         ),
-      ),
-    );
-  }
-
-  Widget _buildField(TextEditingController controller, String label) {
-    return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 8),
-      child: TextFormField(
-        controller: controller,
-        decoration: InputDecoration(labelText: label, border: const OutlineInputBorder()),
-        validator: (value) => value == null || value.isEmpty ? 'Enter $label' : null,
       ),
     );
   }

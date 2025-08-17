@@ -10,7 +10,7 @@ class TestFirestoreWidget extends StatelessWidget {
       appBar: AppBar(title: const Text('Test Firestore Widget')),
       body: StreamBuilder<QuerySnapshot>(
         stream: FirebaseFirestore.instance.collection('deals').snapshots(),
-        builder: (context, snapshot) {
+        builder: (BuildContext context, AsyncSnapshot<QuerySnapshot<Object?>> snapshot) {
           if (snapshot.connectionState == ConnectionState.waiting) {
             return const Center(child: CircularProgressIndicator());
           }
@@ -19,7 +19,7 @@ class TestFirestoreWidget extends StatelessWidget {
             return Center(child: Text('Error: ${snapshot.error}'));
           }
 
-          final docs = snapshot.data?.docs ?? [];
+          final List<QueryDocumentSnapshot<Object?>> docs = snapshot.data?.docs ?? <QueryDocumentSnapshot<Object?>>[];
 
           if (docs.isEmpty) {
             return const Center(child: Text('No deals found in Firestore.'));
@@ -27,8 +27,8 @@ class TestFirestoreWidget extends StatelessWidget {
 
           return ListView.builder(
             itemCount: docs.length,
-            itemBuilder: (context, index) {
-              final data = docs[index].data() as Map<String, dynamic>;
+            itemBuilder: (BuildContext context, int index) {
+              final Map<String, dynamic> data = docs[index].data() as Map<String, dynamic>;
               return ListTile(
                 title: Text(data['title'] ?? 'No Title'),
                 subtitle: Text(data['vendor'] ?? 'No Vendor'),

@@ -6,7 +6,7 @@ class WhitelistVendorsScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final vendorsRef = FirebaseFirestore.instance
+    final Query<Map<String, dynamic>> vendorsRef = FirebaseFirestore.instance
         .collection('vendorWhitelist')
         .orderBy('timestamp', descending: true);
 
@@ -14,13 +14,13 @@ class WhitelistVendorsScreen extends StatelessWidget {
       appBar: AppBar(title: const Text('Whitelisted Vendors')),
       body: StreamBuilder<QuerySnapshot<Map<String, dynamic>>>(
         stream: vendorsRef.snapshots(),
-        builder: (context, snapshot) {
+        builder: (BuildContext context, AsyncSnapshot<QuerySnapshot<Map<String, dynamic>>> snapshot) {
           if (snapshot.hasError) return const Center(child: Text('Error loading vendor whitelist'));
           if (snapshot.connectionState == ConnectionState.waiting) {
             return const Center(child: CircularProgressIndicator());
           }
 
-          final docs = snapshot.data!.docs;
+          final List<QueryDocumentSnapshot<Map<String, dynamic>>> docs = snapshot.data!.docs;
 
           if (docs.isEmpty) {
             return const Center(child: Text('No vendors have been whitelisted yet.'));
@@ -30,10 +30,10 @@ class WhitelistVendorsScreen extends StatelessWidget {
             padding: const EdgeInsets.all(12),
             itemCount: docs.length,
             separatorBuilder: (_, __) => const SizedBox(height: 8),
-            itemBuilder: (context, index) {
-              final doc = docs[index];
-              final vendorName = doc.id;
-              final timestamp = (doc.data()['timestamp'] as Timestamp?)?.toDate();
+            itemBuilder: (BuildContext context, int index) {
+              final QueryDocumentSnapshot<Map<String, dynamic>> doc = docs[index];
+              final String vendorName = doc.id;
+              final DateTime? timestamp = (doc.data()['timestamp'] as Timestamp?)?.toDate();
 
               return Card(
                 child: ListTile(

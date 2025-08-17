@@ -1,9 +1,5 @@
 
 class StoreLocation {
-  final String name;
-  final String category;
-  final double latitude;
-  final double longitude;
 
   StoreLocation({
     required this.name,
@@ -11,9 +7,13 @@ class StoreLocation {
     required this.latitude,
     required this.longitude,
   });
+  final String name;
+  final String category;
+  final double latitude;
+  final double longitude;
 }
 
-final List<StoreLocation> mockStoreLocations = [
+final List<StoreLocation> mockStoreLocations = <StoreLocation>[
   StoreLocation(
     name: 'H-E-B Houston',
     category: 'Groceries',

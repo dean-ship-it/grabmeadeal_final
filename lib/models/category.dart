@@ -1,40 +1,33 @@
-import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
+import 'package:json_annotation/json_annotation.dart';
 
+part 'category.g.dart';
+
+/// Converter to handle [IconData] in JSON
+class IconDataConverter implements JsonConverter<IconData, int> {
+  const IconDataConverter();
+
+  @override
+  IconData fromJson(int json) => IconData(json, fontFamily: 'MaterialIcons');
+
+  @override
+  int toJson(IconData object) => object.codePoint;
+}
+
+@JsonSerializable()
 class Category {
-  final String id;
-  final String title;
-  final String? description;
-  final IconData? icon;
-  final String? imageUrl;
+  final String name;
+
+  @IconDataConverter()
+  final IconData icon;
 
   Category({
-    required this.id,
-    required this.title,
-    this.description,
-    this.icon,
-    this.imageUrl,
+    required this.name,
+    required this.icon,
   });
 
-  factory Category.fromJson(Map<String, dynamic> json) {
-    return Category(
-      id: json['id'] as String,
-      title: json['title'] as String,
-      description: json['description'] as String?,
-      icon: json['icon'] != null ? IconData(json['icon'], fontFamily: 'MaterialIcons') : null,
-      imageUrl: json['imageUrl'] as String?,
-    );
-  }
+  factory Category.fromJson(Map<String, dynamic> json) =>
+      _$CategoryFromJson(json);
 
-  String? get name => null;
-
-  Map<String, dynamic> toJson() => {
-        'id': id,
-        'title': title,
-        'description': description,
-        'icon': icon?.codePoint,
-        'imageUrl': imageUrl,
-      };
-
-  static fromFirestore(QueryDocumentSnapshot<Map<String, dynamic>> doc) {}
+  Map<String, dynamic> toJson() => _$CategoryToJson(this);
 }

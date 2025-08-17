@@ -1,63 +1,70 @@
-// lib/screens/deals_screen.dart
-
 import 'package:flutter/material.dart';
 import 'package:grabmeadeal_final/models/deal.dart';
+import 'package:grabmeadeal_final/services/firestore_service.dart';
 import 'package:grabmeadeal_final/widgets/deal_card.dart';
-import 'package:grabmeadeal_final/widgets/search_bar.dart';
 
-class DealsScreen extends StatelessWidget {
-  final List<Deal> deals;
+class DealsScreen extends StatefulWidget {
   final Set<String> wishlistIds;
-  final void Function(Deal) onWishlistToggle;
-  final VoidCallback onTap;
+  final Function(Deal deal, bool isInWishlist) onWishlistToggle;
 
   const DealsScreen({
     super.key,
-    required this.deals,
     required this.wishlistIds,
     required this.onWishlistToggle,
-    required this.onTap,
   });
 
   @override
-  Widget build(BuildContext context) {
-    final sortedDeals = [...deals]..sort((a, b) => b.date.compareTo(a.date));
+  State<DealsScreen> createState() => _DealsScreenState();
+}
 
+class _DealsScreenState extends State<DealsScreen> {
+  final FirestoreService _firestoreService = FirestoreService();
+
+  @override
+  Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Deals'),
-        elevation: 2,
-        backgroundColor: Colors.white,
-        foregroundColor: Colors.black87,
-        centerTitle: true,
+        title: const Text("Deals"),
       ),
-      body: Column(
-        children: [
-          Padding(
-            padding: const EdgeInsets.all(8.0),
-            child: CustomSearchBar(
-              results: sortedDeals,
-              wishlistIds: wishlistIds,
-              onWishlistToggle: onWishlistToggle,
-              onSearch: (query) {},
-            ),
-          ),
-          Expanded(
-            child: ListView.builder(
-              padding: const EdgeInsets.symmetric(horizontal: 8.0),
-              itemCount: sortedDeals.length,
-              itemBuilder: (ctx, i) {
-                final deal = sortedDeals[i];
-                return DealCard(
-                  deal: deal,
-                  isInWishlist: wishlistIds.contains(deal.id),
-                  onWishlistToggle: () => onWishlistToggle(deal),
-                  onTap: onTap,
-                );
-              },
-            ),
-          ),
-        ],
+      body: StreamBuilder<List<Deal>>(
+        stream: _firestoreService.getDealsStream(),
+        builder: (context, snapshot) {
+          if (snapshot.connectionState == ConnectionState.waiting) {
+            return const Center(child: CircularProgressIndicator());
+          }
+          if (snapshot.hasError) {
+            return const Center(child: Text("Error loading deals"));
+          }
+          if (!snapshot.hasData || snapshot.data!.isEmpty) {
+            return const Center(child: Text("No deals available"));
+          }
+
+          final deals = snapshot.data!;
+
+          return ListView.builder(
+            itemCount: deals.length,
+            itemBuilder: (context, index) {
+              final deal = deals[index];
+              final isInWishlist = widget.wishlistIds.contains(deal.id);
+
+              return DealCard(
+                deal: deal,
+                isInWishlist: isInWishlist,
+                onWishlistToggle: () {
+                  widget.onWishlistToggle(deal, isInWishlist);
+                },
+                onTap: () {
+                  // Navigate to deal details page
+                  Navigator.pushNamed(
+                    context,
+                    '/dealDetail',
+                    arguments: deal,
+                  );
+                },
+              );
+            },
+          );
+        },
       ),
     );
   }

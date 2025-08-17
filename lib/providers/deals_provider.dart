@@ -2,7 +2,7 @@ import 'package:flutter/foundation.dart';
 import 'package:grabmeadeal_final/models/deal.dart';
 
 class DealsProvider with ChangeNotifier {
-  List<Deal> _deals = [];
+  List<Deal> _deals = <Deal>[];
 
   List<Deal> get deals => _deals;
 
@@ -17,7 +17,7 @@ class DealsProvider with ChangeNotifier {
   }
 
   void removeDeal(String dealId) {
-    _deals.removeWhere((deal) => deal.id == dealId);
+    _deals.removeWhere((Deal deal) => deal.id == dealId);
     notifyListeners();
   }
 
@@ -28,7 +28,7 @@ class DealsProvider with ChangeNotifier {
 
   Deal? getDealById(String dealId) {
     try {
-      return _deals.firstWhere((deal) => deal.id == dealId);
+      return _deals.firstWhere((Deal deal) => deal.id == dealId);
     } catch (e) {
       return null;
     }

@@ -4,9 +4,6 @@ import 'package:flutter/material.dart';
 import 'package:grabmeadeal_final/models/deal.dart';
 
 class WishlistDealCard extends StatelessWidget {
-  final String? title;
-  final String? imageUrl;
-  final String? vendor;
 
   const WishlistDealCard({
     super.key,
@@ -14,6 +11,9 @@ class WishlistDealCard extends StatelessWidget {
     required this.imageUrl,
     required this.vendor, required Deal deal, required bool isInWishlist, required Null Function() onTap, required void Function() onWishlistToggle,
   });
+  final String? title;
+  final String? imageUrl;
+  final String? vendor;
 
   @override
   Widget build(BuildContext context) {

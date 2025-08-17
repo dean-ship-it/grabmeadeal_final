@@ -1,47 +1,83 @@
-// lib/screens/categories_screen.dart
-
 import 'package:flutter/material.dart';
-import 'package:grabmeadeal_final/models/category.dart';
-import 'package:grabmeadeal_final/widgets/category_tile.dart';
+import 'package:grabmeadeal_final/screens/category_deals_screen.dart';
 
 class CategoriesScreen extends StatelessWidget {
-  final List<Category> categories;
-  final void Function(Category) onCategoryTap;
+  final List<String> categories;
 
   const CategoriesScreen({
     super.key,
     required this.categories,
-    required this.onCategoryTap,
   });
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Categories'),
-        elevation: 2,
-        backgroundColor: Colors.white,
-        foregroundColor: Colors.black87,
-        centerTitle: true,
+        title: const Text(
+          "Browse Categories",
+          style: TextStyle(fontWeight: FontWeight.bold),
+        ),
       ),
-      body: Padding(
-        padding: const EdgeInsets.all(8.0),
-        child: GridView.builder(
-          itemCount: categories.length,
-          gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-            crossAxisCount: 2,
-            childAspectRatio: 3.5,
-            crossAxisSpacing: 10,
-            mainAxisSpacing: 10,
+      body: GridView.builder(
+        padding: const EdgeInsets.all(16),
+        itemCount: categories.length,
+        gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+          crossAxisCount: 2, // two columns for balance
+          crossAxisSpacing: 16,
+          mainAxisSpacing: 16,
+          childAspectRatio: 1.1,
+        ),
+        itemBuilder: (context, index) {
+          final category = categories[index];
+          return _buildCategoryCard(context, category);
+        },
+      ),
+    );
+  }
+
+  Widget _buildCategoryCard(BuildContext context, String category) {
+    return GestureDetector(
+      onTap: () {
+        Navigator.push(
+          context,
+          MaterialPageRoute(
+            builder: (_) => CategoryDealsScreen(category: category),
           ),
-          itemBuilder: (ctx, index) {
-            final category = categories[index];
-            return CategoryTile(
-              title: category.name,
-              icon: category.icon,
-              onTap: () => onCategoryTap(category),
-            );
-          },
+        );
+      },
+      child: Container(
+        decoration: BoxDecoration(
+          gradient: LinearGradient(
+            colors: [Colors.blue.shade700, Colors.green.shade400],
+            begin: Alignment.topLeft,
+            end: Alignment.bottomRight,
+          ),
+          borderRadius: BorderRadius.circular(18),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black.withOpacity(0.15),
+              blurRadius: 8,
+              offset: const Offset(2, 4),
+            ),
+          ],
+        ),
+        child: Center(
+          child: Text(
+            category,
+            textAlign: TextAlign.center,
+            style: const TextStyle(
+              fontSize: 18,
+              fontWeight: FontWeight.bold,
+              color: Colors.white,
+              shadows: [
+                Shadow(
+                  color: Colors.black38,
+                  blurRadius: 4,
+                  offset: Offset(1, 2),
+                ),
+              ],
+            ),
+          ),
         ),
       ),
     );

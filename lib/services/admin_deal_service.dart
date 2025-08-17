@@ -16,5 +16,7 @@ class AdminDealService {
 }
 
 mixin AdminDeal {
-  Object? toMap() {}
+  Object? toMap() {
+    return null;
+  }
 }

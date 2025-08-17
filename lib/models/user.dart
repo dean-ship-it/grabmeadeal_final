@@ -1,8 +1,4 @@
 class AppUser {
-  final String uid;
-  final String email;
-  final String? displayName;
-  final String? photoUrl;
 
   AppUser({
     required this.uid,
@@ -19,9 +15,13 @@ class AppUser {
       photoUrl: map['photoUrl'],
     );
   }
+  final String uid;
+  final String email;
+  final String? displayName;
+  final String? photoUrl;
 
   Map<String, dynamic> toMap() {
-    return {
+    return <String, dynamic>{
       'uid': uid,
       'email': email,
       'displayName': displayName,

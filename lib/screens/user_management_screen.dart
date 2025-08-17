@@ -5,9 +5,9 @@ class UserManagementScreen extends StatelessWidget {
   const UserManagementScreen({super.key});
 
   Future<List<Map<String, dynamic>>> _fetchUsers() async {
-    final snapshot = await FirebaseFirestore.instance.collection('users').get();
+    final QuerySnapshot<Map<String, dynamic>> snapshot = await FirebaseFirestore.instance.collection('users').get();
     return snapshot.docs
-        .map((doc) => {'id': doc.id, ...doc.data()})
+        .map((QueryDocumentSnapshot<Map<String, dynamic>> doc) => <String, dynamic>{'id': doc.id, ...doc.data()})
         .toList();
   }
 
@@ -17,7 +17,7 @@ class UserManagementScreen extends StatelessWidget {
       appBar: AppBar(title: const Text('User Management')),
       body: FutureBuilder<List<Map<String, dynamic>>>(
         future: _fetchUsers(),
-        builder: (context, snapshot) {
+        builder: (BuildContext context, AsyncSnapshot<List<Map<String, dynamic>>> snapshot) {
           if (snapshot.connectionState == ConnectionState.waiting) {
             return const Center(child: CircularProgressIndicator());
           } else if (snapshot.hasError) {
@@ -26,11 +26,11 @@ class UserManagementScreen extends StatelessWidget {
             return const Center(child: Text('No users found.'));
           }
 
-          final users = snapshot.data!;
+          final List<Map<String, dynamic>> users = snapshot.data!;
           return ListView.builder(
             itemCount: users.length,
-            itemBuilder: (context, index) {
-              final user = users[index];
+            itemBuilder: (BuildContext context, int index) {
+              final Map<String, dynamic> user = users[index];
               return ListTile(
                 title: Text(user['email'] ?? 'No Email'),
                 subtitle: Text(user['id']),

@@ -1,27 +1,21 @@
+import 'dart:async';
 import 'package:flutter/material.dart';
-import 'package:firebase_auth/firebase_auth.dart';
-import 'package:grabmeadeal_final/screens/home_screen.dart';
-import 'package:grabmeadeal_final/screens/auth_screen.dart';
 import 'package:grabmeadeal_final/models/deal.dart';
 import 'package:grabmeadeal_final/models/category.dart';
+import 'package:grabmeadeal_final/screens/main_tab_controller.dart';
+import 'package:grabmeadeal_final/theme/app_theme.dart';
 
 class SplashScreen extends StatefulWidget {
-  final List<Deal> allDeals;
-  final List<Category> categories;
-  final List<Deal> wishlistDeals;
-  final Set<String> wishlistIds;
-  final void Function(Deal) onWishlistToggle;
-  final void Function(Category) onCategoryTap;
 
   const SplashScreen({
-    super.key,
-    required this.allDeals,
-    required this.categories,
-    required this.wishlistDeals,
+    Key? key,
+    required this.deals,
     required this.wishlistIds,
     required this.onWishlistToggle,
-    required this.onCategoryTap,
-  });
+  }) : super(key: key);
+  final List<Deal> deals;
+  final Set<String> wishlistIds;
+  final void Function(Deal) onWishlistToggle;
 
   @override
   State<SplashScreen> createState() => _SplashScreenState();
@@ -31,42 +25,55 @@ class _SplashScreenState extends State<SplashScreen> {
   @override
   void initState() {
     super.initState();
-    _checkAuth();
-  }
 
-  Future<void> _checkAuth() async {
-    await Future.delayed(const Duration(seconds: 2));
+    // ✅ Debug check: make sure we receive deals from main.dart
+    print('🟢 SplashScreen received ${widget.deals.length} deals');
 
-    if (!mounted) return;
-
-    final user = FirebaseAuth.instance.currentUser;
-    if (user != null) {
+    Timer(const Duration(seconds: 2), () {
       Navigator.of(context).pushReplacement(
         MaterialPageRoute(
-          builder: (_) => HomeScreen(
-            allDeals: widget.allDeals,
-            categories: widget.categories,
-            wishlistDeals: widget.wishlistDeals,
+          builder: (_) => MainTabController(
+            deals: widget.deals,
             wishlistIds: widget.wishlistIds,
             onWishlistToggle: widget.onWishlistToggle,
-            onCategoryTap: widget.onCategoryTap,
+            wishlistDeals: widget.deals
+                .where((Deal deal) => widget.wishlistIds.contains(deal.id))
+                .toList(),
+            categories: <Category>[
+              const Category(id: 'grocery', name: 'Grocery', iconName: 'shopping_cart'),
+              const Category(id: 'tools', name: 'Tools & Equipment', iconName: 'build'),
+              const Category(id: 'electronics', name: 'Electronics', iconName: 'electrical_services'),
+              const Category(id: 'fitness', name: 'Fitness & Wellness', iconName: 'fitness_center'),
+              const Category(id: 'pets', name: 'Pet Supplies', iconName: 'pets'),
+            ],
           ),
         ),
       );
-    } else {
-      Navigator.of(context).pushReplacement(
-        MaterialPageRoute(builder: (_) => const AuthScreen()),
-      );
-    }
+    });
   }
 
   @override
   Widget build(BuildContext context) {
     return const Scaffold(
+      backgroundColor: AppTheme.primaryBlue,
       body: Center(
-        child: Text(
-          'Grab Me A Deal',
-          style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: <Widget>[
+            Icon(Icons.local_offer, color: Colors.white, size: 80),
+            SizedBox(height: 20),
+            Text(
+              'Grab Me A Deal',
+              style: TextStyle(
+                color: Colors.white,
+                fontSize: 28,
+                fontWeight: FontWeight.bold,
+                letterSpacing: 1.2,
+              ),
+            ),
+            SizedBox(height: 10),
+            CircularProgressIndicator(color: Colors.white),
+          ],
         ),
       ),
     );

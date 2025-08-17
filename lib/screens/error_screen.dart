@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
 
 class ErrorScreen extends StatelessWidget {
-  final String message;
 
   const ErrorScreen({super.key, this.message = 'Something went wrong!'});
+  final String message;
 
   @override
   Widget build(BuildContext context) {
@@ -17,7 +17,7 @@ class ErrorScreen extends StatelessWidget {
           padding: const EdgeInsets.symmetric(horizontal: 24),
           child: Column(
             mainAxisSize: MainAxisSize.min,
-            children: [
+            children: <Widget>[
               const Icon(Icons.error_outline, size: 64, color: Colors.red),
               const SizedBox(height: 20),
               Text(

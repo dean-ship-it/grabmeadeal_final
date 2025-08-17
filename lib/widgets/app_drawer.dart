@@ -8,7 +8,7 @@ class AppDrawer extends StatelessWidget {
     return Drawer(
       child: ListView(
         padding: EdgeInsets.zero,
-        children: [
+        children: <Widget>[
           const DrawerHeader(
             decoration: BoxDecoration(color: Colors.green),
             child: Text('Grab Me A Deal', style: TextStyle(color: Colors.white, fontSize: 24)),

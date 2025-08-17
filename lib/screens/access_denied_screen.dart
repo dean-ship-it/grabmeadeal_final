@@ -12,7 +12,7 @@ class AccessDeniedScreen extends StatelessWidget {
       body: const Center(
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
-          children: [
+          children: <Widget>[
             Icon(Icons.lock, color: Colors.red, size: 64),
             SizedBox(height: 16),
             Text(

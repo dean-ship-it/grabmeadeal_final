@@ -1,11 +1,6 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 
 class Store {
-  final String id;
-  final String name;
-  final String category;
-  final double latitude;
-  final double longitude;
 
   Store({
     required this.id,
@@ -26,9 +21,14 @@ class Store {
       longitude: (data['longitude'] as num).toDouble(),
     );
   }
+  final String id;
+  final String name;
+  final String category;
+  final double latitude;
+  final double longitude;
 
   Map<String, dynamic> toMap() {
-    return {
+    return <String, dynamic>{
       'name': name,
       'category': category,
       'latitude': latitude,

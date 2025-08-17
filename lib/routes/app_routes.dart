@@ -1,98 +1,90 @@
 // lib/routes/app_routes.dart
 
 import 'package:flutter/material.dart';
-import 'package:provider/provider.dart';
-
-import 'package:grabmeadeal_final/providers/deals_provider.dart';
-import 'package:grabmeadeal_final/providers/wishlist_provider.dart';
-
 import 'package:grabmeadeal_final/models/deal.dart';
-
 import 'package:grabmeadeal_final/screens/deals_screen.dart';
-import 'package:grabmeadeal_final/screens/deal_detail_screen.dart';
-import 'package:grabmeadeal_final/screens/category_deals_screen.dart';
-import 'package:grabmeadeal_final/screens/search_results_screen.dart';
 import 'package:grabmeadeal_final/screens/wishlist_screen.dart';
+import 'package:grabmeadeal_final/screens/categories_screen.dart';
+import 'package:grabmeadeal_final/screens/category_deals_screen.dart';
+import 'package:grabmeadeal_final/screens/deal_detail_screen.dart';
+import 'package:grabmeadeal_final/screens/search_results_screen.dart';
 import 'package:grabmeadeal_final/screens/notifications_screen.dart';
 
 class AppRoutes {
-  static String notifications;
+  static const String deals = '/deals';
+  static const String wishlist = '/wishlist';
+  static const String categories = '/categories';
+  static const String categoryDeals = '/category-deals';
+  static const String dealDetail = '/deal-detail';
+  static const String searchResults = '/search-results';
+  static const String notifications = '/notifications';
 
-  static Route<dynamic>? onGenerateRoute(RouteSettings settings) {
+  static Map<String, WidgetBuilder> routes({
+    required List<Deal> allDeals,
+    required List<Deal> wishlistDeals,
+    required Set<String> wishlistIds,
+    required Function(Deal) onWishlistToggle,
+  }) {
+    return {
+      deals: (_) => DealsScreen(
+            deals: allDeals,
+            wishlistIds: wishlistIds,
+            onWishlistToggle: onWishlistToggle,
+          ),
+      wishlist: (_) => WishlistScreen(
+            wishlistDeals: wishlistDeals,
+            wishlistIds: wishlistIds,
+            onWishlistToggle: onWishlistToggle,
+          ),
+      categories: (_) => CategoriesScreen(
+            deals: allDeals,
+            wishlistIds: wishlistIds,
+            onWishlistToggle: onWishlistToggle,
+          ),
+      notifications: (_) => const NotificationsScreen(),
+    };
+  }
+
+  static Route<dynamic>? onGenerateRoute(RouteSettings settings,
+      {required List<Deal> allDeals,
+      required List<Deal> wishlistDeals,
+      required Set<String> wishlistIds,
+      required Function(Deal) onWishlistToggle}) {
     switch (settings.name) {
-      case '/':
-        return MaterialPageRoute(builder: (ctx) {
-          final dealsProv = ctx.watch<DealsProvider>();
-          final wishlistProv = ctx.watch<WishlistProvider>();
-          return DealsScreen(
-            deals: dealsProv.deals,
-            wishlistIds: wishlistProv.ids,
-            onWishlistToggle: wishlistProv.toggleDeal, onTap: (Deal deal) {  }, allDeals: [], categories: [], wishlistDeals: [],
-          );
-        });
-
-      case '/deal_detail':
-        final deal = settings.arguments as Deal;
-        return MaterialPageRoute(builder: (ctx) {
-          final wishlistProv = ctx.watch<WishlistProvider>();
-          return DealDetailScreen(
-            deal: deal,
-            isInWishlist: wishlistProv.ids.contains(deal.id),
-            onWishlistToggle: wishlistProv.toggleDeal,
-          );
-        });
-
-      case '/category_deals':
-        final category = settings.arguments as String;
-        return MaterialPageRoute(builder: (ctx) {
-          final dealsProv = ctx.watch<DealsProvider>();
-          final wishlistProv = ctx.watch<WishlistProvider>();
-          return CategoryDealsScreen(
-            category: category,
-            deals: dealsProv.deals,
-            wishlistIds: wishlistProv.ids,
-            onWishlistToggle: wishlistProv.toggleDeal, onTap: (Deal ) {  },
-          );
-        });
-
-      case '/search_results':
-        final query = settings.arguments as String;
-        return MaterialPageRoute(builder: (ctx) {
-          final dealsProv = ctx.watch<DealsProvider>();
-          final wishlistProv = ctx.watch<WishlistProvider>();
-          final results = dealsProv.deals
-              .where((d) => d.title.toLowerCase().contains(query.toLowerCase()))
-              .toList();
-          return SearchResultsScreen(
-            results: results,
-            searchQuery: query,
-            wishlistIds: wishlistProv.ids,
-            onWishlistToggle: wishlistProv.toggleDeal,
-          );
-        });
-
-      case '/wishlist':
-        return MaterialPageRoute(builder: (ctx) {
-          final wishlistProv = ctx.watch<WishlistProvider>();
-          return WishlistScreen(
-            wishlistDeals: wishlistProv.wishlistDeals,
-            wishlistIds: wishlistProv.ids,
-            onWishlistToggle: wishlistProv.toggleDeal, onTap: (Deal deal) {  },
-          );
-        });
-
-      case '/notifications':
+      case categoryDeals:
+        final args = settings.arguments as Map<String, dynamic>;
         return MaterialPageRoute(
-          builder: (_) => NotificationsScreen(),
-        );
-
-      default:
-        // Fallback for undefined routes
-        return MaterialPageRoute(
-          builder: (_) => Scaffold(
-            body: Center(child: Text('No route defined for ${settings.name}')),
+          builder: (_) => CategoryDealsScreen(
+            categoryName: args['categoryName'] as String,
+            deals: allDeals,
+            wishlistIds: wishlistIds,
+            onWishlistToggle: onWishlistToggle,
           ),
         );
+      case dealDetail:
+        final deal = settings.arguments as Deal;
+        return MaterialPageRoute(
+          builder: (_) => DealDetailScreen(
+            deal: deal,
+            onWishlistToggle: onWishlistToggle,
+            wishlistIds: wishlistIds,
+          ),
+        );
+      case searchResults:
+        final args = settings.arguments as Map<String, dynamic>;
+        return MaterialPageRoute(
+          builder: (_) => SearchResultsScreen(
+            results: args['results'] as List<Deal>,
+            wishlistIds: wishlistIds,
+            onWishlistToggle: onWishlistToggle,
+          ),
+        );
+      case notifications:
+        return MaterialPageRoute(
+          builder: (_) => const NotificationsScreen(),
+        );
+      default:
+        return null;
     }
   }
 }

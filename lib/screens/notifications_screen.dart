@@ -10,18 +10,20 @@ class NotificationsScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Notifications'),
+        title: const Text("Notifications"),
         centerTitle: true,
       ),
       body: Center(
-        child: ElevatedButton(
-          onPressed: () {
-            NotificationService.showNotification(
-              title: 'Grab Me A Deal',
-              body: 'A nearby store has a deal on your wishlist!',
+        child: ElevatedButton.icon(
+          icon: const Icon(Icons.notifications),
+          label: const Text("Send Test Notification"),
+          onPressed: () async {
+            await NotificationService().showNotification(
+              id: 0,
+              title: "Test Notification",
+              body: "This is a test from NotificationsScreen!",
             );
           },
-          child: const Text('Send Test Notification'),
         ),
       ),
     );
