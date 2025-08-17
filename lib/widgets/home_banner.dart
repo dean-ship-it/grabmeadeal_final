@@ -13,13 +13,13 @@ class HomeBanner extends StatelessWidget {
         borderRadius: BorderRadius.circular(12),
       ),
       child: const Row(
-        children: [
+        children: <Widget>[
           Icon(Icons.local_offer, size: 32, color: Colors.blue),
           SizedBox(width: 12),
           Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
+              children: <Widget>[
                 Text(
                   'Hot Deals Near You!',
                   style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),

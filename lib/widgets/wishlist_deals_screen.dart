@@ -5,7 +5,7 @@ import 'package:grabmeadeal_final/widgets/deal_card.dart';
 class WishlistDealsScreen extends StatelessWidget {
   final List<Deal> wishlistDeals;
   final Set<String> wishlistIds;
-  final void Function(Deal) onWishlistToggle;
+  final void Function(String dealId) onWishlistToggle;
 
   const WishlistDealsScreen({
     super.key,
@@ -18,12 +18,12 @@ class WishlistDealsScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Your Wishlist'),
+        title: const Text('My Wishlist'),
       ),
       body: wishlistDeals.isEmpty
           ? const Center(
               child: Text(
-                'No items in your wishlist yet.',
+                'Your wishlist is empty.',
                 style: TextStyle(fontSize: 16),
               ),
             )
@@ -34,14 +34,10 @@ class WishlistDealsScreen extends StatelessWidget {
                 return DealCard(
                   deal: deal,
                   isInWishlist: wishlistIds.contains(deal.id),
+                  onWishlistToggle: () => onWishlistToggle(deal.id),
                   onTap: () {
-                    Navigator.pushNamed(
-                      context,
-                      '/deal-detail',
-                      arguments: {'deal': deal, 'isInWishlist': true},
-                    );
+                    // You may navigate to DealDetailScreen if needed
                   },
-                  onWishlistToggle: () => onWishlistToggle(deal),
                 );
               },
             ),

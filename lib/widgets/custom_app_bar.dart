@@ -1,14 +1,14 @@
 import 'package:flutter/material.dart';
 
 class CustomAppBar extends StatelessWidget implements PreferredSizeWidget {
-  final String title;
-  final bool showBackButton;
 
   const CustomAppBar({
     super.key,
     required this.title,
     this.showBackButton = false,
   });
+  final String title;
+  final bool showBackButton;
 
   @override
   Widget build(BuildContext context) {

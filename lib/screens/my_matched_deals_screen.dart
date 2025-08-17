@@ -9,7 +9,7 @@ class MyMatchedDealsScreen extends StatefulWidget {
 }
 
 class _MyMatchedDealsScreenState extends State<MyMatchedDealsScreen> {
-  List<DocumentSnapshot> _matchedDeals = [];
+  List<DocumentSnapshot> _matchedDeals = <DocumentSnapshot<Object?>>[];
   bool _isLoading = true;
 
   @override
@@ -19,7 +19,7 @@ class _MyMatchedDealsScreenState extends State<MyMatchedDealsScreen> {
   }
 
   Future<void> _loadMatchedDeals() async {
-    final snapshot = await FirebaseFirestore.instance.collection('matchedDeals').get();
+    final QuerySnapshot<Map<String, dynamic>> snapshot = await FirebaseFirestore.instance.collection('matchedDeals').get();
     if (!mounted) return;
     setState(() {
       _matchedDeals = snapshot.docs;
@@ -35,8 +35,8 @@ class _MyMatchedDealsScreenState extends State<MyMatchedDealsScreen> {
           ? const Center(child: CircularProgressIndicator())
           : ListView.builder(
               itemCount: _matchedDeals.length,
-              itemBuilder: (context, index) {
-                final deal = _matchedDeals[index].data() as Map<String, dynamic>;
+              itemBuilder: (BuildContext context, int index) {
+                final Map<String, dynamic> deal = _matchedDeals[index].data() as Map<String, dynamic>;
                 return ListTile(
                   title: Text(deal['title'] ?? ''),
                   subtitle: Text(deal['description'] ?? ''),

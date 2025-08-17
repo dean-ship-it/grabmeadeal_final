@@ -4,40 +4,61 @@ import 'package:grabmeadeal_final/widgets/deal_card.dart';
 
 class WishlistScreen extends StatelessWidget {
   final List<Deal> wishlistDeals;
-  final Set<String> wishlistIds;
-  final void Function(Deal) onWishlistToggle;
+  final Function(Deal deal, bool isInWishlist) onWishlistToggle;
 
   const WishlistScreen({
-    Key? key,
+    super.key,
     required this.wishlistDeals,
-    required this.wishlistIds,
     required this.onWishlistToggle,
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Your Wishlist'),
+        title: const Text(
+          "My Wishlist",
+          style: TextStyle(fontWeight: FontWeight.bold),
+        ),
       ),
       body: wishlistDeals.isEmpty
-          ? const Center(
-              child: Text(
-                'No deals in your wishlist yet.',
-                style: TextStyle(fontSize: 16),
+          ? Center(
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Icon(Icons.favorite_border,
+                      size: 80, color: Colors.grey.shade400),
+                  const SizedBox(height: 16),
+                  const Text(
+                    "Your wishlist is empty",
+                    style: TextStyle(fontSize: 18, color: Colors.black54),
+                  ),
+                  const SizedBox(height: 8),
+                  const Text(
+                    "Browse deals and tap the ♥ to save them here.",
+                    textAlign: TextAlign.center,
+                    style: TextStyle(fontSize: 14, color: Colors.black45),
+                  ),
+                ],
               ),
             )
-          : ListView.builder(
+          : ListView.separated(
+              padding: const EdgeInsets.all(12),
               itemCount: wishlistDeals.length,
+              separatorBuilder: (_, __) => const SizedBox(height: 12),
               itemBuilder: (context, index) {
                 final deal = wishlistDeals[index];
                 return DealCard(
                   deal: deal,
-                  isInWishlist: wishlistIds.contains(deal.id),
+                  isInWishlist: true,
+                  onWishlistToggle: () => onWishlistToggle(deal, true),
                   onTap: () {
-                    // Optionally navigate to deal detail or do nothing
+                    Navigator.pushNamed(
+                      context,
+                      '/dealDetail',
+                      arguments: deal,
+                    );
                   },
-                  onWishlistToggle: onWishlistToggle,
                 );
               },
             ),

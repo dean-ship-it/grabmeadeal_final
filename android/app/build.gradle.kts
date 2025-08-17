@@ -1,9 +1,8 @@
-import com.android.build.gradle.internal.cxx.configure.gradleLocalProperties
-
 plugins {
     id("com.android.application")
-    id("com.google.gms.google-services") // Firebase
     id("org.jetbrains.kotlin.android")
+    id("dev.flutter.flutter-gradle-plugin")
+    id("com.google.gms.google-services") // Firebase
 }
 
 android {
@@ -12,14 +11,14 @@ android {
 
     defaultConfig {
         applicationId = "com.example.grabmeadeal_final"
-        minSdk = 24
+        minSdk = 23
         targetSdk = 34
         versionCode = 1
         versionName = "1.0"
     }
 
     buildTypes {
-        getByName("release") {
+        release {
             isMinifyEnabled = false
             proguardFiles(
                 getDefaultProguardFile("proguard-android-optimize.txt"),
@@ -27,24 +26,9 @@ android {
             )
         }
     }
-
-    compileOptions {
-        sourceCompatibility = JavaVersion.VERSION_17
-        targetCompatibility = JavaVersion.VERSION_17
-    }
-
-    kotlinOptions {
-        jvmTarget = "17"
-    }
 }
 
 dependencies {
-    implementation("androidx.core:core-ktx:1.12.0")
-    implementation("androidx.appcompat:appcompat:1.6.1")
-    implementation("com.google.android.material:material:1.11.0")
-
-    // ✅ Firebase SDKs for FlutterFire
-    implementation("com.google.firebase:firebase-analytics")
-    implementation("com.google.firebase:firebase-auth")
-    implementation("com.google.firebase:firebase-firestore")
+    implementation("com.google.android.gms:play-services-location:21.3.0") // geofencing
+    implementation("androidx.core:core-ktx:1.13.1")
 }

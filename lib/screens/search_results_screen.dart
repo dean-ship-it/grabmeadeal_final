@@ -1,56 +1,76 @@
 import 'package:flutter/material.dart';
 import 'package:grabmeadeal_final/models/deal.dart';
 import 'package:grabmeadeal_final/widgets/deal_card.dart';
+import 'package:grabmeadeal_final/screens/deal_detail_screen.dart';
 
 class SearchResultsScreen extends StatelessWidget {
-  final List<Deal> deals;
-  final Set<String> wishlistIds;
-  final void Function(Deal) onWishlistToggle;
+  final String searchQuery;
+  final List<Deal> results;
+  final Function(Deal deal, bool isInWishlist) onWishlistToggle;
+  final List<String> wishlistIds;
 
   const SearchResultsScreen({
     super.key,
-    required this.deals,
-    required this.wishlistIds,
+    required this.searchQuery,
+    required this.results,
     required this.onWishlistToggle,
+    required this.wishlistIds,
   });
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text(
-          'Search Results',
-          style: TextStyle(
-            fontWeight: FontWeight.bold,
-            color: Colors.white,
-          ),
+        title: Text(
+          'Results for "$searchQuery"',
+          style: const TextStyle(fontWeight: FontWeight.bold),
         ),
-        backgroundColor: const Color(0xFF0075c9),
-        iconTheme: const IconThemeData(color: Colors.white),
       ),
-      body: deals.isEmpty
+      body: results.isEmpty
           ? const Center(
               child: Text(
-                'No deals found.',
-                style: TextStyle(fontSize: 16),
+                "No deals found.\nTry another search.",
+                textAlign: TextAlign.center,
+                style: TextStyle(fontSize: 16, color: Colors.grey),
               ),
             )
-          : ListView.builder(
-              padding: const EdgeInsets.all(8),
-              itemCount: deals.length,
+          : ListView.separated(
+              padding: const EdgeInsets.all(16),
+              itemCount: results.length,
+              separatorBuilder: (_, __) => const SizedBox(height: 12),
               itemBuilder: (context, index) {
-                final deal = deals[index];
-                return DealCard(
-                  deal: deal,
-                  isInWishlist: wishlistIds.contains(deal.id),
-                  onTap: () {
-                    Navigator.pushNamed(
-                      context,
-                      '/deal-detail',
-                      arguments: deal,
-                    );
-                  },
-                  onWishlistToggle: () => onWishlistToggle(deal),
+                final deal = results[index];
+                return DecoratedBox(
+                  decoration: BoxDecoration(
+                    color: Colors.white,
+                    borderRadius: BorderRadius.circular(16),
+                    boxShadow: [
+                      BoxShadow(
+                        color: Colors.black12,
+                        blurRadius: 8,
+                        offset: const Offset(0, 4),
+                      ),
+                    ],
+                  ),
+                  child: DealCard(
+                    deal: deal,
+                    isInWishlist: wishlistIds.contains(deal.id),
+                    onWishlistToggle: (deal, isInWishlist) {
+                      onWishlistToggle(deal, isInWishlist);
+                    },
+                    onTap: () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (_) => DealDetailScreen(
+                            deal: deal,
+                            isInWishlist: wishlistIds.contains(deal.id),
+                            onWishlistToggle: onWishlistToggle,
+                          ),
+                        ),
+                      );
+                    },
+                  ),
                 );
               },
             ),

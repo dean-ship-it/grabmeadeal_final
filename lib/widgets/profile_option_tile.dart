@@ -1,9 +1,6 @@
 import 'package:flutter/material.dart';
 
 class ProfileOptionTile extends StatelessWidget {
-  final IconData icon;
-  final String title;
-  final VoidCallback onTap;
 
   const ProfileOptionTile({
     super.key,
@@ -11,6 +8,9 @@ class ProfileOptionTile extends StatelessWidget {
     required this.title,
     required this.onTap,
   });
+  final IconData icon;
+  final String title;
+  final VoidCallback onTap;
 
   @override
   Widget build(BuildContext context) {

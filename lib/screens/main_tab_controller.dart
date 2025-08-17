@@ -1,23 +1,18 @@
 import 'package:flutter/material.dart';
-import 'package:grabmeadeal_final/models/category.dart';
 import 'package:grabmeadeal_final/models/deal.dart';
-import 'package:grabmeadeal_final/screens/categories_screen.dart';
 import 'package:grabmeadeal_final/screens/deals_screen.dart';
 import 'package:grabmeadeal_final/screens/wishlist_screen.dart';
+import 'package:grabmeadeal_final/screens/categories_screen.dart';
 
 class MainTabController extends StatefulWidget {
   final List<Deal> deals;
-  final List<Deal> wishlistDeals;
   final Set<String> wishlistIds;
-  final List<Category> categories;
-  final void Function(Deal) onWishlistToggle;
+  final Function(Deal) onWishlistToggle;
 
   const MainTabController({
     super.key,
     required this.deals,
-    required this.wishlistDeals,
     required this.wishlistIds,
-    required this.categories,
     required this.onWishlistToggle,
   });
 
@@ -30,26 +25,25 @@ class _MainTabControllerState extends State<MainTabController> {
 
   @override
   Widget build(BuildContext context) {
-    final List<Widget> screens = [
+    final wishlistDeals = widget.deals
+        .where((deal) => widget.wishlistIds.contains(deal.id))
+        .toList();
+
+    final screens = [
       DealsScreen(
         deals: widget.deals,
         wishlistIds: widget.wishlistIds,
         onWishlistToggle: widget.onWishlistToggle,
       ),
       WishlistScreen(
-        wishlistDeals: widget.wishlistDeals,
+        wishlistDeals: wishlistDeals,
         wishlistIds: widget.wishlistIds,
         onWishlistToggle: widget.onWishlistToggle,
       ),
       CategoriesScreen(
-        categories: widget.categories,
-        onCategoryTap: (category) {
-          Navigator.pushNamed(
-            context,
-            '/category-deals',
-            arguments: category,
-          );
-        },
+        deals: widget.deals,
+        wishlistIds: widget.wishlistIds,
+        onWishlistToggle: widget.onWishlistToggle,
       ),
     ];
 
@@ -57,11 +51,7 @@ class _MainTabControllerState extends State<MainTabController> {
       body: screens[_currentIndex],
       bottomNavigationBar: BottomNavigationBar(
         currentIndex: _currentIndex,
-        onTap: (int newIndex) {
-          setState(() {
-            _currentIndex = newIndex;
-          });
-        },
+        onTap: (index) => setState(() => _currentIndex = index),
         items: const [
           BottomNavigationBarItem(
             icon: Icon(Icons.local_offer),

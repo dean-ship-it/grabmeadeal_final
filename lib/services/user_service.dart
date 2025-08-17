@@ -1,14 +1,14 @@
 import 'package:flutter/material.dart';
 
 class CategoryCard extends StatelessWidget {
-  final String categoryName;
-  final VoidCallback onTap;
 
   const CategoryCard({
     super.key,
     required this.categoryName,
     required this.onTap,
   });
+  final String categoryName;
+  final VoidCallback onTap;
 
   @override
   Widget build(BuildContext context) {

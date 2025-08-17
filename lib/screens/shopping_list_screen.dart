@@ -16,7 +16,7 @@ class _ShoppingListScreenState extends State<ShoppingListScreen> {
   final FirebaseAuth _auth = FirebaseAuth.instance;
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
 
-  List<String> _items = [];
+  List<String> _items = <String>[];
   bool _isLoading = true;
 
   @override
@@ -26,32 +26,32 @@ class _ShoppingListScreenState extends State<ShoppingListScreen> {
   }
 
   Future<void> _loadList() async {
-    final user = _auth.currentUser;
+    final User? user = _auth.currentUser;
     if (user == null) return;
 
-    final snapshot = await _firestore
+    final QuerySnapshot<Map<String, dynamic>> snapshot = await _firestore
         .collection('users')
         .doc(user.uid)
         .collection('shoppingList')
         .get();
 
     setState(() {
-      _items = snapshot.docs.map((doc) => doc.id).toList();
+      _items = snapshot.docs.map((QueryDocumentSnapshot<Map<String, dynamic>> doc) => doc.id).toList();
       _isLoading = false;
     });
   }
 
   Future<void> _addItem(String item) async {
-    final user = _auth.currentUser;
+    final User? user = _auth.currentUser;
     if (user == null || item.trim().isEmpty) return;
 
-    final docRef = _firestore
+    final DocumentReference<Map<String, dynamic>> docRef = _firestore
         .collection('users')
         .doc(user.uid)
         .collection('shoppingList')
         .doc(item.trim().toLowerCase());
 
-    await docRef.set({'added': Timestamp.now()});
+    await docRef.set(<String, dynamic>{'added': Timestamp.now()});
 
     setState(() {
       _items.add(item.trim().toLowerCase());
@@ -61,10 +61,10 @@ class _ShoppingListScreenState extends State<ShoppingListScreen> {
   }
 
   Future<void> _removeItem(String item) async {
-    final user = _auth.currentUser;
+    final User? user = _auth.currentUser;
     if (user == null) return;
 
-    final docRef = _firestore
+    final DocumentReference<Map<String, dynamic>> docRef = _firestore
         .collection('users')
         .doc(user.uid)
         .collection('shoppingList')
@@ -84,11 +84,11 @@ class _ShoppingListScreenState extends State<ShoppingListScreen> {
       body: _isLoading
           ? const Center(child: CircularProgressIndicator())
           : Column(
-              children: [
+              children: <Widget>[
                 Padding(
                   padding: const EdgeInsets.all(16),
                   child: Row(
-                    children: [
+                    children: <Widget>[
                       Expanded(
                         child: TextField(
                           controller: _controller,
@@ -109,8 +109,8 @@ class _ShoppingListScreenState extends State<ShoppingListScreen> {
                 Expanded(
                   child: ListView.builder(
                     itemCount: _items.length,
-                    itemBuilder: (context, index) {
-                      final item = _items[index];
+                    itemBuilder: (BuildContext context, int index) {
+                      final String item = _items[index];
                       return ListTile(
                         title: Text(item),
                         trailing: IconButton(

@@ -3,9 +3,6 @@
 import 'package:flutter/material.dart';
 
 class WishlistDealTile extends StatelessWidget {
-  final String? title;
-  final String? vendor;
-  final String? imageUrl;
 
   const WishlistDealTile({
     super.key,
@@ -13,6 +10,9 @@ class WishlistDealTile extends StatelessWidget {
     required this.vendor,
     required this.imageUrl,
   });
+  final String? title;
+  final String? vendor;
+  final String? imageUrl;
 
   @override
   Widget build(BuildContext context) {

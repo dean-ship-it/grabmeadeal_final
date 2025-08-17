@@ -1,12 +1,4 @@
 class AdminDeal {
-  final String title;
-  final String description;
-  final String category;
-  final String vendor;
-  final String imageUrl;
-  final String affiliateUrl;
-  final DateTime date;
-  final bool isFeatured;
 
   AdminDeal({
     required this.title,
@@ -18,9 +10,17 @@ class AdminDeal {
     required this.date,
     required this.isFeatured,
   });
+  final String title;
+  final String description;
+  final String category;
+  final String vendor;
+  final String imageUrl;
+  final String affiliateUrl;
+  final DateTime date;
+  final bool isFeatured;
 
   Map<String, dynamic> toMap() {
-    return {
+    return <String, dynamic>{
       'title': title,
       'description': description,
       'category': category,

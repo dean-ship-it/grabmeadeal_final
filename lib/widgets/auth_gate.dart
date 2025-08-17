@@ -7,11 +7,6 @@ import 'package:grabmeadeal_final/models/deal.dart';
 import 'package:grabmeadeal_final/models/category.dart';
 
 class AuthGate extends StatelessWidget {
-  final List<Deal> deals;
-  final List<Deal> wishlistDeals;
-  final Set<String> wishlistIds;
-  final List<Category> categories;
-  final void Function(Deal) onWishlistToggle;
 
   const AuthGate({
     super.key,
@@ -21,12 +16,17 @@ class AuthGate extends StatelessWidget {
     required this.categories,
     required this.onWishlistToggle,
   });
+  final List<Deal> deals;
+  final List<Deal> wishlistDeals;
+  final Set<String> wishlistIds;
+  final List<Category> categories;
+  final void Function(Deal) onWishlistToggle;
 
   @override
   Widget build(BuildContext context) {
     return StreamBuilder<User?>(
       stream: FirebaseAuth.instance.authStateChanges(),
-      builder: (context, snapshot) {
+      builder: (BuildContext context, AsyncSnapshot<User?> snapshot) {
         if (snapshot.connectionState == ConnectionState.waiting) {
           return const Scaffold(
             body: Center(child: CircularProgressIndicator()),

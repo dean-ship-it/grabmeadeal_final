@@ -18,34 +18,70 @@ class DealCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Card(
-      margin: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-      elevation: 3,
+      margin: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+      elevation: 2,
       child: InkWell(
         onTap: onTap,
+        borderRadius: BorderRadius.circular(12),
         child: Padding(
-          padding: const EdgeInsets.all(12.0),
-          child: Column(
+          padding: const EdgeInsets.all(12),
+          child: Row(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Text(
-                deal.title,
-                style: Theme.of(context).textTheme.titleLarge,
-              ),
-              const SizedBox(height: 6),
-              Text(deal.description),
-              const SizedBox(height: 8),
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  Text('\$${deal.price.toStringAsFixed(2)}'),
-                  IconButton(
-                    icon: Icon(
-                      isInWishlist ? Icons.favorite : Icons.favorite_border,
-                      color: isInWishlist ? Colors.red : Colors.grey,
-                    ),
-                    onPressed: onWishlistToggle,
+              if (deal.imageUrl != null)
+                ClipRRect(
+                  borderRadius: BorderRadius.circular(8),
+                  child: Image.network(
+                    deal.imageUrl!,
+                    width: 80,
+                    height: 80,
+                    fit: BoxFit.cover,
                   ),
-                ],
+                ),
+              const SizedBox(width: 12),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      deal.title,
+                      style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                            fontWeight: FontWeight.bold,
+                          ),
+                    ),
+                    const SizedBox(height: 4),
+                    Text(
+                      deal.vendor,
+                      style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                            color: Colors.grey[700],
+                          ),
+                    ),
+                    const SizedBox(height: 6),
+                    Text(
+                      "\$${deal.price.toStringAsFixed(2)}",
+                      style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                            color: Colors.green[700],
+                            fontWeight: FontWeight.bold,
+                          ),
+                    ),
+                    if (deal.originalPrice != null)
+                      Text(
+                        "Was \$${deal.originalPrice!.toStringAsFixed(2)}",
+                        style: const TextStyle(
+                          decoration: TextDecoration.lineThrough,
+                          color: Colors.grey,
+                        ),
+                      ),
+                  ],
+                ),
+              ),
+              IconButton(
+                icon: Icon(
+                  isInWishlist ? Icons.favorite : Icons.favorite_border,
+                  color: isInWishlist ? Colors.red : null,
+                ),
+                onPressed: onWishlistToggle,
               ),
             ],
           ),

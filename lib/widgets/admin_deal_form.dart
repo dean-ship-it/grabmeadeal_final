@@ -1,14 +1,6 @@
 import 'package:flutter/material.dart';
 
 class AdminDealForm extends StatelessWidget {
-  final TextEditingController titleController;
-  final TextEditingController descriptionController;
-  final TextEditingController categoryController;
-  final TextEditingController vendorController;
-  final TextEditingController imageUrlController;
-  final TextEditingController affiliateUrlController;
-  final VoidCallback onSubmit;
-  final bool isLoading;
 
   const AdminDealForm({
     super.key,
@@ -21,11 +13,19 @@ class AdminDealForm extends StatelessWidget {
     required this.onSubmit,
     required this.isLoading,
   });
+  final TextEditingController titleController;
+  final TextEditingController descriptionController;
+  final TextEditingController categoryController;
+  final TextEditingController vendorController;
+  final TextEditingController imageUrlController;
+  final TextEditingController affiliateUrlController;
+  final VoidCallback onSubmit;
+  final bool isLoading;
 
   @override
   Widget build(BuildContext context) {
     return Column(
-      children: [
+      children: <Widget>[
         _buildTextField(titleController, 'Title'),
         _buildTextField(descriptionController, 'Description', maxLines: 2),
         _buildTextField(categoryController, 'Category'),
@@ -44,7 +44,7 @@ class AdminDealForm extends StatelessWidget {
   }
 
   Widget _buildTextField(TextEditingController controller, String label,
-      {int maxLines = 1}) {
+      {int maxLines = 1,}) {
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 6.0),
       child: TextField(

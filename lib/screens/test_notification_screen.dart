@@ -31,9 +31,9 @@ class _TestNotificationScreenState extends State<TestNotificationScreen> {
 
     if (permission == LocationPermission.whileInUse ||
         permission == LocationPermission.always) {
-      final position = await Geolocator.getCurrentPosition();
+      final Position position = await Geolocator.getCurrentPosition();
 
-      final distance = Geolocator.distanceBetween(
+      final double distance = Geolocator.distanceBetween(
         position.latitude,
         position.longitude,
         _targetLat,
@@ -49,7 +49,7 @@ class _TestNotificationScreenState extends State<TestNotificationScreen> {
         setState(() => _status = '🎉 You’re inside the geofence zone.');
       } else {
         setState(() => _status =
-            '📍 Outside geofence. Distance: ${distance.toStringAsFixed(0)}m');
+            '📍 Outside geofence. Distance: ${distance.toStringAsFixed(0)}m',);
       }
     } else {
       setState(() => _status = '❌ Location permission denied.');

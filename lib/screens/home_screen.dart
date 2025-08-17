@@ -1,3 +1,5 @@
+// lib/screens/home_screen.dart
+
 import 'package:flutter/material.dart';
 import 'package:grabmeadeal_final/models/deal.dart';
 import 'package:grabmeadeal_final/models/category.dart';
@@ -8,7 +10,10 @@ class HomeScreen extends StatelessWidget {
   final List<Deal> wishlistDeals;
   final Set<String> wishlistIds;
   final List<Category> categories;
+  final List<Deal> allDeals;
   final void Function(Deal) onWishlistToggle;
+  final void Function(Deal) onTap;
+  final void Function(Category) onCategoryTap;
 
   const HomeScreen({
     super.key,
@@ -16,7 +21,10 @@ class HomeScreen extends StatelessWidget {
     required this.wishlistDeals,
     required this.wishlistIds,
     required this.categories,
+    required this.allDeals,
     required this.onWishlistToggle,
+    required this.onTap,
+    required this.onCategoryTap,
   });
 
   @override
@@ -26,7 +34,10 @@ class HomeScreen extends StatelessWidget {
       wishlistDeals: wishlistDeals,
       wishlistIds: wishlistIds,
       categories: categories,
-      onWishlistToggle: onWishlistToggle, allDeals: const [], onCategoryTap: (Category ) {  },
+      allDeals: allDeals,
+      onWishlistToggle: onWishlistToggle,
+      onTap: onTap,
+      onCategoryTap: onCategoryTap,
     );
   }
 }

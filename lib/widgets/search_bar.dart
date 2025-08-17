@@ -1,11 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:grabmeadeal_final/models/deal.dart';
-import 'package:grabmeadeal_final/screens/search_results_screen.dart';
 
 class CustomSearchBar extends StatefulWidget {
   final List<Deal> results;
   final Set<String> wishlistIds;
-  final void Function(Deal) onWishlistToggle;
+  final Function(Deal) onWishlistToggle;
 
   const CustomSearchBar({
     super.key,
@@ -22,42 +21,36 @@ class _CustomSearchBarState extends State<CustomSearchBar> {
   final TextEditingController _controller = TextEditingController();
 
   void _handleSearch(String query) {
+    if (query.isEmpty) return;
     final filtered = widget.results
         .where((deal) =>
             deal.title.toLowerCase().contains(query.toLowerCase()) ||
-            deal.vendor.toLowerCase().contains(query.toLowerCase()))
+            deal.description.toLowerCase().contains(query.toLowerCase()))
         .toList();
 
-    Navigator.of(context).push(
-      MaterialPageRoute(
-        builder: (context) => SearchResultsScreen(
-          deals: filtered,
-          wishlistIds: widget.wishlistIds,
-          onWishlistToggle: widget.onWishlistToggle,
-        ),
-      ),
+    Navigator.pushNamed(
+      context,
+      '/search-results',
+      arguments: {'results': filtered},
     );
   }
 
   @override
   Widget build(BuildContext context) {
     return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+      padding: const EdgeInsets.all(12.0),
       child: TextField(
         controller: _controller,
-        onSubmitted: _handleSearch,
-        textInputAction: TextInputAction.search,
         decoration: InputDecoration(
           hintText: 'Search deals...',
           prefixIcon: const Icon(Icons.search),
-          filled: true,
-          fillColor: Colors.grey[200],
-          contentPadding: const EdgeInsets.symmetric(vertical: 0, horizontal: 16),
           border: OutlineInputBorder(
             borderRadius: BorderRadius.circular(12),
-            borderSide: BorderSide.none,
           ),
+          filled: true,
         ),
+        textInputAction: TextInputAction.search,
+        onSubmitted: _handleSearch,
       ),
     );
   }

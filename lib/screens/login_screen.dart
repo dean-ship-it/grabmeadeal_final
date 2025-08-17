@@ -12,13 +12,13 @@ class LoginScreen extends StatelessWidget {
           padding: const EdgeInsets.all(24),
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
-            children: [
+            children: <Widget>[
               // Logo
               Image.asset(
                 'assets/logo/logo.png',
                 width: 150,
                 height: 150,
-                errorBuilder: (context, error, stackTrace) =>
+                errorBuilder: (BuildContext context, Object error, StackTrace? stackTrace) =>
                     const Icon(Icons.image_not_supported, size: 100, color: Colors.grey),
               ),
               const SizedBox(height: 32),

@@ -9,7 +9,7 @@ class SkippedDealsScreen extends StatefulWidget {
 }
 
 class _SkippedDealsScreenState extends State<SkippedDealsScreen> {
-  final Set<String> selectedIds = {};
+  final Set<String> selectedIds = <String>{};
 
   void toggleSelection(String docId) {
     setState(() {
@@ -26,14 +26,14 @@ class _SkippedDealsScreenState extends State<SkippedDealsScreen> {
       if (selectedIds.length == docs.length) {
         selectedIds.clear();
       } else {
-        selectedIds.addAll(docs.map((doc) => doc.id));
+        selectedIds.addAll(docs.map((QueryDocumentSnapshot<Map<String, dynamic>> doc) => doc.id));
       }
     });
   }
 
   Future<void> bulkDelete(List<QueryDocumentSnapshot<Map<String, dynamic>>> docs) async {
-    final batch = FirebaseFirestore.instance.batch();
-    for (var doc in docs) {
+    final WriteBatch batch = FirebaseFirestore.instance.batch();
+    for (QueryDocumentSnapshot<Map<String, dynamic>> doc in docs) {
       if (selectedIds.contains(doc.id)) {
         batch.delete(doc.reference);
       }
@@ -43,11 +43,11 @@ class _SkippedDealsScreenState extends State<SkippedDealsScreen> {
   }
 
   Future<void> bulkPromote(List<QueryDocumentSnapshot<Map<String, dynamic>>> docs) async {
-    final batch = FirebaseFirestore.instance.batch();
-    for (var doc in docs) {
+    final WriteBatch batch = FirebaseFirestore.instance.batch();
+    for (QueryDocumentSnapshot<Map<String, dynamic>> doc in docs) {
       if (selectedIds.contains(doc.id)) {
-        final data = doc.data();
-        final dealRef = FirebaseFirestore.instance.collection('deals').doc();
+        final Map<String, dynamic> data = doc.data();
+        final DocumentReference<Map<String, dynamic>> dealRef = FirebaseFirestore.instance.collection('deals').doc();
         batch.set(dealRef, data);
         batch.delete(doc.reference);
       }
@@ -57,12 +57,12 @@ class _SkippedDealsScreenState extends State<SkippedDealsScreen> {
   }
 
   Future<void> bulkWhitelist(List<QueryDocumentSnapshot<Map<String, dynamic>>> docs) async {
-    final whitelistRef = FirebaseFirestore.instance.collection('vendorWhitelist');
-    for (var doc in docs) {
+    final CollectionReference<Map<String, dynamic>> whitelistRef = FirebaseFirestore.instance.collection('vendorWhitelist');
+    for (QueryDocumentSnapshot<Map<String, dynamic>> doc in docs) {
       if (selectedIds.contains(doc.id)) {
         final vendor = doc.data()['vendor'];
         if (vendor != null) {
-          await whitelistRef.doc(vendor).set({'timestamp': FieldValue.serverTimestamp()});
+          await whitelistRef.doc(vendor).set(<String, dynamic>{'timestamp': FieldValue.serverTimestamp()});
         }
       }
     }
@@ -80,19 +80,19 @@ class _SkippedDealsScreenState extends State<SkippedDealsScreen> {
             .collection('skippedDeals')
             .orderBy('timestamp', descending: true)
             .snapshots(),
-        builder: (context, snapshot) {
+        builder: (BuildContext context, AsyncSnapshot<QuerySnapshot<Map<String, dynamic>>> snapshot) {
           if (snapshot.hasError) return const Center(child: Text('Error loading skipped deals'));
           if (snapshot.connectionState == ConnectionState.waiting) return const Center(child: CircularProgressIndicator());
 
-          final docs = snapshot.data!.docs;
+          final List<QueryDocumentSnapshot<Map<String, dynamic>>> docs = snapshot.data!.docs;
 
           return Column(
-            children: [
+            children: <Widget>[
               if (docs.isNotEmpty)
                 Padding(
                   padding: const EdgeInsets.all(8),
                   child: Row(
-                    children: [
+                    children: <Widget>[
                       ElevatedButton(
                         onPressed: () => selectAll(docs),
                         child: Text(selectedIds.length == docs.length ? 'Deselect All' : 'Select All'),
@@ -123,10 +123,10 @@ class _SkippedDealsScreenState extends State<SkippedDealsScreen> {
                         padding: const EdgeInsets.all(8),
                         itemCount: docs.length,
                         separatorBuilder: (_, __) => const SizedBox(height: 8),
-                        itemBuilder: (context, index) {
-                          final doc = docs[index];
-                          final data = doc.data();
-                          final isSelected = selectedIds.contains(doc.id);
+                        itemBuilder: (BuildContext context, int index) {
+                          final QueryDocumentSnapshot<Map<String, dynamic>> doc = docs[index];
+                          final Map<String, dynamic> data = doc.data();
+                          final bool isSelected = selectedIds.contains(doc.id);
 
                           return GestureDetector(
                             onLongPress: () => toggleSelection(doc.id),
@@ -138,7 +138,7 @@ class _SkippedDealsScreenState extends State<SkippedDealsScreen> {
                                 title: Text(data['title'] ?? 'Untitled'),
                                 subtitle: Column(
                                   crossAxisAlignment: CrossAxisAlignment.start,
-                                  children: [
+                                  children: <Widget>[
                                     Text('Vendor: ${data['vendor'] ?? 'Unknown'}'),
                                     Text('Category: ${data['category'] ?? '—'}'),
                                     Text('Reason: ${data['reason'] ?? 'n/a'}'),

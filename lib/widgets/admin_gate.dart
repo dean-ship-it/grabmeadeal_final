@@ -5,11 +5,6 @@ import 'package:grabmeadeal_final/screens/admin_upload_screen.dart';
 import 'package:grabmeadeal_final/screens/admin_deal_uploader_screen.dart';
 
 class AdminGate extends StatelessWidget {
-  final List<Deal> allDeals;
-  final List<Deal> wishlistDeals;
-  final Set<String> wishlistIds;
-  final List<Category> categories;
-  final void Function(Deal) onWishlistToggle;
 
   const AdminGate({
     super.key,
@@ -19,6 +14,11 @@ class AdminGate extends StatelessWidget {
     required this.categories,
     required this.onWishlistToggle,
   });
+  final List<Deal> allDeals;
+  final List<Deal> wishlistDeals;
+  final Set<String> wishlistIds;
+  final List<Category> categories;
+  final void Function(Deal) onWishlistToggle;
 
   @override
   Widget build(BuildContext context) {
@@ -26,7 +26,7 @@ class AdminGate extends StatelessWidget {
       appBar: AppBar(title: const Text('Admin Tools')),
       body: ListView(
         padding: const EdgeInsets.all(16),
-        children: [
+        children: <Widget>[
           ListTile(
             leading: const Icon(Icons.cloud_upload),
             title: const Text('Upload Deals (Manual)'),

@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:grabmeadeal_final/models/deal.dart';
 
 class DealProvider extends ChangeNotifier {
-  List<Deal> _deals = [];
+  List<Deal> _deals = <Deal>[];
 
   List<Deal> get deals => _deals;
 

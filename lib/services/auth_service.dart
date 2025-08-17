@@ -1,38 +1,30 @@
-import 'package:grabmeadeal_final/models/user.dart';
+import 'package:firebase_auth/firebase_auth.dart';
+import 'package:google_sign_in/google_sign_in.dart';
 
 class AuthService {
-  AppUser? _currentUser;
+  final FirebaseAuth _auth = FirebaseAuth.instance;
+  final GoogleSignIn _google = GoogleSignIn();
 
-  AppUser? get currentUser => _currentUser;
+  /// Stream of authentication state
+  Stream<User?> get authStateChanges => _auth.authStateChanges();
 
-  // Mock sign-in method (replace with Firebase Auth or your API)
-  Future<AppUser?> signIn(String email, String password) async {
-    // TODO: Implement real authentication logic
-    await Future.delayed(const Duration(seconds: 1)); // Simulate network delay
-    _currentUser = AppUser(
-      uid: 'mock_uid',
-      email: email,
-      displayName: 'Sample User',
-      photoUrl: null,
+  /// Triggers the Google Sign-In flow
+  Future<UserCredential> signInWithGoogle() async {
+    final googleUser = await _google.signIn();
+    if (googleUser == null) {
+      throw Exception('Sign-in aborted');
+    }
+    final googleAuth = await googleUser.authentication;
+    final OAuthCredential credential = GoogleAuthProvider.credential(
+      accessToken: googleAuth.accessToken,
+      idToken: googleAuth.idToken,
     );
-    return _currentUser;
+    return _auth.signInWithCredential(credential);
   }
 
-  // Mock sign-out
+  /// Signs out from both Firebase and Google
   Future<void> signOut() async {
-    await Future.delayed(const Duration(milliseconds: 500));
-    _currentUser = null;
-  }
-
-  // Mock sign-up (replace with Firebase Auth or your API)
-  Future<AppUser?> signUp(String email, String password) async {
-    await Future.delayed(const Duration(seconds: 1));
-    _currentUser = AppUser(
-      uid: 'mock_uid',
-      email: email,
-      displayName: 'Sample User',
-      photoUrl: null,
-    );
-    return _currentUser;
+    await _auth.signOut();
+    await _google.signOut();
   }
 }

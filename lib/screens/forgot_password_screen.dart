@@ -9,8 +9,8 @@ class ForgotPasswordScreen extends StatefulWidget {
 }
 
 class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
-  final _emailController = TextEditingController();
-  final _formKey = GlobalKey<FormState>();
+  final TextEditingController _emailController = TextEditingController();
+  final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
   bool _isSending = false;
 
   Future<void> _resetPassword() async {
@@ -58,14 +58,14 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
         child: Form(
           key: _formKey,
           child: Column(
-            children: [
+            children: <Widget>[
               TextFormField(
                 controller: _emailController,
                 keyboardType: TextInputType.emailAddress,
                 decoration: const InputDecoration(
                   labelText: 'Email Address',
                 ),
-                validator: (value) {
+                validator: (String? value) {
                   if (value == null || value.trim().isEmpty) {
                     return 'Please enter your email address';
                   }

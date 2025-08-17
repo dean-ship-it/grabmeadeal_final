@@ -1,20 +1,20 @@
 import 'package:flutter/material.dart';
 
 class WishlistBadgeIcon extends StatelessWidget {
-  final int itemCount;
-  final VoidCallback onPressed;
 
   const WishlistBadgeIcon({
     super.key,
     required this.itemCount,
     required this.onPressed,
   });
+  final int itemCount;
+  final VoidCallback onPressed;
 
   @override
   Widget build(BuildContext context) {
     return Stack(
       alignment: Alignment.center,
-      children: [
+      children: <Widget>[
         IconButton(
           icon: const Icon(Icons.favorite),
           onPressed: onPressed,
