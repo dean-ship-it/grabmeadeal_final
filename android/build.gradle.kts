@@ -1,12 +1,1 @@
-buildscript {
-    dependencies {
-        classpath("com.google.gms:google-services:4.4.2")
-    }
-}
-
-allprojects {
-    repositories {
-        google()
-        mavenCentral()
-    }
-}
+// Top-level build file — plugin versions are declared in settings.gradle.kts
