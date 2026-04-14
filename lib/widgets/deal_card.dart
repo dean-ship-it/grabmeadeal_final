@@ -31,6 +31,12 @@ class DealCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final hasSavings = deal.originalPrice != null &&
+        deal.originalPrice! > deal.price;
+    final savings = hasSavings
+        ? ((1 - deal.price / deal.originalPrice!) * 100).round()
+        : 0;
+
     return Card(
       margin: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
@@ -43,6 +49,7 @@ class DealCard extends StatelessWidget {
           child: Row(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
+              // ── Image ──
               ClipRRect(
                 borderRadius: BorderRadius.circular(8),
                 child: deal.imageUrl.isNotEmpty
@@ -64,10 +71,13 @@ class DealCard extends StatelessWidget {
                     : _imageFallback(),
               ),
               const SizedBox(width: 12),
-              Expanded(
+
+              // ── Text content — Flexible prevents Row overflow ──
+              Flexible(
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
+                    // Title: max 2 lines with ellipsis
                     Text(
                       deal.title,
                       maxLines: 2,
@@ -77,37 +87,124 @@ class DealCard extends StatelessWidget {
                           ),
                     ),
                     const SizedBox(height: 4),
+
+                    // Vendor: single line with ellipsis
                     Text(
                       deal.vendor,
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
                       style: Theme.of(context).textTheme.bodySmall?.copyWith(
                             color: Colors.grey[700],
                           ),
                     ),
                     const SizedBox(height: 6),
-                    Text(
-                      "\$${deal.price.toStringAsFixed(2)}",
-                      style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                            color: Colors.green[700],
-                            fontWeight: FontWeight.bold,
+
+                    // Price row with savings badge — wrapped in Flexible
+                    Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Flexible(
+                          child: Text(
+                            "\$${deal.price.toStringAsFixed(2)}",
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                            style: Theme.of(context)
+                                .textTheme
+                                .titleMedium
+                                ?.copyWith(
+                                  color: Colors.green[700],
+                                  fontWeight: FontWeight.bold,
+                                ),
                           ),
+                        ),
+                        if (hasSavings) ...[
+                          const SizedBox(width: 6),
+                          // Savings badge — Flexible prevents overflow
+                          Flexible(
+                            child: Container(
+                              padding: const EdgeInsets.symmetric(
+                                  horizontal: 6, vertical: 2),
+                              decoration: BoxDecoration(
+                                color: Colors.red.shade50,
+                                borderRadius: BorderRadius.circular(4),
+                                border:
+                                    Border.all(color: Colors.red.shade200),
+                              ),
+                              child: Text(
+                                "-$savings%",
+                                maxLines: 1,
+                                overflow: TextOverflow.ellipsis,
+                                style: TextStyle(
+                                  fontSize: 11,
+                                  fontWeight: FontWeight.w700,
+                                  color: Colors.red.shade700,
+                                ),
+                              ),
+                            ),
+                          ),
+                        ],
+                      ],
                     ),
-                    if (deal.originalPrice != null)
-                      Text(
-                        "Was \$${deal.originalPrice!.toStringAsFixed(2)}",
-                        style: const TextStyle(
-                          decoration: TextDecoration.lineThrough,
-                          color: Colors.grey,
+
+                    if (deal.originalPrice != null) ...[
+                      const SizedBox(height: 2),
+                      // Original price — Flexible prevents overflow
+                      Flexible(
+                        child: Text(
+                          "Was \$${deal.originalPrice!.toStringAsFixed(2)}",
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                          style: const TextStyle(
+                            decoration: TextDecoration.lineThrough,
+                            color: Colors.grey,
+                            fontSize: 12,
+                          ),
                         ),
                       ),
+                    ],
+
+                    // Category chip — Flexible prevents overflow
+                    if (deal.category.isNotEmpty) ...[
+                      const SizedBox(height: 6),
+                      Flexible(
+                        child: Container(
+                          padding: const EdgeInsets.symmetric(
+                              horizontal: 6, vertical: 2),
+                          decoration: BoxDecoration(
+                            color: const Color(0xFF0075C9).withOpacity(0.08),
+                            borderRadius: BorderRadius.circular(4),
+                          ),
+                          child: Text(
+                            deal.category,
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                            style: const TextStyle(
+                              fontSize: 10,
+                              fontWeight: FontWeight.w600,
+                              color: Color(0xFF0075C9),
+                            ),
+                          ),
+                        ),
+                      ),
+                    ],
                   ],
                 ),
               ),
-              IconButton(
-                icon: Icon(
-                  isInWishlist ? Icons.favorite : Icons.favorite_border,
-                  color: isInWishlist ? Colors.red : null,
-                ),
-                onPressed: onWishlistToggle,
+
+              // ── Wishlist icon — compact Column with min size ──
+              Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  IconButton(
+                    icon: Icon(
+                      isInWishlist ? Icons.favorite : Icons.favorite_border,
+                      color: isInWishlist ? Colors.red : null,
+                    ),
+                    onPressed: onWishlistToggle,
+                    padding: const EdgeInsets.all(8),
+                    constraints: const BoxConstraints(),
+                  ),
+                ],
               ),
             ],
           ),
