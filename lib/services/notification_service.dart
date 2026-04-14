@@ -1,89 +1,124 @@
 // lib/services/notification_service.dart
 
-import 'package:flutter_local_notifications/flutter_local_notifications.dart';
+import "package:firebase_messaging/firebase_messaging.dart";
+import "package:flutter/material.dart";
+import "package:flutter_local_notifications/flutter_local_notifications.dart";
 
-/// A reusable NotificationService to initialize and manage
-/// local notifications across the app.
+@pragma("vm:entry-point")
+Future<void> _firebaseMessagingBackgroundHandler(RemoteMessage message) async {
+  debugPrint("[FCM Background] ${message.messageId}: ${message.notification?.title}");
+}
+
 class NotificationService {
-  static final NotificationService _instance = NotificationService._internal();
+  NotificationService._();
+  static final NotificationService instance = NotificationService._();
 
-  factory NotificationService() => _instance;
+  final FirebaseMessaging _fcm = FirebaseMessaging.instance;
+  final FlutterLocalNotificationsPlugin _local = FlutterLocalNotificationsPlugin();
 
-  NotificationService._internal();
+  static const _channelId = "grabmeadeal_default";
+  static const _channelName = "GrabMeADeal Alerts";
+  static const _channelDesc = "Deal alerts and store notifications";
 
-  final FlutterLocalNotificationsPlugin flutterLocalNotificationsPlugin =
-      FlutterLocalNotificationsPlugin();
-
-  /// Initialize notification channels and settings.
   Future<void> initialize() async {
-    const AndroidInitializationSettings androidSettings =
-        AndroidInitializationSettings('@mipmap/ic_launcher');
+    FirebaseMessaging.onBackgroundMessage(_firebaseMessagingBackgroundHandler);
+    await _fcm.requestPermission(alert: true, badge: true, sound: true);
 
-    const InitializationSettings initSettings =
-        InitializationSettings(android: androidSettings);
+    const androidChannel = AndroidNotificationChannel(
+      _channelId,
+      _channelName,
+      description: _channelDesc,
+      importance: Importance.high,
+    );
 
-    await flutterLocalNotificationsPlugin.initialize(initSettings);
+    await _local
+        .resolvePlatformSpecificImplementation<
+            AndroidFlutterLocalNotificationsPlugin>()
+        ?.createNotificationChannel(androidChannel);
+
+    const androidInit = AndroidInitializationSettings("@mipmap/ic_launcher");
+    await _local.initialize(
+      const InitializationSettings(android: androidInit),
+      onDidReceiveNotificationResponse: _onNotificationTap,
+    );
+
+    FirebaseMessaging.onMessage.listen(_handleForegroundMessage);
+    FirebaseMessaging.onMessageOpenedApp.listen(_handleNotificationOpen);
+
+    final initial = await _fcm.getInitialMessage();
+    if (initial != null) _handleNotificationOpen(initial);
+
+    final token = await _fcm.getToken();
+    debugPrint("[FCM Token] $token");
   }
 
-  /// Show a simple notification.
-  Future<void> showNotification({
+  void _handleForegroundMessage(RemoteMessage message) {
+    final n = message.notification;
+    if (n == null) return;
+    _showLocal(title: n.title ?? "GrabMeADeal", body: n.body ?? "");
+  }
+
+  void _handleNotificationOpen(RemoteMessage message) {
+    debugPrint("[FCM Opened] ${message.data}");
+  }
+
+  void _onNotificationTap(NotificationResponse response) {
+    debugPrint("[Local Tap] payload=${response.payload}");
+  }
+
+  Future<void> _showLocal({
     required String title,
     required String body,
+    String? payload,
+    int id = 0,
   }) async {
-    const AndroidNotificationDetails androidDetails =
-        AndroidNotificationDetails(
-      'default_channel',
-      'General Notifications',
-      channelDescription: 'Default notifications for Grab Me A Deal app',
-      importance: Importance.max,
-      priority: Priority.high,
-      playSound: true,
-    );
-
-    const NotificationDetails platformDetails =
-        NotificationDetails(android: androidDetails);
-
-    await flutterLocalNotificationsPlugin.show(
-      DateTime.now().millisecondsSinceEpoch ~/ 1000,
+    await _local.show(
+      id,
       title,
       body,
-      platformDetails,
+      NotificationDetails(
+        android: AndroidNotificationDetails(
+          _channelId,
+          _channelName,
+          channelDescription: _channelDesc,
+          importance: Importance.high,
+          priority: Priority.high,
+          icon: "@mipmap/ic_launcher",
+        ),
+      ),
+      payload: payload,
     );
   }
 
-  /// Schedule a notification at a later time.
-  Future<void> scheduleNotification({
+  void showNotification({
+    BuildContext? context,
     required String title,
     required String body,
-    required DateTime scheduledTime,
-  }) async {
-    const AndroidNotificationDetails androidDetails =
-        AndroidNotificationDetails(
-      'scheduled_channel',
-      'Scheduled Notifications',
-      channelDescription: 'Scheduled alerts for deals and reminders',
-      importance: Importance.max,
-      priority: Priority.high,
-      playSound: true,
-    );
+    int? id,
+    String? payload,
+  }) {
+    if (context != null) {
+      final messenger = ScaffoldMessenger.maybeOf(context);
+      if (messenger != null) {
+        messenger.showSnackBar(SnackBar(content: Text("$title: $body")));
+        return;
+      }
+    }
+    _showLocal(title: title, body: body, id: id ?? 0, payload: payload);
+  }
 
-    const NotificationDetails platformDetails =
-        NotificationDetails(android: androidDetails);
-
-    await flutterLocalNotificationsPlugin.zonedSchedule(
-      DateTime.now().millisecondsSinceEpoch ~/ 1000,
-      title,
-      body,
-      scheduledTime.toUtc(),
-      platformDetails,
-      androidAllowWhileIdle: true,
-      uiLocalNotificationDateInterpretation:
-          UILocalNotificationDateInterpretation.absoluteTime,
+  void showStoreClosingAlert({
+    required BuildContext context,
+    required String storeName,
+    required int minutesUntilClose,
+  }) {
+    showNotification(
+      context: context,
+      title: "Closing Soon",
+      body: "$storeName closes in $minutesUntilClose minutes",
     );
   }
 
-  /// Cancel all active notifications.
-  Future<void> cancelAll() async {
-    await flutterLocalNotificationsPlugin.cancelAll();
-  }
+  Future<void> start() async {}
+  Future<void> stop() async {}
 }
