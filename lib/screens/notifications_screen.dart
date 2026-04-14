@@ -17,8 +17,8 @@ class NotificationsScreen extends StatelessWidget {
         child: ElevatedButton.icon(
           icon: const Icon(Icons.notifications),
           label: const Text("Send Test Notification"),
-          onPressed: () async {
-            await NotificationService().showNotification(
+          onPressed: () {
+            NotificationService.instance.showNotification(
               id: 0,
               title: "Test Notification",
               body: "This is a test from NotificationsScreen!",

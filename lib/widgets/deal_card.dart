@@ -1,5 +1,6 @@
-import 'package:flutter/material.dart';
-import 'package:grabmeadeal_final/models/deal.dart';
+import "package:cached_network_image/cached_network_image.dart";
+import "package:flutter/material.dart";
+import "package:grabmeadeal_final/models/deal.dart";
 
 class DealCard extends StatelessWidget {
   final Deal deal;
@@ -15,6 +16,19 @@ class DealCard extends StatelessWidget {
     required this.onWishlistToggle,
   });
 
+  Widget _imageFallback() {
+    return Container(
+      width: 80,
+      height: 80,
+      color: Colors.grey.shade200,
+      child: Icon(
+        Icons.image_not_supported_outlined,
+        color: Colors.grey.shade400,
+        size: 32,
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return Card(
@@ -29,16 +43,26 @@ class DealCard extends StatelessWidget {
           child: Row(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              if (deal.imageUrl != null)
-                ClipRRect(
-                  borderRadius: BorderRadius.circular(8),
-                  child: Image.network(
-                    deal.imageUrl!,
-                    width: 80,
-                    height: 80,
-                    fit: BoxFit.cover,
-                  ),
-                ),
+              ClipRRect(
+                borderRadius: BorderRadius.circular(8),
+                child: deal.imageUrl.isNotEmpty
+                    ? CachedNetworkImage(
+                        imageUrl: deal.imageUrl,
+                        width: 80,
+                        height: 80,
+                        fit: BoxFit.cover,
+                        placeholder: (context, url) => Container(
+                          width: 80,
+                          height: 80,
+                          color: Colors.grey.shade100,
+                          child: const Center(
+                            child: CircularProgressIndicator(strokeWidth: 2),
+                          ),
+                        ),
+                        errorWidget: (context, url, error) => _imageFallback(),
+                      )
+                    : _imageFallback(),
+              ),
               const SizedBox(width: 12),
               Expanded(
                 child: Column(
@@ -46,6 +70,8 @@ class DealCard extends StatelessWidget {
                   children: [
                     Text(
                       deal.title,
+                      maxLines: 2,
+                      overflow: TextOverflow.ellipsis,
                       style: Theme.of(context).textTheme.titleMedium?.copyWith(
                             fontWeight: FontWeight.bold,
                           ),

@@ -1,90 +1,99 @@
 // lib/routes/app_routes.dart
 
-import 'package:flutter/material.dart';
-import 'package:grabmeadeal_final/models/deal.dart';
-import 'package:grabmeadeal_final/screens/deals_screen.dart';
-import 'package:grabmeadeal_final/screens/wishlist_screen.dart';
-import 'package:grabmeadeal_final/screens/categories_screen.dart';
-import 'package:grabmeadeal_final/screens/category_deals_screen.dart';
-import 'package:grabmeadeal_final/screens/deal_detail_screen.dart';
-import 'package:grabmeadeal_final/screens/search_results_screen.dart';
-import 'package:grabmeadeal_final/screens/notifications_screen.dart';
+import "package:flutter/material.dart";
+import "package:grabmeadeal_final/screens/admin_login_screen.dart";
+import "package:grabmeadeal_final/screens/admin_upload_screen.dart";
+import "package:grabmeadeal_final/screens/auth_gate.dart";
+import "package:grabmeadeal_final/screens/auth_screen.dart";
+import "package:grabmeadeal_final/screens/categories_screen.dart";
+import "package:grabmeadeal_final/screens/deal_detail_screen.dart";
+import "package:grabmeadeal_final/screens/deals_screen.dart";
+import "package:grabmeadeal_final/screens/main_tab_controller.dart";
+import "package:grabmeadeal_final/screens/notifications_screen.dart";
+import "package:grabmeadeal_final/screens/search_results_screen.dart";
+import "package:grabmeadeal_final/screens/wishlist_screen.dart";
+import "package:grabmeadeal_final/screens/puzzle_reward_screen.dart";
+import "package:grabmeadeal_final/models/deal.dart";
 
 class AppRoutes {
-  static const String deals = '/deals';
-  static const String wishlist = '/wishlist';
-  static const String categories = '/categories';
-  static const String categoryDeals = '/category-deals';
-  static const String dealDetail = '/deal-detail';
-  static const String searchResults = '/search-results';
-  static const String notifications = '/notifications';
+  AppRoutes._();
 
-  static Map<String, WidgetBuilder> routes({
-    required List<Deal> allDeals,
-    required List<Deal> wishlistDeals,
-    required Set<String> wishlistIds,
-    required Function(Deal) onWishlistToggle,
-  }) {
-    return {
-      deals: (_) => DealsScreen(
-            deals: allDeals,
-            wishlistIds: wishlistIds,
-            onWishlistToggle: onWishlistToggle,
-          ),
-      wishlist: (_) => WishlistScreen(
-            wishlistDeals: wishlistDeals,
-            wishlistIds: wishlistIds,
-            onWishlistToggle: onWishlistToggle,
-          ),
-      categories: (_) => CategoriesScreen(
-            deals: allDeals,
-            wishlistIds: wishlistIds,
-            onWishlistToggle: onWishlistToggle,
-          ),
-      notifications: (_) => const NotificationsScreen(),
-    };
-  }
+  static const String root          = "/";
+  static const String home          = "/home";
+  static const String deals         = "/deals";
+  static const String wishlist      = "/wishlist";
+  static const String wishlistDeals = "/wishlist";
+  static const String notifications = "/notifications";
+  static const String adminLogin    = "/admin-login";
+  static const String adminUpload   = "/admin-upload";
+  static const String search        = "/search";
+  static const String categories    = "/categories";
+  static const String dealDetail    = "/deal-detail";
+  static const String puzzle        = "/puzzle";
 
-  static Route<dynamic>? onGenerateRoute(RouteSettings settings,
-      {required List<Deal> allDeals,
-      required List<Deal> wishlistDeals,
-      required Set<String> wishlistIds,
-      required Function(Deal) onWishlistToggle}) {
+  static Route<dynamic> onGenerate(RouteSettings settings) {
     switch (settings.name) {
-      case categoryDeals:
-        final args = settings.arguments as Map<String, dynamic>;
+      case root:
+        return _fade(const AuthGate());
+      case home:
+        return _fade(const MainTabController());
+      case deals:
         return MaterialPageRoute(
-          builder: (_) => CategoryDealsScreen(
-            categoryName: args['categoryName'] as String,
-            deals: allDeals,
-            wishlistIds: wishlistIds,
-            onWishlistToggle: onWishlistToggle,
-          ),
+          builder: (_) => const DealsScreen(),
         );
-      case dealDetail:
-        final deal = settings.arguments as Deal;
+      case wishlist:
         return MaterialPageRoute(
-          builder: (_) => DealDetailScreen(
-            deal: deal,
-            onWishlistToggle: onWishlistToggle,
-            wishlistIds: wishlistIds,
-          ),
-        );
-      case searchResults:
-        final args = settings.arguments as Map<String, dynamic>;
-        return MaterialPageRoute(
-          builder: (_) => SearchResultsScreen(
-            results: args['results'] as List<Deal>,
-            wishlistIds: wishlistIds,
-            onWishlistToggle: onWishlistToggle,
-          ),
+          builder: (_) => const WishlistScreen(),
         );
       case notifications:
         return MaterialPageRoute(
           builder: (_) => const NotificationsScreen(),
         );
+      case categories:
+        return MaterialPageRoute(
+          builder: (_) => const CategoriesScreen(),
+        );
+      case search:
+        final query = settings.arguments is String
+            ? settings.arguments as String
+            : "";
+        return MaterialPageRoute(
+          builder: (_) => SearchResultsScreen(initialQuery: query),
+        );
+      case dealDetail:
+        final deal = settings.arguments is Deal
+            ? settings.arguments as Deal
+            : null;
+        return MaterialPageRoute(
+          builder: (_) => DealDetailScreen(deal: deal),
+        );
+      case adminLogin:
+        return MaterialPageRoute(
+          builder: (_) => const AdminLoginScreen(),
+        );
+      case adminUpload:
+        return MaterialPageRoute(
+          builder: (_) => const AdminUploadScreen(),
+        );
+      case puzzle:
+        return MaterialPageRoute(
+          builder: (_) => const PuzzleRewardScreen(),
+        );
       default:
-        return null;
+        return MaterialPageRoute(
+          builder: (_) => const Scaffold(
+            body: Center(child: Text("404 — Route not found")),
+          ),
+        );
     }
+  }
+
+  static PageRouteBuilder<void> _fade(Widget page) {
+    return PageRouteBuilder(
+      pageBuilder: (_, __, ___) => page,
+      transitionsBuilder: (_, animation, __, child) =>
+          FadeTransition(opacity: animation, child: child),
+      transitionDuration: const Duration(milliseconds: 250),
+    );
   }
 }
