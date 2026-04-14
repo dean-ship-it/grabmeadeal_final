@@ -1,56 +1,36 @@
 // lib/main.dart
 
-import 'package:flutter/material.dart';
-import 'package:grabmeadeal_final/services/notification_service.dart';
-import 'package:grabmeadeal_final/services/location_handler.dart';
+import "package:firebase_core/firebase_core.dart";
+import "package:flutter/material.dart";
+import "package:provider/provider.dart";
+import "package:grabmeadeal_final/providers/wishlist_provider.dart";
+import "package:grabmeadeal_final/routes/app_routes.dart";
+import "package:grabmeadeal_final/services/notification_service.dart";
 
-void main() async {
+Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
-
-  // Initialize notifications first
-  await NotificationService().initialize();
-
-  // Initialize location/geofence logic
-  final locationHandler = LocationHandler();
-  await locationHandler.initialize();
-
-  runApp(const MyApp());
+  await Firebase.initializeApp();
+  await NotificationService.instance.initialize();
+  runApp(const GrabMeADealApp());
 }
 
-class MyApp extends StatelessWidget {
-  const MyApp({super.key});
+class GrabMeADealApp extends StatelessWidget {
+  const GrabMeADealApp({super.key});
 
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
-      title: 'Grab Me A Deal',
-      theme: ThemeData(
-        colorScheme: ColorScheme.fromSeed(seedColor: Colors.blue),
-        useMaterial3: true,
-      ),
-      home: const HomeScreen(),
-    );
-  }
-}
-
-class HomeScreen extends StatelessWidget {
-  const HomeScreen({super.key});
-
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: const Text("Grab Me A Deal"),
-      ),
-      body: Center(
-        child: ElevatedButton(
-          onPressed: () {
-            NotificationService().showNotification(
-              title: "Test Notification",
-              body: "This is a test push from HomeScreen",
-            );
-          },
-          child: const Text("Send Test Notification"),
+    return MultiProvider(
+      providers: [
+        ChangeNotifierProvider(create: (_) => WishlistProvider()),
+      ],
+      child: MaterialApp(
+        title: "Grab Me A Deal",
+        debugShowCheckedModeBanner: false,
+        initialRoute: AppRoutes.root,
+        onGenerateRoute: AppRoutes.onGenerate,
+        theme: ThemeData(
+          colorScheme: ColorScheme.fromSeed(seedColor: Colors.indigo),
+          useMaterial3: true,
         ),
       ),
     );
