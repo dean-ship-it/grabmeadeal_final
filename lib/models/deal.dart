@@ -27,8 +27,35 @@ class Deal {
     required this.createdAt,
   });
 
-  /// Factory method to build from Firestore JSON
+  /// Factory method to build from Firestore JSON.
+  /// Handles both old field names (imageUrl, date, price) and
+  /// new field names (link, createdAt, priceCurrent).
   factory Deal.fromJson(Map<String, dynamic> json, String id) {
+    // price: try 'priceCurrent' (new) then 'price' (old)
+    final rawPrice = json['priceCurrent'] ?? json['price'];
+    final double price = (rawPrice is int)
+        ? rawPrice.toDouble()
+        : (rawPrice as num? ?? 0.0).toDouble();
+
+    // originalPrice: unchanged field name
+    final rawOriginal = json['originalPrice'];
+    final double? originalPrice = rawOriginal != null
+        ? (rawOriginal is int)
+            ? rawOriginal.toDouble()
+            : (rawOriginal as num).toDouble()
+        : null;
+
+    // imageUrl: try 'imageUrl' (old) then 'link' (new)
+    final String imageUrl = json['imageUrl'] ?? json['link'] ?? '';
+
+    // createdAt: try 'createdAt' (new) then 'date' (old)
+    final rawDate = json['createdAt'] ?? json['date'];
+    final DateTime createdAt = (rawDate is Timestamp)
+        ? rawDate.toDate()
+        : (rawDate is String)
+            ? DateTime.tryParse(rawDate) ?? DateTime.now()
+            : DateTime.now();
+
     return Deal(
       id: id,
       title: json['title'] ?? '',
@@ -36,22 +63,19 @@ class Deal {
       category: json['category'] ?? '',
       subcategory: json['subcategory'] ?? '',
       vendor: json['vendor'] ?? '',
-      price: (json['price'] is int)
-          ? (json['price'] as int).toDouble()
-          : (json['price'] ?? 0.0).toDouble(),
-      originalPrice: json['originalPrice'] != null
-          ? (json['originalPrice'] is int)
-              ? (json['originalPrice'] as int).toDouble()
-              : (json['originalPrice'] as num).toDouble()
-          : null,
-      imageUrl: json['imageUrl'] ?? '',
-      keywords: (json['keywords'] != null)
+      price: price,
+      originalPrice: originalPrice,
+      imageUrl: imageUrl,
+      keywords: json['keywords'] != null
           ? List<String>.from(json['keywords'])
           : [],
-      createdAt: (json['createdAt'] is Timestamp)
-          ? (json['createdAt'] as Timestamp).toDate()
-          : DateTime.tryParse(json['createdAt'] ?? '') ?? DateTime.now(),
+      createdAt: createdAt,
     );
+  }
+
+  /// Factory method to build from a Firestore document snapshot.
+  factory Deal.fromFirestore(QueryDocumentSnapshot<Map<String, dynamic>> doc) {
+    return Deal.fromJson(doc.data(), doc.id);
   }
 
   /// Convert to JSON for Firestore

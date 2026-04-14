@@ -1,19 +1,19 @@
-import 'package:flutter/material.dart';
-import 'package:grabmeadeal_final/models/deal.dart';
-import 'package:grabmeadeal_final/widgets/deal_card.dart';
+// lib/screens/wishlist_screen.dart
+
+import "package:flutter/material.dart";
+import "package:provider/provider.dart";
+import "package:grabmeadeal_final/providers/wishlist_provider.dart";
+import "package:grabmeadeal_final/routes/app_routes.dart";
+import "package:grabmeadeal_final/widgets/deal_card.dart";
 
 class WishlistScreen extends StatelessWidget {
-  final List<Deal> wishlistDeals;
-  final Function(Deal deal, bool isInWishlist) onWishlistToggle;
-
-  const WishlistScreen({
-    super.key,
-    required this.wishlistDeals,
-    required this.onWishlistToggle,
-  });
+  const WishlistScreen({super.key});
 
   @override
   Widget build(BuildContext context) {
+    final wishlist = context.watch<WishlistProvider>();
+    final deals = wishlist.wishlistDeals;
+
     return Scaffold(
       appBar: AppBar(
         title: const Text(
@@ -21,7 +21,7 @@ class WishlistScreen extends StatelessWidget {
           style: TextStyle(fontWeight: FontWeight.bold),
         ),
       ),
-      body: wishlistDeals.isEmpty
+      body: deals.isEmpty
           ? Center(
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
@@ -44,21 +44,19 @@ class WishlistScreen extends StatelessWidget {
             )
           : ListView.separated(
               padding: const EdgeInsets.all(12),
-              itemCount: wishlistDeals.length,
+              itemCount: deals.length,
               separatorBuilder: (_, __) => const SizedBox(height: 12),
               itemBuilder: (context, index) {
-                final deal = wishlistDeals[index];
+                final deal = deals[index];
                 return DealCard(
                   deal: deal,
                   isInWishlist: true,
-                  onWishlistToggle: () => onWishlistToggle(deal, true),
-                  onTap: () {
-                    Navigator.pushNamed(
-                      context,
-                      '/dealDetail',
-                      arguments: deal,
-                    );
-                  },
+                  onWishlistToggle: () => wishlist.toggleWishlist(deal),
+                  onTap: () => Navigator.pushNamed(
+                    context,
+                    AppRoutes.dealDetail,
+                    arguments: deal,
+                  ),
                 );
               },
             ),

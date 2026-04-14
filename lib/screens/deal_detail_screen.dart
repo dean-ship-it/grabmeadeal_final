@@ -1,30 +1,34 @@
-import 'package:flutter/material.dart';
-import 'package:grabmeadeal_final/models/deal.dart';
+import "package:flutter/material.dart";
+import "package:provider/provider.dart";
+import "package:grabmeadeal_final/models/deal.dart";
+import "package:grabmeadeal_final/providers/wishlist_provider.dart";
 
 class DealDetailScreen extends StatelessWidget {
-  final Deal deal;
-  final bool isInWishlist;
-  final VoidCallback onWishlistToggle;
+  final Deal? deal;
 
-  const DealDetailScreen({
-    super.key,
-    required this.deal,
-    required this.isInWishlist,
-    required this.onWishlistToggle,
-  });
+  const DealDetailScreen({super.key, required this.deal});
 
   @override
   Widget build(BuildContext context) {
+    if (deal == null) {
+      return const Scaffold(
+        body: Center(child: Text("Deal not found.")),
+      );
+    }
+
+    final wishlist = context.watch<WishlistProvider>();
+    final isInWishlist = wishlist.wishlistIds.contains(deal!.id);
+
     return Scaffold(
       appBar: AppBar(
-        title: Text(deal.title, maxLines: 1, overflow: TextOverflow.ellipsis),
+        title: Text(deal!.title, maxLines: 1, overflow: TextOverflow.ellipsis),
         actions: [
           IconButton(
             icon: Icon(
               isInWishlist ? Icons.favorite : Icons.favorite_border,
               color: isInWishlist ? Colors.red : Colors.white,
             ),
-            onPressed: onWishlistToggle,
+            onPressed: () => wishlist.toggleWishlist(deal!),
           ),
         ],
       ),
@@ -33,11 +37,10 @@ class DealDetailScreen extends StatelessWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            // Deal Image
             ClipRRect(
               borderRadius: BorderRadius.circular(12),
               child: Image.network(
-                deal.imageUrl,
+                deal!.imageUrl,
                 width: double.infinity,
                 height: 220,
                 fit: BoxFit.cover,
@@ -46,23 +49,16 @@ class DealDetailScreen extends StatelessWidget {
               ),
             ),
             const SizedBox(height: 16),
-
-            // Title
             Text(
-              deal.title,
-              style: const TextStyle(
-                fontSize: 22,
-                fontWeight: FontWeight.bold,
-              ),
+              deal!.title,
+              style: const TextStyle(fontSize: 22, fontWeight: FontWeight.bold),
             ),
             const SizedBox(height: 8),
-
-            // Price & Vendor
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
                 Text(
-                  "\$${deal.price.toStringAsFixed(2)}",
+                  "\$${deal!.price.toStringAsFixed(2)}",
                   style: const TextStyle(
                     fontSize: 20,
                     fontWeight: FontWeight.bold,
@@ -70,7 +66,7 @@ class DealDetailScreen extends StatelessWidget {
                   ),
                 ),
                 Text(
-                  deal.vendor,
+                  deal!.vendor,
                   style: const TextStyle(
                     fontSize: 16,
                     fontStyle: FontStyle.italic,
@@ -79,26 +75,19 @@ class DealDetailScreen extends StatelessWidget {
               ],
             ),
             const SizedBox(height: 16),
-
-            // Description
             const Text(
               "Description",
               style: TextStyle(fontSize: 18, fontWeight: FontWeight.w600),
             ),
             const SizedBox(height: 6),
-            Text(
-              deal.description,
-              style: const TextStyle(fontSize: 15),
-            ),
+            Text(deal!.description, style: const TextStyle(fontSize: 15)),
             const SizedBox(height: 20),
-
-            // Category
             Row(
               children: [
                 const Icon(Icons.category, color: Colors.blueGrey),
                 const SizedBox(width: 8),
                 Text(
-                  deal.category,
+                  deal!.category,
                   style: const TextStyle(
                     fontSize: 16,
                     fontWeight: FontWeight.w500,
@@ -107,15 +96,12 @@ class DealDetailScreen extends StatelessWidget {
               ],
             ),
             const SizedBox(height: 24),
-
-            // Buy Now Button
             SizedBox(
               width: double.infinity,
               child: ElevatedButton.icon(
                 icon: const Icon(Icons.shopping_cart_checkout),
                 label: const Text("Buy Now"),
                 onPressed: () {
-                  // Placeholder for redirect to vendor site
                   ScaffoldMessenger.of(context).showSnackBar(
                     const SnackBar(
                       content: Text("Redirecting to vendor (placeholder)..."),

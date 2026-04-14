@@ -13,7 +13,7 @@ class AdminLoginScreen extends StatelessWidget {
         return; // User canceled sign-in
       }
 
-      final GoogleSignInAuthentication googleAuth = googleUser.authentication;
+      final GoogleSignInAuthentication googleAuth = await googleUser.authentication;
 
       final OAuthCredential credential = GoogleAuthProvider.credential(
         accessToken: googleAuth.accessToken,

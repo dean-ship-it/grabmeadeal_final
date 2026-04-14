@@ -1,6 +1,7 @@
 // lib/services/notification_service.dart
 
 import "package:firebase_messaging/firebase_messaging.dart";
+import "package:flutter/foundation.dart";
 import "package:flutter/material.dart";
 import "package:flutter_local_notifications/flutter_local_notifications.dart";
 
@@ -21,35 +22,46 @@ class NotificationService {
   static const _channelDesc = "Deal alerts and store notifications";
 
   Future<void> initialize() async {
-    FirebaseMessaging.onBackgroundMessage(_firebaseMessagingBackgroundHandler);
-    await _fcm.requestPermission(alert: true, badge: true, sound: true);
+    try {
+      FirebaseMessaging.onBackgroundMessage(_firebaseMessagingBackgroundHandler);
 
-    const androidChannel = AndroidNotificationChannel(
-      _channelId,
-      _channelName,
-      description: _channelDesc,
-      importance: Importance.high,
-    );
+      // Skip permission request on web — the browser dialog blocks rendering.
+      // Web notifications are handled separately via the service worker.
+      if (!kIsWeb) {
+        await _fcm.requestPermission(alert: true, badge: true, sound: true);
+      }
 
-    await _local
-        .resolvePlatformSpecificImplementation<
-            AndroidFlutterLocalNotificationsPlugin>()
-        ?.createNotificationChannel(androidChannel);
+      if (!kIsWeb) {
+        const androidChannel = AndroidNotificationChannel(
+          _channelId,
+          _channelName,
+          description: _channelDesc,
+          importance: Importance.high,
+        );
 
-    const androidInit = AndroidInitializationSettings("@mipmap/ic_launcher");
-    await _local.initialize(
-      const InitializationSettings(android: androidInit),
-      onDidReceiveNotificationResponse: _onNotificationTap,
-    );
+        await _local
+            .resolvePlatformSpecificImplementation<
+                AndroidFlutterLocalNotificationsPlugin>()
+            ?.createNotificationChannel(androidChannel);
 
-    FirebaseMessaging.onMessage.listen(_handleForegroundMessage);
-    FirebaseMessaging.onMessageOpenedApp.listen(_handleNotificationOpen);
+        const androidInit = AndroidInitializationSettings("@mipmap/ic_launcher");
+        await _local.initialize(
+          const InitializationSettings(android: androidInit),
+          onDidReceiveNotificationResponse: _onNotificationTap,
+        );
+      }
 
-    final initial = await _fcm.getInitialMessage();
-    if (initial != null) _handleNotificationOpen(initial);
+      FirebaseMessaging.onMessage.listen(_handleForegroundMessage);
+      FirebaseMessaging.onMessageOpenedApp.listen(_handleNotificationOpen);
 
-    final token = await _fcm.getToken();
-    debugPrint("[FCM Token] $token");
+      final initial = await _fcm.getInitialMessage();
+      if (initial != null) _handleNotificationOpen(initial);
+
+      final token = await _fcm.getToken();
+      debugPrint("[FCM Token] $token");
+    } catch (e, stack) {
+      debugPrint("[NotificationService] initialization failed: $e\n$stack");
+    }
   }
 
   void _handleForegroundMessage(RemoteMessage message) {

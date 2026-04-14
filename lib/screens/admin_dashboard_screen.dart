@@ -85,9 +85,8 @@ class AdminDashboardScreen extends StatelessWidget {
                 const Text('Top Skipped Vendors', style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold)),
                 const SizedBox(height: 12),
                 Column(
-                  children: skippedByVendor.entries
-                      .toList()
-                      .sorted((a, b) => b.value.compareTo(a.value))
+                  children: (skippedByVendor.entries.toList()
+                      ..sort((a, b) => b.value.compareTo(a.value)))
                       .take(5)
                       .map(
                         (entry) => ListTile(

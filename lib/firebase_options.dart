@@ -23,12 +23,12 @@ class DefaultFirebaseOptions {
   }
 
   static const FirebaseOptions web = FirebaseOptions(
-    apiKey: 'YOUR_WEB_API_KEY',
-    appId: 'YOUR_WEB_APP_ID',
-    messagingSenderId: 'YOUR_MESSAGING_SENDER_ID',
+    apiKey: 'AIzaSyCgTqCMMvek-N1dNns_DZwro6DuhdEAHz8',
+    appId: '1:346101400207:web:318faa1d4bba39e839a6fa',
+    messagingSenderId: '346101400207',
     projectId: 'grab-me-a-deal-e69ae',
     authDomain: 'grab-me-a-deal-e69ae.firebaseapp.com',
-    storageBucket: 'grab-me-a-deal-e69ae.appspot.com',
+    storageBucket: 'grab-me-a-deal-e69ae.firebasestorage.app',
     measurementId: 'G-MEASUREMENT-ID',
   );
 

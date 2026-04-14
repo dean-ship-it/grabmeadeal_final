@@ -3,13 +3,17 @@
 import "package:firebase_core/firebase_core.dart";
 import "package:flutter/material.dart";
 import "package:provider/provider.dart";
+import "package:grabmeadeal_final/firebase_options.dart";
+import "package:grabmeadeal_final/providers/puzzle_provider.dart";
 import "package:grabmeadeal_final/providers/wishlist_provider.dart";
 import "package:grabmeadeal_final/routes/app_routes.dart";
 import "package:grabmeadeal_final/services/notification_service.dart";
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
-  await Firebase.initializeApp();
+  await Firebase.initializeApp(
+    options: DefaultFirebaseOptions.currentPlatform,
+  );
   await NotificationService.instance.initialize();
   runApp(const GrabMeADealApp());
 }
@@ -22,6 +26,7 @@ class GrabMeADealApp extends StatelessWidget {
     return MultiProvider(
       providers: [
         ChangeNotifierProvider(create: (_) => WishlistProvider()),
+        ChangeNotifierProvider(create: (_) => PuzzleProvider()),
       ],
       child: MaterialApp(
         title: "Grab Me A Deal",
@@ -29,8 +34,17 @@ class GrabMeADealApp extends StatelessWidget {
         initialRoute: AppRoutes.root,
         onGenerateRoute: AppRoutes.onGenerate,
         theme: ThemeData(
-          colorScheme: ColorScheme.fromSeed(seedColor: Colors.indigo),
+          colorScheme: ColorScheme.fromSeed(
+            seedColor: const Color(0xFF0075C9),
+            primary: const Color(0xFF0075C9),
+            secondary: const Color(0xFFA6CE39),
+          ),
           useMaterial3: true,
+          appBarTheme: const AppBarTheme(
+            backgroundColor: Color(0xFF0075C9),
+            foregroundColor: Colors.white,
+            elevation: 0,
+          ),
         ),
       ),
     );

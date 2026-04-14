@@ -3,7 +3,6 @@ import "package:flutter/material.dart";
 import "package:provider/provider.dart";
 import "package:grabmeadeal_final/models/deal.dart";
 import "package:grabmeadeal_final/providers/wishlist_provider.dart";
-import "package:grabmeadeal_final/screens/deal_detail_screen.dart";
 import "package:grabmeadeal_final/widgets/deal_card.dart";
 
 class SearchResultsScreen extends StatefulWidget {
@@ -128,18 +127,11 @@ class _SearchResultsScreenState extends State<SearchResultsScreen> {
                 deal: deal,
                 isInWishlist: inWishlist,
                 onWishlistToggle: () => wishlist.toggleWishlist(deal),
-                onTap: () {
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                      builder: (_) => DealDetailScreen(
-                        deal: deal,
-                        isInWishlist: wishlist.wishlistIds.contains(deal.id),
-                        onWishlistToggle: () => wishlist.toggleWishlist(deal),
-                      ),
-                    ),
-                  );
-                },
+                onTap: () => Navigator.pushNamed(
+                  context,
+                  "/deal-detail",
+                  arguments: deal,
+                ),
               );
             },
           );
