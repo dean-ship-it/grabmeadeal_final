@@ -1,4 +1,5 @@
 import "package:cached_network_image/cached_network_image.dart";
+import "package:firebase_auth/firebase_auth.dart";
 import "package:flutter/material.dart";
 import "package:grabmeadeal_final/models/deal.dart";
 
@@ -69,6 +70,65 @@ class DealCard extends StatelessWidget {
         child: Text(
           icon,
           style: const TextStyle(fontSize: 32),
+        ),
+      ),
+    );
+  }
+
+  void _promptSignIn(BuildContext context) {
+    showModalBottomSheet<void>(
+      context: context,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+      ),
+      builder: (ctx) => Padding(
+        padding: const EdgeInsets.all(24),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            const Icon(Icons.favorite_border, size: 48, color: Color(0xFF0075C9)),
+            const SizedBox(height: 16),
+            const Text(
+              "Sign in to save deals",
+              style: TextStyle(fontSize: 20, fontWeight: FontWeight.w700),
+            ),
+            const SizedBox(height: 8),
+            const Text(
+              "Create a free account to save deals, build your want list, and get deal alerts.",
+              textAlign: TextAlign.center,
+              style: TextStyle(color: Colors.black54),
+            ),
+            const SizedBox(height: 24),
+            SizedBox(
+              width: double.infinity,
+              height: 48,
+              child: FilledButton(
+                onPressed: () {
+                  Navigator.pop(ctx);
+                  Navigator.pushNamed(context, "/auth");
+                },
+                style: FilledButton.styleFrom(
+                  backgroundColor: const Color(0xFF0075C9),
+                ),
+                child: const Text(
+                  "Sign In / Create Account",
+                  style: TextStyle(
+                    fontWeight: FontWeight.w700,
+                    fontSize: 16,
+                  ),
+                ),
+              ),
+            ),
+            const SizedBox(height: 12),
+            TextButton(
+              onPressed: () => Navigator.pop(ctx),
+              child: const Text(
+                "Maybe later",
+                style: TextStyle(color: Colors.grey),
+              ),
+            ),
+            const SizedBox(height: 8),
+          ],
         ),
       ),
     );
@@ -233,7 +293,14 @@ class DealCard extends StatelessWidget {
                       isInWishlist ? Icons.favorite : Icons.favorite_border,
                       color: isInWishlist ? Colors.red : null,
                     ),
-                    onPressed: onWishlistToggle,
+                    onPressed: () {
+                      final user = FirebaseAuth.instance.currentUser;
+                      if (user == null) {
+                        _promptSignIn(context);
+                      } else {
+                        onWishlistToggle();
+                      }
+                    },
                     padding: const EdgeInsets.all(8),
                     constraints: const BoxConstraints(),
                   ),

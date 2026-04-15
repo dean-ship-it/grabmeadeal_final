@@ -1,45 +1,15 @@
-import "package:firebase_auth/firebase_auth.dart";
-import "package:flutter/foundation.dart" show kDebugMode;
-import "package:flutter/material.dart";
-import "package:grabmeadeal_final/routes/app_routes.dart";
-import "package:grabmeadeal_final/screens/auth_screen.dart";
-import "package:grabmeadeal_final/services/notification_service.dart";
+// lib/screens/auth_gate.dart
 
+import "package:flutter/material.dart";
+import "package:grabmeadeal_final/screens/main_tab_controller.dart";
+
+/// Goes straight to the app — no login required to browse.
+/// Auth is requested only when user takes an action that requires it.
 class AuthGate extends StatelessWidget {
   const AuthGate({super.key});
 
   @override
   Widget build(BuildContext context) {
-    // In debug mode, skip auth and go straight to home for easier preview/testing.
-    if (kDebugMode) {
-      WidgetsBinding.instance.addPostFrameCallback((_) {
-        Navigator.pushReplacementNamed(context, AppRoutes.home);
-      });
-      return const Scaffold(
-        body: Center(child: CircularProgressIndicator()),
-      );
-    }
-
-    return StreamBuilder<User?>(
-      stream: FirebaseAuth.instance.authStateChanges(),
-      builder: (context, snapshot) {
-        if (snapshot.connectionState == ConnectionState.waiting) {
-          return const Scaffold(
-            body: Center(child: CircularProgressIndicator()),
-          );
-        }
-        if (snapshot.hasData) {
-          WidgetsBinding.instance.addPostFrameCallback((_) {
-            // Subscribe to deal alerts topic on successful auth
-            NotificationService.instance.subscribeToDealsChannel();
-            Navigator.pushReplacementNamed(context, AppRoutes.home);
-          });
-          return const Scaffold(
-            body: Center(child: CircularProgressIndicator()),
-          );
-        }
-        return const AuthScreen();
-      },
-    );
+    return const MainTabController();
   }
 }

@@ -6,6 +6,7 @@ import "package:flutter/material.dart";
 import "package:provider/provider.dart";
 import "package:grabmeadeal_final/firebase_options.dart";
 import "package:grabmeadeal_final/providers/puzzle_provider.dart";
+import "package:grabmeadeal_final/providers/want_list_provider.dart";
 import "package:grabmeadeal_final/providers/wishlist_provider.dart";
 import "package:grabmeadeal_final/routes/app_routes.dart";
 import "package:grabmeadeal_final/services/notification_service.dart";
@@ -39,6 +40,7 @@ class GrabMeADealApp extends StatelessWidget {
       providers: [
         ChangeNotifierProvider(create: (_) => WishlistProvider()),
         ChangeNotifierProvider(create: (_) => PuzzleProvider()),
+        ChangeNotifierProvider(create: (_) => WantListProvider()),
       ],
       child: MaterialApp(
         title: "Grab Me A Deal",
