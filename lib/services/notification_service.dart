@@ -131,6 +131,15 @@ class NotificationService {
     );
   }
 
+  Future<void> subscribeToDealsChannel() async {
+    try {
+      await _fcm.subscribeToTopic("deals_alerts");
+      debugPrint("[FCM] Subscribed to deals_alerts topic");
+    } catch (e) {
+      debugPrint("[FCM] Subscribe error: $e");
+    }
+  }
+
   Future<void> start() async {}
   Future<void> stop() async {}
 }

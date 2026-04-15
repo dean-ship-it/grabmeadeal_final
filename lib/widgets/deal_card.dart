@@ -99,9 +99,8 @@ class DealCard extends StatelessWidget {
                     ),
                     const SizedBox(height: 6),
 
-                    // Price row with savings badge — wrapped in Flexible
+                    // Price row with optional savings badge
                     Row(
-                      mainAxisSize: MainAxisSize.min,
                       children: [
                         Flexible(
                           child: Text(
@@ -119,26 +118,20 @@ class DealCard extends StatelessWidget {
                         ),
                         if (hasSavings) ...[
                           const SizedBox(width: 6),
-                          // Savings badge — Flexible prevents overflow
-                          Flexible(
-                            child: Container(
-                              padding: const EdgeInsets.symmetric(
-                                  horizontal: 6, vertical: 2),
-                              decoration: BoxDecoration(
-                                color: Colors.red.shade50,
-                                borderRadius: BorderRadius.circular(4),
-                                border:
-                                    Border.all(color: Colors.red.shade200),
-                              ),
-                              child: Text(
-                                "-$savings%",
-                                maxLines: 1,
-                                overflow: TextOverflow.ellipsis,
-                                style: TextStyle(
-                                  fontSize: 11,
-                                  fontWeight: FontWeight.w700,
-                                  color: Colors.red.shade700,
-                                ),
+                          Container(
+                            padding: const EdgeInsets.symmetric(
+                                horizontal: 6, vertical: 2),
+                            decoration: BoxDecoration(
+                              color: Colors.red.shade50,
+                              borderRadius: BorderRadius.circular(4),
+                              border: Border.all(color: Colors.red.shade200),
+                            ),
+                            child: Text(
+                              "-$savings%",
+                              style: TextStyle(
+                                fontSize: 11,
+                                fontWeight: FontWeight.w700,
+                                color: Colors.red.shade700,
                               ),
                             ),
                           ),
@@ -148,41 +141,36 @@ class DealCard extends StatelessWidget {
 
                     if (deal.originalPrice != null) ...[
                       const SizedBox(height: 2),
-                      // Original price — Flexible prevents overflow
-                      Flexible(
-                        child: Text(
-                          "Was \$${deal.originalPrice!.toStringAsFixed(2)}",
-                          maxLines: 1,
-                          overflow: TextOverflow.ellipsis,
-                          style: const TextStyle(
-                            decoration: TextDecoration.lineThrough,
-                            color: Colors.grey,
-                            fontSize: 12,
-                          ),
+                      Text(
+                        "Was \$${deal.originalPrice!.toStringAsFixed(2)}",
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                        style: const TextStyle(
+                          decoration: TextDecoration.lineThrough,
+                          color: Colors.grey,
+                          fontSize: 12,
                         ),
                       ),
                     ],
 
-                    // Category chip — Flexible prevents overflow
+                    // Category chip
                     if (deal.category.isNotEmpty) ...[
                       const SizedBox(height: 6),
-                      Flexible(
-                        child: Container(
-                          padding: const EdgeInsets.symmetric(
-                              horizontal: 6, vertical: 2),
-                          decoration: BoxDecoration(
-                            color: const Color(0xFF0075C9).withOpacity(0.08),
-                            borderRadius: BorderRadius.circular(4),
-                          ),
-                          child: Text(
-                            deal.category,
-                            maxLines: 1,
-                            overflow: TextOverflow.ellipsis,
-                            style: const TextStyle(
-                              fontSize: 10,
-                              fontWeight: FontWeight.w600,
-                              color: Color(0xFF0075C9),
-                            ),
+                      Container(
+                        padding: const EdgeInsets.symmetric(
+                            horizontal: 6, vertical: 2),
+                        decoration: BoxDecoration(
+                          color: const Color(0xFF0075C9).withOpacity(0.08),
+                          borderRadius: BorderRadius.circular(4),
+                        ),
+                        child: Text(
+                          deal.category,
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                          style: const TextStyle(
+                            fontSize: 10,
+                            fontWeight: FontWeight.w600,
+                            color: Color(0xFF0075C9),
                           ),
                         ),
                       ),

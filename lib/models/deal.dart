@@ -10,6 +10,7 @@ class Deal {
   final double price;
   final double? originalPrice;
   final String imageUrl;
+  final String dealUrl;
   final List<String> keywords;
   final DateTime createdAt;
 
@@ -23,6 +24,7 @@ class Deal {
     required this.price,
     this.originalPrice,
     required this.imageUrl,
+    this.dealUrl = '',
     required this.keywords,
     required this.createdAt,
   });
@@ -48,6 +50,10 @@ class Deal {
     // imageUrl: try 'imageUrl' (old) then 'link' (new)
     final String imageUrl = json['imageUrl'] ?? json['link'] ?? '';
 
+    // dealUrl: affiliate/vendor link
+    final String dealUrl =
+        json['dealUrl'] ?? json['affiliateUrl'] ?? json['url'] ?? '';
+
     // createdAt: try 'createdAt' (new) then 'date' (old)
     final rawDate = json['createdAt'] ?? json['date'];
     final DateTime createdAt = (rawDate is Timestamp)
@@ -66,6 +72,7 @@ class Deal {
       price: price,
       originalPrice: originalPrice,
       imageUrl: imageUrl,
+      dealUrl: dealUrl,
       keywords: json['keywords'] != null
           ? List<String>.from(json['keywords'])
           : [],
@@ -89,6 +96,7 @@ class Deal {
       'price': price,
       'originalPrice': originalPrice,
       'imageUrl': imageUrl,
+      'dealUrl': dealUrl,
       'keywords': keywords.map((k) => k.toLowerCase()).toList(),
       'createdAt': Timestamp.fromDate(createdAt),
     };

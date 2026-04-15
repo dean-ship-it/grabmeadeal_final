@@ -6,7 +6,7 @@ plugins {
 }
 
 android {
-    namespace = "com.example.grabmeadeal_final"
+    namespace = "com.grabmeadeal.app"
     compileSdk = 36
 
     compileOptions {
@@ -20,11 +20,11 @@ android {
     }
 
     defaultConfig {
-        applicationId = "com.example.grabmeadeal_final"
+        applicationId = "com.grabmeadeal.app"
         minSdk = 23
         targetSdk = 36
         versionCode = 1
-        versionName = "1.0"
+        versionName = "1.0.0"
     }
 
     buildTypes {
@@ -35,6 +35,8 @@ android {
         release {
             isMinifyEnabled = false
             isShrinkResources = false
+            // Temporary: use debug signing until keystore is generated
+            signingConfig = signingConfigs.getByName("debug")
             proguardFiles(
                 getDefaultProguardFile("proguard-android-optimize.txt"),
                 "proguard-rules.pro"

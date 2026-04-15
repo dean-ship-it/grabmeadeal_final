@@ -41,6 +41,11 @@ class DealsScreen extends StatelessWidget {
         elevation: 0,
         actions: [
           IconButton(
+            icon: const Icon(Icons.notifications_outlined),
+            tooltip: "Notifications",
+            onPressed: () => Navigator.pushNamed(context, "/notifications"),
+          ),
+          IconButton(
             icon: const Text("🧩", style: TextStyle(fontSize: 22)),
             tooltip: "Puzzle Rewards",
             onPressed: () => Navigator.pushNamed(context, "/puzzle"),
@@ -56,6 +61,44 @@ class DealsScreen extends StatelessWidget {
         children: [
           // ── Category Banner ──
           const _CategoryBanner(),
+          // ── Search Bar ──
+          Padding(
+            padding: const EdgeInsets.fromLTRB(16, 12, 16, 0),
+            child: TextField(
+              onSubmitted: (query) {
+                if (query.trim().isNotEmpty) {
+                  Navigator.pushNamed(
+                    context,
+                    "/search",
+                    arguments: query.trim(),
+                  );
+                }
+              },
+              textInputAction: TextInputAction.search,
+              decoration: InputDecoration(
+                hintText: "Search deals...",
+                prefixIcon: const Icon(Icons.search),
+                border: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(12),
+                  borderSide:
+                      const BorderSide(color: Color(0xFF0075C9)),
+                ),
+                focusedBorder: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(12),
+                  borderSide: const BorderSide(
+                    color: Color(0xFF0075C9),
+                    width: 2,
+                  ),
+                ),
+                filled: true,
+                fillColor: Colors.white,
+                contentPadding: const EdgeInsets.symmetric(
+                  horizontal: 16,
+                  vertical: 12,
+                ),
+              ),
+            ),
+          ),
           // ── Deals Content ──
           Expanded(
             child: StreamBuilder<List<Deal>>(
