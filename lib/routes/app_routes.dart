@@ -20,6 +20,7 @@ class AppRoutes {
 
   static const String root          = "/";
   static const String home          = "/home";
+  static const String auth          = "/auth";
   static const String deals         = "/deals";
   static const String wishlist      = "/wishlist";
   static const String wishlistDeals = "/wishlist";
@@ -37,6 +38,10 @@ class AppRoutes {
         return _fade(const AuthGate());
       case home:
         return _fade(const MainTabController());
+      case auth:
+        return MaterialPageRoute(
+          builder: (_) => const AuthScreen(),
+        );
       case deals:
         return MaterialPageRoute(
           builder: (_) => const DealsScreen(),
