@@ -17,14 +17,59 @@ class DealCard extends StatelessWidget {
   });
 
   Widget _imageFallback() {
+    final Map<String, Color> categoryColors = {
+      "electronics": const Color(0xFF1565C0),
+      "furniture": const Color(0xFF4E342E),
+      "tools": const Color(0xFF37474F),
+      "gaming": const Color(0xFF6A1B9A),
+      "beauty": const Color(0xFFAD1457),
+      "petSupplies": const Color(0xFF2E7D32),
+      "apparel": const Color(0xFF0075C9),
+      "automotive": const Color(0xFF004A8D),
+      "grocery": const Color(0xFF558B2F),
+      "outdoor": const Color(0xFF00695C),
+      "homeGoods": const Color(0xFFE65100),
+      "toys": const Color(0xFFF9A825),
+      "cleaning": const Color(0xFF00838F),
+      "fitness": const Color(0xFFC62828),
+      "art": const Color(0xFF6A1B9A),
+      "business": const Color(0xFF1B5E20),
+    };
+
+    final Map<String, String> categoryIcons = {
+      "electronics": "💻",
+      "furniture": "🛋",
+      "tools": "🛠",
+      "gaming": "🎮",
+      "beauty": "💄",
+      "petSupplies": "🐾",
+      "apparel": "👕",
+      "automotive": "🚗",
+      "grocery": "🛒",
+      "outdoor": "🏕",
+      "homeGoods": "🏠",
+      "toys": "🧸",
+      "cleaning": "🧹",
+      "fitness": "🏋️",
+      "art": "🎨",
+      "business": "📈",
+    };
+
+    final color = categoryColors[deal.category] ?? const Color(0xFF0075C9);
+    final icon = categoryIcons[deal.category] ?? "🏷";
+
     return Container(
       width: 80,
       height: 80,
-      color: Colors.grey.shade200,
-      child: Icon(
-        Icons.image_not_supported_outlined,
-        color: Colors.grey.shade400,
-        size: 32,
+      decoration: BoxDecoration(
+        color: color,
+        borderRadius: BorderRadius.circular(8),
+      ),
+      child: Center(
+        child: Text(
+          icon,
+          style: const TextStyle(fontSize: 32),
+        ),
       ),
     );
   }
