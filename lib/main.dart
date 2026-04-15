@@ -1,5 +1,6 @@
 // lib/main.dart
 
+import "dart:async";
 import "package:firebase_core/firebase_core.dart";
 import "package:flutter/material.dart";
 import "package:provider/provider.dart";
@@ -11,10 +12,21 @@ import "package:grabmeadeal_final/services/notification_service.dart";
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
-  await Firebase.initializeApp(
-    options: DefaultFirebaseOptions.currentPlatform,
-  );
-  await NotificationService.instance.initialize();
+  try {
+    await Firebase.initializeApp(
+      options: DefaultFirebaseOptions.currentPlatform,
+    );
+  } catch (e) {
+    // Ignore duplicate-app error — Firebase already initialized natively
+    debugPrint("[Main] Firebase init: $e");
+  }
+  // Initialize notifications with timeout — never block UI
+  try {
+    await NotificationService.instance.initialize()
+        .timeout(const Duration(seconds: 3));
+  } catch (e) {
+    debugPrint("[Main] Notification init skipped: $e");
+  }
   runApp(const GrabMeADealApp());
 }
 

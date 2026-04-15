@@ -3,6 +3,7 @@ import "package:flutter/foundation.dart" show kDebugMode;
 import "package:flutter/material.dart";
 import "package:grabmeadeal_final/routes/app_routes.dart";
 import "package:grabmeadeal_final/screens/auth_screen.dart";
+import "package:grabmeadeal_final/services/notification_service.dart";
 
 class AuthGate extends StatelessWidget {
   const AuthGate({super.key});
@@ -29,6 +30,8 @@ class AuthGate extends StatelessWidget {
         }
         if (snapshot.hasData) {
           WidgetsBinding.instance.addPostFrameCallback((_) {
+            // Subscribe to deal alerts topic on successful auth
+            NotificationService.instance.subscribeToDealsChannel();
             Navigator.pushReplacementNamed(context, AppRoutes.home);
           });
           return const Scaffold(
