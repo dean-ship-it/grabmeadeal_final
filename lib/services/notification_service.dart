@@ -1,5 +1,7 @@
 // lib/services/notification_service.dart
 
+import "package:cloud_firestore/cloud_firestore.dart";
+import "package:firebase_auth/firebase_auth.dart";
 import "package:firebase_messaging/firebase_messaging.dart";
 import "package:flutter/foundation.dart";
 import "package:flutter/material.dart";
@@ -59,6 +61,23 @@ class NotificationService {
 
       final token = await _fcm.getToken();
       debugPrint("[FCM Token] $token");
+
+      if (token != null) {
+        final uid = FirebaseAuth.instance.currentUser?.uid;
+        if (uid != null) {
+          await FirebaseFirestore.instance
+              .collection("users")
+              .doc(uid)
+              .set(
+                {
+                  "fcmToken": token,
+                  "updatedAt": DateTime.now().toIso8601String(),
+                },
+                SetOptions(merge: true),
+              );
+          debugPrint("[FCM Token saved to Firestore]");
+        }
+      }
     } catch (e, stack) {
       debugPrint("[NotificationService] initialization failed: $e\n$stack");
     }
