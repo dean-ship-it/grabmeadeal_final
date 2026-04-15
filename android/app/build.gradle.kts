@@ -6,7 +6,7 @@ plugins {
 }
 
 android {
-    namespace = "com.grabmeadeal.app"
+    namespace = "com.example.grabmeadeal_final"
     compileSdk = 36
 
     compileOptions {
@@ -20,7 +20,7 @@ android {
     }
 
     defaultConfig {
-        applicationId = "com.grabmeadeal.app"
+        applicationId = "com.example.grabmeadeal_final"
         minSdk = 23
         targetSdk = 36
         versionCode = 1

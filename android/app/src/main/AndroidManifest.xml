@@ -1,5 +1,5 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
-    package="com.grabmeadeal.app">
+    package="com.example.grabmeadeal_final">
 
     <!-- Required permissions -->
     <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION"/>
