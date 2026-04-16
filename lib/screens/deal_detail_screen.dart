@@ -1,8 +1,10 @@
+import "package:firebase_auth/firebase_auth.dart";
 import "package:flutter/material.dart";
 import "package:provider/provider.dart";
 import "package:url_launcher/url_launcher.dart";
 import "package:grabmeadeal_final/models/deal.dart";
 import "package:grabmeadeal_final/providers/puzzle_provider.dart";
+import "package:grabmeadeal_final/providers/want_list_provider.dart";
 import "package:grabmeadeal_final/providers/wishlist_provider.dart";
 
 class DealDetailScreen extends StatelessWidget {
@@ -200,6 +202,56 @@ class DealDetailScreen extends StatelessWidget {
                     : null,
               ),
             ),
+
+            // ── Notify Me Nearby ──
+            if (deal!.category.isNotEmpty) ...[
+              const SizedBox(height: 12),
+              SizedBox(
+                width: double.infinity,
+                height: 48,
+                child: OutlinedButton.icon(
+                  onPressed: () async {
+                    final user = FirebaseAuth.instance.currentUser;
+                    if (user == null) {
+                      Navigator.pushNamed(context, "/auth");
+                      return;
+                    }
+                    final wantList = context.read<WantListProvider>();
+                    await wantList.addWant(
+                      keyword: deal!.title,
+                      category: deal!.category,
+                      maxPrice: deal!.price,
+                    );
+                    if (context.mounted) {
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        SnackBar(
+                          content: Row(
+                            children: [
+                              const Icon(Icons.notifications_active, color: Colors.white),
+                              const SizedBox(width: 8),
+                              Expanded(
+                                child: Text(
+                                  "We'll notify you when this deal goes on sale nearby!",
+                                  maxLines: 2,
+                                ),
+                              ),
+                            ],
+                          ),
+                          backgroundColor: const Color(0xFF0075C9),
+                          duration: const Duration(seconds: 3),
+                        ),
+                      );
+                    }
+                  },
+                  icon: const Icon(Icons.notifications_outlined),
+                  label: const Text("Notify Me Nearby"),
+                  style: OutlinedButton.styleFrom(
+                    foregroundColor: const Color(0xFF0075C9),
+                    side: const BorderSide(color: Color(0xFF0075C9)),
+                  ),
+                ),
+              ),
+            ],
 
             // ── Puzzle unlock hint ──
             const SizedBox(height: 12),

@@ -52,11 +52,6 @@ class DealsScreen extends StatelessWidget {
           ),
         ],
       ),
-      floatingActionButton: FloatingActionButton(
-        onPressed: () => Navigator.pushNamed(context, "/admin-upload"),
-        tooltip: "Admin Upload",
-        child: const Icon(Icons.add),
-      ),
       body: Column(
         children: [
           // ── Category Banner ──
@@ -133,11 +128,75 @@ class DealsScreen extends StatelessWidget {
                 }
                 return Consumer<WishlistProvider>(
                   builder: (context, wishlist, _) {
+                    final totalSavings = deals.fold<double>(0, (sum, deal) {
+                      if (deal.originalPrice != null && deal.originalPrice! > deal.price) {
+                        return sum + (deal.originalPrice! - deal.price);
+                      }
+                      return sum;
+                    });
                     return SingleChildScrollView(
                       padding: const EdgeInsets.all(16),
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
+                          // ── Savings Banner ──
+                          if (totalSavings > 0)
+                            Container(
+                              margin: const EdgeInsets.only(bottom: 16),
+                              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                              decoration: BoxDecoration(
+                                gradient: const LinearGradient(
+                                  colors: [Color(0xFF004A8D), Color(0xFF0075C9)],
+                                  begin: Alignment.centerLeft,
+                                  end: Alignment.centerRight,
+                                ),
+                                borderRadius: BorderRadius.circular(12),
+                              ),
+                              child: Row(
+                                children: [
+                                  const Text("💰", style: TextStyle(fontSize: 24)),
+                                  const SizedBox(width: 12),
+                                  Expanded(
+                                    child: Column(
+                                      crossAxisAlignment: CrossAxisAlignment.start,
+                                      children: [
+                                        const Text(
+                                          "Today's Total Savings",
+                                          style: TextStyle(
+                                            color: Colors.white70,
+                                            fontSize: 12,
+                                            fontWeight: FontWeight.w500,
+                                          ),
+                                        ),
+                                        Text(
+                                          "You could save \$${totalSavings.toStringAsFixed(0)} today!",
+                                          style: const TextStyle(
+                                            color: Colors.white,
+                                            fontSize: 18,
+                                            fontWeight: FontWeight.w800,
+                                          ),
+                                        ),
+                                      ],
+                                    ),
+                                  ),
+                                  Container(
+                                    padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                                    decoration: BoxDecoration(
+                                      color: const Color(0xFFA6CE39),
+                                      borderRadius: BorderRadius.circular(20),
+                                    ),
+                                    child: const Text(
+                                      "Shop Now",
+                                      style: TextStyle(
+                                        color: Colors.black,
+                                        fontSize: 12,
+                                        fontWeight: FontWeight.w700,
+                                      ),
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
                           // ── Featured Deal ──
                           Text(
                             "Featured Deal",
