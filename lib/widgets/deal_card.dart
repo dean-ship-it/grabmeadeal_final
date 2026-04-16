@@ -60,8 +60,8 @@ class DealCard extends StatelessWidget {
     final icon = categoryIcons[deal.category] ?? "🏷";
 
     return Container(
-      width: 80,
-      height: 80,
+      width: 72,
+      height: 72,
       decoration: BoxDecoration(
         color: color,
         borderRadius: BorderRadius.circular(8),
@@ -150,7 +150,7 @@ class DealCard extends StatelessWidget {
         onTap: onTap,
         borderRadius: BorderRadius.circular(12),
         child: Padding(
-          padding: const EdgeInsets.all(12),
+          padding: const EdgeInsets.all(8),
           child: Row(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
@@ -160,12 +160,12 @@ class DealCard extends StatelessWidget {
                 child: deal.imageUrl.isNotEmpty
                     ? CachedNetworkImage(
                         imageUrl: deal.imageUrl,
-                        width: 80,
-                        height: 80,
+                        width: 72,
+                        height: 72,
                         fit: BoxFit.cover,
                         placeholder: (context, url) => Container(
-                          width: 80,
-                          height: 80,
+                          width: 72,
+                          height: 72,
                           color: Colors.grey.shade100,
                           child: const Center(
                             child: CircularProgressIndicator(strokeWidth: 2),
@@ -301,7 +301,7 @@ class DealCard extends StatelessWidget {
                         onWishlistToggle();
                       }
                     },
-                    padding: const EdgeInsets.all(8),
+                    padding: const EdgeInsets.all(6),
                     constraints: const BoxConstraints(),
                   ),
                 ],
