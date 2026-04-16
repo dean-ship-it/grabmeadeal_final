@@ -278,12 +278,10 @@ android/
 
 ---
 
-## Passwords & Credentials (Store Securely — Never Commit)
-- Keystore password: GrabMeADeal2026!
-- Keystore alias: grabmeadeal
-- Keystore file: android/grabmeadeal-release.jks
-- Firebase project: grab-me-a-deal-e69ae
-- CJ Account: dean@amresto.com
+## Passwords & Credentials
+Store all credentials securely in a password manager.
+Never commit passwords, API keys, or keystore passwords to Git.
+See team password manager for keystore and API credentials.
 
 ---
 
