@@ -80,7 +80,7 @@ class _PuzzleRewardScreenState extends State<PuzzleRewardScreen>
       barrierDismissible: false,
       builder: (ctx) => AlertDialog(
         title: const Text(
-          "🎉 You Won!",
+          "\u{1F389} You Won!",
           textAlign: TextAlign.center,
           style: TextStyle(fontSize: 28, fontWeight: FontWeight.w800),
         ),
@@ -98,43 +98,35 @@ class _PuzzleRewardScreenState extends State<PuzzleRewardScreen>
             ),
             const SizedBox(height: 16),
             const Text(
-              "Choose how to redeem your prize:",
+              "Verify your phone number to claim your prize!",
               textAlign: TextAlign.center,
-            ),
-            const SizedBox(height: 16),
-            FilledButton(
-              onPressed: () {
-                Navigator.pop(ctx);
-                _showRedemptionConfirm("Gift Certificate");
-              },
-              child: const Text("💳 Take Gift Certificate"),
-            ),
-            const SizedBox(height: 8),
-            OutlinedButton(
-              onPressed: () {
-                Navigator.pop(ctx);
-                _showRedemptionConfirm("% Off Future Purchase");
-              },
-              child: const Text("🏷 Convert to % Off"),
             ),
           ],
         ),
-      ),
-    );
-  }
-
-  void _showRedemptionConfirm(String method) {
-    showDialog<void>(
-      context: context,
-      builder: (ctx) => AlertDialog(
-        title: const Text("Redemption Confirmed"),
-        content: Text(
-          "Your prize has been recorded as: $_prize via $method.\n\nOur team will contact you at your registered email within 24 hours.",
-        ),
         actions: [
-          FilledButton(
-            onPressed: () => Navigator.pop(ctx),
-            child: const Text("Got it!"),
+          SizedBox(
+            width: double.infinity,
+            child: FilledButton(
+              onPressed: () {
+                Navigator.pop(ctx);
+                Navigator.pushNamed(
+                  context,
+                  "/prize-claim",
+                  arguments: prize,
+                );
+              },
+              style: FilledButton.styleFrom(
+                backgroundColor: const Color(0xFFA6CE39),
+                foregroundColor: Colors.black,
+              ),
+              child: const Text(
+                "Claim My Prize",
+                style: TextStyle(
+                  fontWeight: FontWeight.w800,
+                  fontSize: 16,
+                ),
+              ),
+            ),
           ),
         ],
       ),
