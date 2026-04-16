@@ -1,5 +1,6 @@
+// lib/widgets/deal_card.dart
+
 import "package:cached_network_image/cached_network_image.dart";
-import "package:firebase_auth/firebase_auth.dart";
 import "package:flutter/material.dart";
 import "package:grabmeadeal_final/models/deal.dart";
 
@@ -17,7 +18,166 @@ class DealCard extends StatelessWidget {
     required this.onWishlistToggle,
   });
 
-  Widget _imageFallback() {
+  @override
+  Widget build(BuildContext context) {
+    final hasSavings = deal.originalPrice != null && deal.originalPrice! > deal.price;
+    final savings = hasSavings ? deal.originalPrice! - deal.price : 0.0;
+    final savingsPct = hasSavings
+        ? ((savings / deal.originalPrice!) * 100).round()
+        : 0;
+
+    return Card(
+      margin: EdgeInsets.zero,
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+      elevation: 2,
+      clipBehavior: Clip.antiAlias,
+      child: InkWell(
+        onTap: onTap,
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            // ── Image ──
+            Stack(
+              children: [
+                SizedBox(
+                  height: 120,
+                  width: double.infinity,
+                  child: deal.imageUrl.isNotEmpty
+                      ? CachedNetworkImage(
+                          imageUrl: deal.imageUrl,
+                          fit: BoxFit.cover,
+                          placeholder: (_, __) => _placeholder(),
+                          errorWidget: (_, __, ___) => _fallback(),
+                        )
+                      : _fallback(),
+                ),
+                // Savings badge top right
+                if (hasSavings)
+                  Positioned(
+                    top: 8,
+                    right: 8,
+                    child: Container(
+                      padding: const EdgeInsets.symmetric(
+                          horizontal: 6, vertical: 3),
+                      decoration: BoxDecoration(
+                        color: Colors.red.shade600,
+                        borderRadius: BorderRadius.circular(6),
+                      ),
+                      child: Text(
+                        "-$savingsPct%",
+                        style: const TextStyle(
+                          color: Colors.white,
+                          fontSize: 11,
+                          fontWeight: FontWeight.w800,
+                        ),
+                      ),
+                    ),
+                  ),
+                // Wishlist button top left
+                Positioned(
+                  top: 4,
+                  left: 4,
+                  child: GestureDetector(
+                    onTap: onWishlistToggle,
+                    child: Container(
+                      padding: const EdgeInsets.all(4),
+                      decoration: BoxDecoration(
+                        color: Colors.white.withValues(alpha: 0.9),
+                        shape: BoxShape.circle,
+                      ),
+                      child: Icon(
+                        isInWishlist
+                            ? Icons.favorite_rounded
+                            : Icons.favorite_border,
+                        color: isInWishlist ? Colors.red : Colors.grey,
+                        size: 18,
+                      ),
+                    ),
+                  ),
+                ),
+              ],
+            ),
+
+            // ── Content ──
+            Padding(
+              padding: const EdgeInsets.all(8),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  // Title
+                  Text(
+                    deal.title,
+                    maxLines: 2,
+                    overflow: TextOverflow.ellipsis,
+                    style: const TextStyle(
+                      fontWeight: FontWeight.w700,
+                      fontSize: 12,
+                    ),
+                  ),
+                  const SizedBox(height: 2),
+                  // Vendor
+                  if (deal.vendor.isNotEmpty)
+                    Text(
+                      deal.vendor,
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                      style: TextStyle(
+                        fontSize: 11,
+                        color: Colors.grey.shade600,
+                      ),
+                    ),
+                  const SizedBox(height: 4),
+                  // Price row
+                  Row(
+                    children: [
+                      Text(
+                        "\$${deal.price.toStringAsFixed(2)}",
+                        style: TextStyle(
+                          color: Colors.green.shade700,
+                          fontWeight: FontWeight.w800,
+                          fontSize: 13,
+                        ),
+                      ),
+                      if (hasSavings) ...[
+                        const SizedBox(width: 4),
+                        Flexible(
+                          child: Text(
+                            "\$${deal.originalPrice!.toStringAsFixed(0)}",
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                            style: const TextStyle(
+                              decoration: TextDecoration.lineThrough,
+                              color: Colors.grey,
+                              fontSize: 11,
+                            ),
+                          ),
+                        ),
+                      ],
+                    ],
+                  ),
+                ],
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _placeholder() {
+    return Container(
+      color: Colors.grey.shade200,
+      child: const Center(
+        child: SizedBox(
+          width: 20,
+          height: 20,
+          child: CircularProgressIndicator(strokeWidth: 2),
+        ),
+      ),
+    );
+  }
+
+  Widget _fallback() {
     final Map<String, Color> categoryColors = {
       "electronics": const Color(0xFF1565C0),
       "furniture": const Color(0xFF4E342E),
@@ -28,291 +188,28 @@ class DealCard extends StatelessWidget {
       "apparel": const Color(0xFF0075C9),
       "automotive": const Color(0xFF004A8D),
       "grocery": const Color(0xFF558B2F),
-      "outdoor": const Color(0xFF00695C),
       "homeGoods": const Color(0xFFE65100),
-      "toys": const Color(0xFFF9A825),
-      "cleaning": const Color(0xFF00838F),
       "fitness": const Color(0xFFC62828),
-      "art": const Color(0xFF6A1B9A),
-      "business": const Color(0xFF1B5E20),
     };
-
     final Map<String, String> categoryIcons = {
-      "electronics": "💻",
-      "furniture": "🛋",
-      "tools": "🛠",
-      "gaming": "🎮",
-      "beauty": "💄",
-      "petSupplies": "🐾",
-      "apparel": "👕",
-      "automotive": "🚗",
-      "grocery": "🛒",
-      "outdoor": "🏕",
-      "homeGoods": "🏠",
-      "toys": "🧸",
-      "cleaning": "🧹",
-      "fitness": "🏋️",
-      "art": "🎨",
-      "business": "📈",
+      "electronics": "\u{1F4BB}",
+      "furniture": "\u{1F6CB}",
+      "tools": "\u{1F6E0}",
+      "gaming": "\u{1F3AE}",
+      "beauty": "\u{1F484}",
+      "petSupplies": "\u{1F43E}",
+      "apparel": "\u{1F455}",
+      "automotive": "\u{1F697}",
+      "grocery": "\u{1F6D2}",
+      "homeGoods": "\u{1F3E0}",
+      "fitness": "\u{1F3CB}\u{FE0F}",
     };
-
     final color = categoryColors[deal.category] ?? const Color(0xFF0075C9);
-    final icon = categoryIcons[deal.category] ?? "🏷";
-
+    final icon = categoryIcons[deal.category] ?? "\u{1F3F7}";
     return Container(
-      width: 68,
-      height: 68,
-      decoration: BoxDecoration(
-        color: color,
-        borderRadius: BorderRadius.circular(8),
-      ),
+      color: color,
       child: Center(
-        child: Text(
-          icon,
-          style: const TextStyle(fontSize: 32),
-        ),
-      ),
-    );
-  }
-
-  void _promptSignIn(BuildContext context) {
-    showModalBottomSheet<void>(
-      context: context,
-      shape: const RoundedRectangleBorder(
-        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
-      ),
-      builder: (ctx) => Padding(
-        padding: const EdgeInsets.all(24),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            const Icon(Icons.favorite_border, size: 48, color: Color(0xFF0075C9)),
-            const SizedBox(height: 16),
-            const Text(
-              "Sign in to save deals",
-              style: TextStyle(fontSize: 20, fontWeight: FontWeight.w700),
-            ),
-            const SizedBox(height: 8),
-            const Text(
-              "Create a free account to save deals, build your want list, and get deal alerts.",
-              textAlign: TextAlign.center,
-              style: TextStyle(color: Colors.black54),
-            ),
-            const SizedBox(height: 24),
-            SizedBox(
-              width: double.infinity,
-              height: 48,
-              child: FilledButton(
-                onPressed: () {
-                  Navigator.pop(ctx);
-                  Navigator.pushNamed(context, "/auth");
-                },
-                style: FilledButton.styleFrom(
-                  backgroundColor: const Color(0xFF0075C9),
-                ),
-                child: const Text(
-                  "Sign In / Create Account",
-                  style: TextStyle(
-                    fontWeight: FontWeight.w700,
-                    fontSize: 16,
-                  ),
-                ),
-              ),
-            ),
-            const SizedBox(height: 12),
-            TextButton(
-              onPressed: () => Navigator.pop(ctx),
-              child: const Text(
-                "Maybe later",
-                style: TextStyle(color: Colors.grey),
-              ),
-            ),
-            const SizedBox(height: 8),
-          ],
-        ),
-      ),
-    );
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    final hasSavings = deal.originalPrice != null &&
-        deal.originalPrice! > deal.price;
-    final savings = hasSavings
-        ? ((1 - deal.price / deal.originalPrice!) * 100).round()
-        : 0;
-
-    return Card(
-      margin: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-      elevation: 2,
-      clipBehavior: Clip.hardEdge,
-      child: InkWell(
-        onTap: onTap,
-        borderRadius: BorderRadius.circular(12),
-        child: Padding(
-          padding: const EdgeInsets.all(8),
-          child: Row(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              // ── Image ──
-              ClipRRect(
-                borderRadius: BorderRadius.circular(8),
-                child: deal.imageUrl.isNotEmpty
-                    ? CachedNetworkImage(
-                        imageUrl: deal.imageUrl,
-                        width: 68,
-                        height: 68,
-                        fit: BoxFit.cover,
-                        placeholder: (context, url) => Container(
-                          width: 68,
-                          height: 68,
-                          color: Colors.grey.shade100,
-                          child: const Center(
-                            child: CircularProgressIndicator(strokeWidth: 2),
-                          ),
-                        ),
-                        errorWidget: (context, url, error) => _imageFallback(),
-                      )
-                    : _imageFallback(),
-              ),
-              const SizedBox(width: 8),
-
-              // ── Text content — Expanded fills remaining space ──
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    // Title: max 2 lines with ellipsis
-                    Text(
-                      deal.title,
-                      maxLines: 2,
-                      overflow: TextOverflow.ellipsis,
-                      style: Theme.of(context).textTheme.titleSmall?.copyWith(
-                            fontWeight: FontWeight.bold,
-                          ),
-                    ),
-                    const SizedBox(height: 2),
-
-                    // Vendor: single line with ellipsis
-                    Text(
-                      deal.vendor,
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
-                      style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                            color: Colors.grey[700],
-                          ),
-                    ),
-                    const SizedBox(height: 4),
-
-                    // Price row with optional savings badge
-                    Row(
-                      children: [
-                        Flexible(
-                          child: Text(
-                            "\$${deal.price.toStringAsFixed(2)}",
-                            maxLines: 1,
-                            overflow: TextOverflow.ellipsis,
-                            style: TextStyle(
-                              fontSize: 14,
-                              color: Colors.green[700],
-                              fontWeight: FontWeight.bold,
-                            ),
-                          ),
-                        ),
-                        if (hasSavings) ...[
-                          const SizedBox(width: 4),
-                          Flexible(
-                            flex: 0,
-                            child: Container(
-                              padding: const EdgeInsets.symmetric(
-                                  horizontal: 4, vertical: 1),
-                              decoration: BoxDecoration(
-                                color: Colors.red.shade50,
-                                borderRadius: BorderRadius.circular(4),
-                                border: Border.all(color: Colors.red.shade200),
-                              ),
-                              child: Text(
-                                "-$savings%",
-                                maxLines: 1,
-                                overflow: TextOverflow.ellipsis,
-                                style: TextStyle(
-                                  fontSize: 10,
-                                  fontWeight: FontWeight.w700,
-                                  color: Colors.red.shade700,
-                                ),
-                              ),
-                            ),
-                          ),
-                        ],
-                      ],
-                    ),
-
-                    if (deal.originalPrice != null) ...[
-                      const SizedBox(height: 2),
-                      Text(
-                        "Was \$${deal.originalPrice!.toStringAsFixed(2)}",
-                        maxLines: 1,
-                        overflow: TextOverflow.ellipsis,
-                        style: const TextStyle(
-                          decoration: TextDecoration.lineThrough,
-                          color: Colors.grey,
-                          fontSize: 11,
-                        ),
-                      ),
-                    ],
-
-                    // Category chip
-                    if (deal.category.isNotEmpty) ...[
-                      const SizedBox(height: 4),
-                      Flexible(
-                        flex: 0,
-                        child: Container(
-                          padding: const EdgeInsets.symmetric(
-                              horizontal: 4, vertical: 1),
-                          decoration: BoxDecoration(
-                            color: const Color(0xFF0075C9).withValues(alpha: 0.08),
-                            borderRadius: BorderRadius.circular(4),
-                          ),
-                          child: Text(
-                            deal.category,
-                            maxLines: 1,
-                            overflow: TextOverflow.ellipsis,
-                            style: const TextStyle(
-                              fontSize: 9,
-                              fontWeight: FontWeight.w600,
-                              color: Color(0xFF0075C9),
-                            ),
-                          ),
-                        ),
-                      ),
-                    ],
-                  ],
-                ),
-              ),
-
-              // ── Wishlist icon — minimal footprint ──
-              IconButton(
-                icon: Icon(
-                  isInWishlist ? Icons.favorite : Icons.favorite_border,
-                  color: isInWishlist ? Colors.red : null,
-                  size: 20,
-                ),
-                onPressed: () {
-                  final user = FirebaseAuth.instance.currentUser;
-                  if (user == null) {
-                    _promptSignIn(context);
-                  } else {
-                    onWishlistToggle();
-                  }
-                },
-                padding: const EdgeInsets.all(4),
-                constraints: const BoxConstraints(),
-              ),
-            ],
-          ),
-        ),
+        child: Text(icon, style: const TextStyle(fontSize: 40)),
       ),
     );
   }
