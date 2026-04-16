@@ -32,12 +32,9 @@ class DefaultFirebaseOptions {
     measurementId: 'G-MEASUREMENT-ID',
   );
 
-  // TODO: After adding com.grabmeadeal.app in Firebase Console,
-  // run `flutterfire configure` to auto-populate these values,
-  // or manually copy appId from the new google-services.json.
   static const FirebaseOptions android = FirebaseOptions(
     apiKey: 'AIzaSyCgTqCMMvek-N1dNns_DZwro6DuhdEAHz8',
-    appId: '1:346101400207:android:27e56f791c1e5db239a6fa', // UPDATE after Firebase re-register
+    appId: '1:346101400207:android:025706c3849ce53139a6fa',
     messagingSenderId: '346101400207',
     projectId: 'grab-me-a-deal-e69ae',
     storageBucket: 'grab-me-a-deal-e69ae.firebasestorage.app',
