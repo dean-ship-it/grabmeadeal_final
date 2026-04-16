@@ -60,8 +60,8 @@ class DealCard extends StatelessWidget {
     final icon = categoryIcons[deal.category] ?? "🏷";
 
     return Container(
-      width: 72,
-      height: 72,
+      width: 68,
+      height: 68,
       decoration: BoxDecoration(
         color: color,
         borderRadius: BorderRadius.circular(8),
@@ -143,9 +143,10 @@ class DealCard extends StatelessWidget {
         : 0;
 
     return Card(
-      margin: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+      margin: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
       elevation: 2,
+      clipBehavior: Clip.hardEdge,
       child: InkWell(
         onTap: onTap,
         borderRadius: BorderRadius.circular(12),
@@ -160,12 +161,12 @@ class DealCard extends StatelessWidget {
                 child: deal.imageUrl.isNotEmpty
                     ? CachedNetworkImage(
                         imageUrl: deal.imageUrl,
-                        width: 72,
-                        height: 72,
+                        width: 68,
+                        height: 68,
                         fit: BoxFit.cover,
                         placeholder: (context, url) => Container(
-                          width: 72,
-                          height: 72,
+                          width: 68,
+                          height: 68,
                           color: Colors.grey.shade100,
                           child: const Center(
                             child: CircularProgressIndicator(strokeWidth: 2),
@@ -175,23 +176,24 @@ class DealCard extends StatelessWidget {
                       )
                     : _imageFallback(),
               ),
-              const SizedBox(width: 12),
+              const SizedBox(width: 8),
 
-              // ── Text content — Flexible prevents Row overflow ──
-              Flexible(
+              // ── Text content — Expanded fills remaining space ──
+              Expanded(
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
+                  mainAxisSize: MainAxisSize.min,
                   children: [
                     // Title: max 2 lines with ellipsis
                     Text(
                       deal.title,
                       maxLines: 2,
                       overflow: TextOverflow.ellipsis,
-                      style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                      style: Theme.of(context).textTheme.titleSmall?.copyWith(
                             fontWeight: FontWeight.bold,
                           ),
                     ),
-                    const SizedBox(height: 4),
+                    const SizedBox(height: 2),
 
                     // Vendor: single line with ellipsis
                     Text(
@@ -202,7 +204,7 @@ class DealCard extends StatelessWidget {
                             color: Colors.grey[700],
                           ),
                     ),
-                    const SizedBox(height: 6),
+                    const SizedBox(height: 4),
 
                     // Price row with optional savings badge
                     Row(
@@ -212,31 +214,34 @@ class DealCard extends StatelessWidget {
                             "\$${deal.price.toStringAsFixed(2)}",
                             maxLines: 1,
                             overflow: TextOverflow.ellipsis,
-                            style: Theme.of(context)
-                                .textTheme
-                                .titleMedium
-                                ?.copyWith(
-                                  color: Colors.green[700],
-                                  fontWeight: FontWeight.bold,
-                                ),
+                            style: TextStyle(
+                              fontSize: 14,
+                              color: Colors.green[700],
+                              fontWeight: FontWeight.bold,
+                            ),
                           ),
                         ),
                         if (hasSavings) ...[
-                          const SizedBox(width: 6),
-                          Container(
-                            padding: const EdgeInsets.symmetric(
-                                horizontal: 6, vertical: 2),
-                            decoration: BoxDecoration(
-                              color: Colors.red.shade50,
-                              borderRadius: BorderRadius.circular(4),
-                              border: Border.all(color: Colors.red.shade200),
-                            ),
-                            child: Text(
-                              "-$savings%",
-                              style: TextStyle(
-                                fontSize: 11,
-                                fontWeight: FontWeight.w700,
-                                color: Colors.red.shade700,
+                          const SizedBox(width: 4),
+                          Flexible(
+                            flex: 0,
+                            child: Container(
+                              padding: const EdgeInsets.symmetric(
+                                  horizontal: 4, vertical: 1),
+                              decoration: BoxDecoration(
+                                color: Colors.red.shade50,
+                                borderRadius: BorderRadius.circular(4),
+                                border: Border.all(color: Colors.red.shade200),
+                              ),
+                              child: Text(
+                                "-$savings%",
+                                maxLines: 1,
+                                overflow: TextOverflow.ellipsis,
+                                style: TextStyle(
+                                  fontSize: 10,
+                                  fontWeight: FontWeight.w700,
+                                  color: Colors.red.shade700,
+                                ),
                               ),
                             ),
                           ),
@@ -253,29 +258,32 @@ class DealCard extends StatelessWidget {
                         style: const TextStyle(
                           decoration: TextDecoration.lineThrough,
                           color: Colors.grey,
-                          fontSize: 12,
+                          fontSize: 11,
                         ),
                       ),
                     ],
 
                     // Category chip
                     if (deal.category.isNotEmpty) ...[
-                      const SizedBox(height: 6),
-                      Container(
-                        padding: const EdgeInsets.symmetric(
-                            horizontal: 6, vertical: 2),
-                        decoration: BoxDecoration(
-                          color: const Color(0xFF0075C9).withOpacity(0.08),
-                          borderRadius: BorderRadius.circular(4),
-                        ),
-                        child: Text(
-                          deal.category,
-                          maxLines: 1,
-                          overflow: TextOverflow.ellipsis,
-                          style: const TextStyle(
-                            fontSize: 10,
-                            fontWeight: FontWeight.w600,
-                            color: Color(0xFF0075C9),
+                      const SizedBox(height: 4),
+                      Flexible(
+                        flex: 0,
+                        child: Container(
+                          padding: const EdgeInsets.symmetric(
+                              horizontal: 4, vertical: 1),
+                          decoration: BoxDecoration(
+                            color: const Color(0xFF0075C9).withValues(alpha: 0.08),
+                            borderRadius: BorderRadius.circular(4),
+                          ),
+                          child: Text(
+                            deal.category,
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                            style: const TextStyle(
+                              fontSize: 9,
+                              fontWeight: FontWeight.w600,
+                              color: Color(0xFF0075C9),
+                            ),
                           ),
                         ),
                       ),
@@ -284,27 +292,23 @@ class DealCard extends StatelessWidget {
                 ),
               ),
 
-              // ── Wishlist icon — compact Column with min size ──
-              Column(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  IconButton(
-                    icon: Icon(
-                      isInWishlist ? Icons.favorite : Icons.favorite_border,
-                      color: isInWishlist ? Colors.red : null,
-                    ),
-                    onPressed: () {
-                      final user = FirebaseAuth.instance.currentUser;
-                      if (user == null) {
-                        _promptSignIn(context);
-                      } else {
-                        onWishlistToggle();
-                      }
-                    },
-                    padding: const EdgeInsets.all(6),
-                    constraints: const BoxConstraints(),
-                  ),
-                ],
+              // ── Wishlist icon — minimal footprint ──
+              IconButton(
+                icon: Icon(
+                  isInWishlist ? Icons.favorite : Icons.favorite_border,
+                  color: isInWishlist ? Colors.red : null,
+                  size: 20,
+                ),
+                onPressed: () {
+                  final user = FirebaseAuth.instance.currentUser;
+                  if (user == null) {
+                    _promptSignIn(context);
+                  } else {
+                    onWishlistToggle();
+                  }
+                },
+                padding: const EdgeInsets.all(4),
+                constraints: const BoxConstraints(),
               ),
             ],
           ),
