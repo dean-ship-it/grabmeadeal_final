@@ -1,0 +1,28 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(flutter build *)",
+      "Bash(flutter run *)",
+      "Bash(flutter analyze *)",
+      "Bash(flutter clean)",
+      "Bash(flutter pub *)",
+      "Bash(flutter devices)",
+      "Bash(git add *)",
+      "Bash(git commit *)",
+      "Bash(git push *)",
+      "Bash(git pull *)",
+      "Bash(git stash *)",
+      "Bash(git checkout *)",
+      "Bash(git reset *)",
+      "Bash(\"C:/Users/dean/AppData/Local/Android/Sdk/platform-tools/adb.exe\" *)",
+      "Bash(keytool *)",
+      "Bash(firebase deploy *)",
+      "Bash(cp *)",
+      "Bash(rm *)",
+      "Bash(mkdir *)",
+      "Bash(gh pr *)",
+      "mcp__ccd_session__mark_chapter",
+      "mcp__ccd_session__spawn_task"
+    ]
+  }
+}
