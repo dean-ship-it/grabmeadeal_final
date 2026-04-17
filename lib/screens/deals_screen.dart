@@ -26,15 +26,13 @@ class DealsScreen extends StatelessWidget {
     return Scaffold(
       appBar: AppBar(
         centerTitle: true,
-        title: SizedBox(
-          height: 40,
-          child: Image.asset(
-            "assets/logo/logo.png",
-            fit: BoxFit.contain,
-            errorBuilder: (_, __, ___) => const Text(
-              "Grab Me A Deal",
-              style: TextStyle(fontWeight: FontWeight.w700),
-            ),
+        title: const Text(
+          "Grab Me A Deal",
+          style: TextStyle(
+            fontWeight: FontWeight.w800,
+            fontSize: 22,
+            color: Colors.white,
+            letterSpacing: 0.5,
           ),
         ),
         backgroundColor: Theme.of(context).colorScheme.primary,
