@@ -47,12 +47,12 @@ class Deal {
             : (rawOriginal as num).toDouble()
         : null;
 
-    // imageUrl: try 'imageUrl' (old) then 'link' (new)
-    final String imageUrl = json['imageUrl'] ?? json['link'] ?? '';
+    // imageUrl: try 'imageUrl' only
+    final String imageUrl = json['imageUrl'] ?? '';
 
     // dealUrl: affiliate/vendor link
     final String dealUrl =
-        json['dealUrl'] ?? json['affiliateUrl'] ?? json['url'] ?? '';
+        json['dealUrl'] ?? json['affiliateUrl'] ?? json['url'] ?? json['link'] ?? '';
 
     // createdAt: try 'createdAt' (new) then 'date' (old)
     final rawDate = json['createdAt'] ?? json['date'];

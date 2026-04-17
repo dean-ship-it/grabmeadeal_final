@@ -130,6 +130,14 @@
       },
       "oauth_client": [
         {
+          "client_id": "346101400207-hi1aurbu5g1n4spb7jp7sd4oqqnhii0q.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.grabmeadeal.app",
+            "certificate_hash": "7c5a079a1733392076f0362a07f14c2c90cd2f17"
+          }
+        },
+        {
           "client_id": "346101400207-mkuik5t72ccodkbu0b7fslbuje9afc9n.apps.googleusercontent.com",
           "client_type": 3
         }

@@ -20,7 +20,6 @@ class CategoryDealsScreen extends StatelessWidget {
     return FirebaseFirestore.instance
         .collection("deals")
         .where("category", isEqualTo: category.name)
-        .orderBy("createdAt", descending: true)
         .snapshots()
         .map((snap) => snap.docs.map((doc) => Deal.fromFirestore(doc)).toList());
   }
