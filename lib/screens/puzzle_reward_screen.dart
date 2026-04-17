@@ -1,211 +1,149 @@
 // lib/screens/puzzle_reward_screen.dart
 //
-// DOPAMINE MACHINE — Gambling psychology meets deal-hunting.
-// Users NEVER lose. Every action = progress. Every piece = a rush.
+// DOPAMINE MACHINE v3 — Real interlocking jigsaw pieces forming a circle.
+// Each piece = a category. Locked = empty slot. Unlocked = snapped in.
+// "Like gambling, but you NEVER lose."
 
 import "dart:math";
+import "dart:ui" as ui;
 import "package:flutter/material.dart";
 import "package:provider/provider.dart";
 import "package:grabmeadeal_final/providers/puzzle_provider.dart";
 
-// ── Vibrant piece colors — each category has a bold, distinct color ──
+// ── 8 vibrant piece colors ──
 const _pieceColors = [
-  Color(0xFF1565C0), // Electronics — electric blue
-  Color(0xFF8D6E63), // Furniture — warm mocha
-  Color(0xFF546E7A), // Tools — gunmetal
-  Color(0xFF7B1FA2), // Gaming — vivid purple
-  Color(0xFFD81B60), // Beauty — hot pink
-  Color(0xFF43A047), // Pet Supplies — lush green
-  Color(0xFFFF6F00), // Apparel — blazing orange
-  Color(0xFFE53935), // Automotive — cherry red
+  Color(0xFF1565C0), // Electronics
+  Color(0xFF6D4C41), // Furniture
+  Color(0xFF455A64), // Tools
+  Color(0xFF7B1FA2), // Gaming
+  Color(0xFFD81B60), // Beauty
+  Color(0xFF2E7D32), // Pet Supplies
+  Color(0xFFEF6C00), // Apparel
+  Color(0xFFC62828), // Automotive
 ];
 
-const _lockedColor = Color(0xFF0D1B2A);
-
-// ── Urgency messages — gets more intense as progress increases ──
-const _urgencyMessages = <int, List<String>>{
-  0: ["Start your puzzle journey!", "Every deal unlocks a piece \u{1F525}"],
-  1: ["You're on the board!", "Keep the momentum going!"],
-  2: ["2 down, 6 to go!", "You're building something big \u{1F4AA}"],
-  3: ["Almost halfway!", "Don't stop now \u{1F525}\u{1F525}"],
-  4: ["HALFWAY THERE!", "You can taste that prize \u{1F60B}"],
-  5: ["Only 3 more pieces!", "The wheel is calling your name \u{1F3B0}"],
-  6: ["SO CLOSE! Just 2 more!", "Your prize is waiting \u{1F4B0}\u{1F4B0}"],
-  7: ["ONE. MORE. PIECE.", "This is YOUR moment \u{1F525}\u{1F525}\u{1F525}"],
-  8: ["\u{1F389} PUZZLE COMPLETE!", "SPIN THAT WHEEL! \u{1F3B0}"],
+// ── Urgency messages — escalate with progress ──
+const _msgs = <int, List<String>>{
+  0: ["Your puzzle awaits!", "Shop deals to unlock pieces"],
+  1: ["Nice start!", "7 more pieces to your prize \u{1F3AF}"],
+  2: ["Momentum building!", "Keep shopping \u{1F525}"],
+  3: ["Almost halfway!", "You're on a streak \u{1F4AA}"],
+  4: ["HALFWAY THERE!", "The prize is calling \u{1F60B}"],
+  5: ["3 more pieces!", "So close you can feel it \u{1F525}\u{1F525}"],
+  6: ["JUST 2 MORE!", "Don't stop now \u{1F4B0}"],
+  7: ["ONE. MORE. PIECE.", "THIS IS YOUR MOMENT \u{1F525}\u{1F525}\u{1F525}"],
+  8: ["PUZZLE COMPLETE!", "SPIN THE WHEEL! \u{1F3B0}"],
 };
 
 class PuzzleRewardScreen extends StatefulWidget {
   const PuzzleRewardScreen({super.key});
-
   @override
   State<PuzzleRewardScreen> createState() => _PuzzleRewardScreenState();
 }
 
 class _PuzzleRewardScreenState extends State<PuzzleRewardScreen>
     with TickerProviderStateMixin {
-  // Wheel spin
-  late AnimationController _wheelController;
-  late Animation<double> _wheelAnimation;
-
-  // Shimmer on locked pieces
-  late AnimationController _shimmerController;
-  late Animation<double> _shimmerAnimation;
-
-  // Pulse glow on the ring
-  late AnimationController _pulseController;
-  late Animation<double> _pulseAnimation;
-
-  // Celebration bounce
-  late AnimationController _celebrationController;
-  late Animation<double> _celebrationScale;
-
-  // Heartbeat for urgency text
-  late AnimationController _heartbeatController;
-  late Animation<double> _heartbeatAnimation;
+  late AnimationController _wheelCtrl;
+  late Animation<double> _wheelAnim;
+  late AnimationController _shimmerCtrl;
+  late Animation<double> _shimmerAnim;
+  late AnimationController _pulseCtrl;
+  late Animation<double> _pulseAnim;
+  late AnimationController _heartCtrl;
+  late Animation<double> _heartAnim;
+  late AnimationController _celebCtrl;
+  late Animation<double> _celebScale;
 
   bool _spinning = false;
-  int _landedSegment = 0;
-  bool _celebrationPlayed = false;
+  int _landedSeg = 0;
+  bool _celebPlayed = false;
 
   @override
   void initState() {
     super.initState();
+    _wheelCtrl = AnimationController(vsync: this, duration: const Duration(seconds: 4));
+    _wheelAnim = CurvedAnimation(parent: _wheelCtrl, curve: Curves.easeOutCubic);
 
-    _wheelController = AnimationController(
-        vsync: this, duration: const Duration(seconds: 4));
-    _wheelAnimation = CurvedAnimation(
-        parent: _wheelController, curve: Curves.easeOutCubic);
+    _shimmerCtrl = AnimationController(vsync: this, duration: const Duration(milliseconds: 2400))..repeat();
+    _shimmerAnim = Tween<double>(begin: -0.5, end: 1.5).animate(
+        CurvedAnimation(parent: _shimmerCtrl, curve: Curves.easeInOut));
 
-    _shimmerController = AnimationController(
-        vsync: this, duration: const Duration(milliseconds: 2200))
-      ..repeat();
-    _shimmerAnimation = Tween<double>(begin: -1.0, end: 2.0).animate(
-        CurvedAnimation(parent: _shimmerController, curve: Curves.easeInOut));
+    _pulseCtrl = AnimationController(vsync: this, duration: const Duration(milliseconds: 1800))..repeat(reverse: true);
+    _pulseAnim = Tween<double>(begin: 0.0, end: 1.0).animate(
+        CurvedAnimation(parent: _pulseCtrl, curve: Curves.easeInOut));
 
-    _pulseController = AnimationController(
-        vsync: this, duration: const Duration(milliseconds: 1600))
-      ..repeat(reverse: true);
-    _pulseAnimation = Tween<double>(begin: 0.0, end: 1.0).animate(
-        CurvedAnimation(parent: _pulseController, curve: Curves.easeInOut));
+    _heartCtrl = AnimationController(vsync: this, duration: const Duration(milliseconds: 700))..repeat(reverse: true);
+    _heartAnim = Tween<double>(begin: 1.0, end: 1.06).animate(
+        CurvedAnimation(parent: _heartCtrl, curve: Curves.easeInOut));
 
-    _celebrationController = AnimationController(
-        vsync: this, duration: const Duration(milliseconds: 1400));
-    _celebrationScale = Tween<double>(begin: 0.6, end: 1.0).animate(
-        CurvedAnimation(
-            parent: _celebrationController, curve: Curves.elasticOut));
-
-    _heartbeatController = AnimationController(
-        vsync: this, duration: const Duration(milliseconds: 800))
-      ..repeat(reverse: true);
-    _heartbeatAnimation = Tween<double>(begin: 1.0, end: 1.08).animate(
-        CurvedAnimation(
-            parent: _heartbeatController, curve: Curves.easeInOut));
+    _celebCtrl = AnimationController(vsync: this, duration: const Duration(milliseconds: 1500));
+    _celebScale = Tween<double>(begin: 0.5, end: 1.0).animate(
+        CurvedAnimation(parent: _celebCtrl, curve: Curves.elasticOut));
   }
 
   @override
   void dispose() {
-    _wheelController.dispose();
-    _shimmerController.dispose();
-    _pulseController.dispose();
-    _celebrationController.dispose();
-    _heartbeatController.dispose();
+    _wheelCtrl.dispose();
+    _shimmerCtrl.dispose();
+    _pulseCtrl.dispose();
+    _heartCtrl.dispose();
+    _celebCtrl.dispose();
     super.dispose();
   }
 
-  void _checkCelebration(PuzzleProvider puzzle) {
-    if (!_celebrationPlayed &&
-        puzzle.progress != null &&
-        puzzle.progress!.canSpin == true) {
-      _celebrationPlayed = true;
-      _celebrationController.forward();
+  void _maybeCelebrate(bool canSpin) {
+    if (!_celebPlayed && canSpin) {
+      _celebPlayed = true;
+      _celebCtrl.forward();
     }
   }
 
-  Future<void> _spinWheel() async {
+  Future<void> _spin() async {
     if (_spinning) return;
     setState(() => _spinning = true);
-
-    _landedSegment = Random().nextInt(8);
-    _wheelController.reset();
-    await _wheelController.animateTo(1.0,
-        duration: const Duration(seconds: 4));
-
+    _landedSeg = Random().nextInt(8);
+    _wheelCtrl.reset();
+    await _wheelCtrl.animateTo(1.0);
     if (!mounted) return;
-    final puzzle = context.read<PuzzleProvider>();
-    final prize = await puzzle.recordSpin(_landedSegment);
-
+    final prize = await context.read<PuzzleProvider>().recordSpin(_landedSeg);
     if (!mounted) return;
     setState(() => _spinning = false);
-    _showPrizeDialog(prize);
+    _showWin(prize);
   }
 
-  void _showPrizeDialog(String prize) {
+  void _showWin(String prize) {
     showDialog<void>(
       context: context,
       barrierDismissible: false,
       builder: (ctx) => AlertDialog(
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(24)),
         backgroundColor: const Color(0xFF0D1B2A),
-        title: const Text(
-          "\u{1F4B0} JACKPOT! \u{1F4B0}",
-          textAlign: TextAlign.center,
-          style: TextStyle(
-              fontSize: 28,
-              fontWeight: FontWeight.w900,
-              color: Color(0xFFFFC107)),
-        ),
-        content: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            const Text("YOU WON",
-                style: TextStyle(
-                    color: Colors.white70,
-                    fontSize: 14,
-                    letterSpacing: 3)),
-            const SizedBox(height: 8),
-            Text(
-              prize,
-              textAlign: TextAlign.center,
-              style: const TextStyle(
-                fontSize: 36,
-                fontWeight: FontWeight.w900,
-                color: Colors.white,
-              ),
-            ),
-            const SizedBox(height: 16),
-            Container(
-              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-              decoration: BoxDecoration(
-                color: const Color(0xFFFFC107).withValues(alpha: 0.15),
-                borderRadius: BorderRadius.circular(8),
-              ),
-              child: const Text(
-                "Verify your phone to claim \u{2192}",
-                style: TextStyle(
-                    color: Color(0xFFFFC107), fontWeight: FontWeight.w600),
-              ),
-            ),
-          ],
-        ),
+        title: const Text("\u{1F4B0} JACKPOT! \u{1F4B0}",
+            textAlign: TextAlign.center,
+            style: TextStyle(fontSize: 26, fontWeight: FontWeight.w900, color: Color(0xFFFFC107))),
+        content: Column(mainAxisSize: MainAxisSize.min, children: [
+          const Text("YOU WON", style: TextStyle(color: Colors.white54, fontSize: 12, letterSpacing: 4)),
+          const SizedBox(height: 8),
+          Text(prize, textAlign: TextAlign.center,
+              style: const TextStyle(fontSize: 34, fontWeight: FontWeight.w900, color: Colors.white)),
+          const SizedBox(height: 16),
+          Container(
+            padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
+            decoration: BoxDecoration(
+              color: const Color(0xFFFFC107).withValues(alpha: 0.12),
+              borderRadius: BorderRadius.circular(8)),
+            child: const Text("Verify phone to claim \u{2192}",
+                style: TextStyle(color: Color(0xFFFFC107), fontWeight: FontWeight.w600)),
+          ),
+        ]),
         actions: [
           SizedBox(
-            width: double.infinity,
-            height: 56,
+            width: double.infinity, height: 54,
             child: FilledButton(
-              onPressed: () {
-                Navigator.pop(ctx);
-                Navigator.pushNamed(context, "/prize-claim", arguments: prize);
-              },
-              style: FilledButton.styleFrom(
-                backgroundColor: const Color(0xFFFFC107),
-                foregroundColor: Colors.black,
-                shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(16)),
-              ),
-              child: const Text("CLAIM MY PRIZE \u{1F3C6}",
-                  style:
-                      TextStyle(fontWeight: FontWeight.w900, fontSize: 18)),
+              onPressed: () { Navigator.pop(ctx); Navigator.pushNamed(context, "/prize-claim", arguments: prize); },
+              style: FilledButton.styleFrom(backgroundColor: const Color(0xFFFFC107), foregroundColor: Colors.black,
+                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14))),
+              child: const Text("CLAIM MY PRIZE \u{1F3C6}", style: TextStyle(fontWeight: FontWeight.w900, fontSize: 17)),
             ),
           ),
         ],
@@ -215,837 +153,439 @@ class _PuzzleRewardScreenState extends State<PuzzleRewardScreen>
 
   @override
   Widget build(BuildContext context) {
-    return Consumer<PuzzleProvider>(
-      builder: (context, puzzle, _) {
-        final progress = puzzle.progress;
-        final pieces = PuzzleProvider.pieces;
-        final unlockedCount = progress?.unlockedCategories.length ?? 0;
-        final allComplete = progress?.canSpin == true;
-        final unlockedSet = progress?.unlockedCategories ?? {};
-        final msgs = _urgencyMessages[unlockedCount] ??
-            _urgencyMessages[0]!;
+    return Consumer<PuzzleProvider>(builder: (context, puzzle, _) {
+      final progress = puzzle.progress;
+      final pieces = PuzzleProvider.pieces;
+      final n = progress?.unlockedCategories.length ?? 0;
+      final complete = progress?.canSpin == true;
+      final unlocked = progress?.unlockedCategories ?? {};
+      final m = _msgs[n] ?? _msgs[0]!;
+      _maybeCelebrate(complete);
 
-        _checkCelebration(puzzle);
-
-        return Scaffold(
-          extendBodyBehindAppBar: true,
-          appBar: AppBar(
-            title: const Text("PUZZLE REWARDS",
-                style: TextStyle(
-                    fontWeight: FontWeight.w900, letterSpacing: 2)),
-            centerTitle: true,
-            backgroundColor: Colors.transparent,
-            foregroundColor: Colors.white,
-            elevation: 0,
-          ),
-          body: Container(
-            width: double.infinity,
-            height: double.infinity,
-            decoration: const BoxDecoration(
-              gradient: LinearGradient(
-                begin: Alignment.topCenter,
-                end: Alignment.bottomCenter,
-                colors: [
-                  Color(0xFF0D1B2A),
-                  Color(0xFF1B2838),
-                  Color(0xFF0D1B2A),
-                ],
-              ),
-            ),
+      return Scaffold(
+        extendBodyBehindAppBar: true,
+        appBar: AppBar(
+          title: const Text("PUZZLE REWARDS", style: TextStyle(fontWeight: FontWeight.w900, letterSpacing: 2, fontSize: 16)),
+          centerTitle: true, backgroundColor: Colors.transparent, foregroundColor: Colors.white, elevation: 0,
+        ),
+        body: Container(
+          decoration: const BoxDecoration(gradient: LinearGradient(
+            begin: Alignment.topCenter, end: Alignment.bottomCenter,
+            colors: [Color(0xFF0A1628), Color(0xFF162A4A), Color(0xFF0A1628)])),
+          child: SafeArea(
             child: SingleChildScrollView(
-              padding: const EdgeInsets.fromLTRB(16, 100, 16, 40),
-              child: Column(
-                children: [
-                  // ── Urgency Header — heartbeat pulse ──
-                  AnimatedBuilder(
-                    animation: _heartbeatAnimation,
-                    builder: (context, _) {
-                      final scale = unlockedCount >= 5
-                          ? _heartbeatAnimation.value
-                          : 1.0;
-                      return Transform.scale(
-                        scale: scale,
-                        child: Column(
-                          children: [
-                            Text(
-                              msgs[0],
-                              textAlign: TextAlign.center,
-                              style: TextStyle(
-                                color: unlockedCount >= 6
-                                    ? const Color(0xFFFFC107)
-                                    : Colors.white,
-                                fontSize: unlockedCount >= 6 ? 24 : 20,
-                                fontWeight: FontWeight.w900,
-                                letterSpacing: unlockedCount >= 7 ? 2 : 0,
-                              ),
-                            ),
-                            const SizedBox(height: 4),
-                            Text(
-                              msgs[1],
-                              textAlign: TextAlign.center,
-                              style: TextStyle(
-                                color: unlockedCount >= 5
-                                    ? const Color(0xFFFFC107)
-                                        .withValues(alpha: 0.8)
-                                    : Colors.white54,
-                                fontSize: 14,
-                                fontWeight: FontWeight.w500,
-                              ),
-                            ),
-                          ],
-                        ),
-                      );
-                    },
-                  ),
+              padding: const EdgeInsets.fromLTRB(20, 12, 20, 40),
+              child: Column(children: [
+                // ── Urgency Header ──
+                AnimatedBuilder(animation: _heartAnim, builder: (_, __) {
+                  return Transform.scale(scale: n >= 5 ? _heartAnim.value : 1.0,
+                    child: Column(children: [
+                      Text(m[0], textAlign: TextAlign.center, style: TextStyle(
+                        color: n >= 6 ? const Color(0xFFFFC107) : Colors.white,
+                        fontSize: n >= 7 ? 26 : n >= 4 ? 22 : 18,
+                        fontWeight: FontWeight.w900, letterSpacing: n >= 7 ? 2 : 0)),
+                      const SizedBox(height: 4),
+                      Text(m[1], textAlign: TextAlign.center, style: TextStyle(
+                        color: n >= 5 ? const Color(0xFFFFC107).withValues(alpha: 0.7) : Colors.white38,
+                        fontSize: 13)),
+                    ]));
+                }),
 
-                  const SizedBox(height: 28),
+                const SizedBox(height: 24),
 
-                  // ── Puzzle Ring ──
-                  AnimatedBuilder(
-                    animation: Listenable.merge([
-                      _shimmerController,
-                      _pulseController,
-                      _celebrationController,
-                    ]),
-                    builder: (context, _) {
-                      final scale =
-                          allComplete ? _celebrationScale.value : 1.0;
-
-                      return Transform.scale(
-                        scale: scale,
-                        child: SizedBox(
-                          width: 320,
-                          height: 320,
-                          child: Stack(
-                            alignment: Alignment.center,
-                            children: [
-                              // Painted puzzle ring
-                              CustomPaint(
-                                size: const Size(320, 320),
-                                painter: _PuzzleRingPainter(
-                                  pieceCount: 8,
-                                  unlockedSet: unlockedSet,
-                                  categories: pieces
-                                      .map((p) => p["category"]!)
-                                      .toList(),
-                                  colors: _pieceColors,
-                                  shimmerValue: _shimmerAnimation.value,
-                                  pulseValue: _pulseAnimation.value,
-                                ),
-                              ),
-
-                              // Emoji + label overlays
-                              ...List.generate(pieces.length, (i) {
-                                final angle = (2 * pi * i / pieces.length) -
-                                    pi / 2;
-                                const r = 108.0;
-                                final x = r * cos(angle);
-                                final y = r * sin(angle);
-                                final cat = pieces[i]["category"]!;
-                                final unlocked = unlockedSet.contains(cat);
-
-                                return Transform.translate(
-                                  offset: Offset(x, y),
-                                  child: Column(
-                                    mainAxisSize: MainAxisSize.min,
-                                    children: [
-                                      // Emoji with optional glow
-                                      Container(
-                                        width: 44,
-                                        height: 44,
-                                        decoration: unlocked
-                                            ? BoxDecoration(
-                                                shape: BoxShape.circle,
-                                                color: Colors.white
-                                                    .withValues(alpha: 0.2),
-                                                boxShadow: [
-                                                  BoxShadow(
-                                                    color: _pieceColors[i]
-                                                        .withValues(
-                                                            alpha: 0.6),
-                                                    blurRadius: 12,
-                                                  ),
-                                                ],
-                                              )
-                                            : null,
-                                        child: Center(
-                                          child: Text(
-                                            pieces[i]["icon"]!,
-                                            style: TextStyle(
-                                              fontSize:
-                                                  unlocked ? 28 : 20,
-                                            ),
-                                          ),
-                                        ),
-                                      ),
-                                      const SizedBox(height: 2),
-                                      Text(
-                                        pieces[i]["label"]!
-                                            .split(" ")
-                                            .first,
-                                        maxLines: 1,
-                                        style: TextStyle(
-                                          fontSize: 9,
-                                          fontWeight: FontWeight.w700,
-                                          color: unlocked
-                                              ? Colors.white
-                                              : Colors.white.withValues(
-                                                  alpha: 0.3),
-                                        ),
-                                      ),
-                                    ],
-                                  ),
-                                );
-                              }),
-
-                              // Center logo with pulsing glow
-                              Container(
-                                width: 82,
-                                height: 82,
-                                decoration: BoxDecoration(
-                                  shape: BoxShape.circle,
-                                  color: Colors.white,
-                                  boxShadow: [
-                                    BoxShadow(
-                                      color: allComplete
-                                          ? Color.lerp(
-                                              const Color(0xFFFFC107),
-                                              const Color(0xFFFF6F00),
-                                              _pulseAnimation.value)!
-                                          : const Color(0xFF0075C9)
-                                              .withValues(alpha: 0.4 +
-                                                  _pulseAnimation.value *
-                                                      0.3),
-                                      blurRadius: allComplete
-                                          ? 24 +
-                                              _pulseAnimation.value * 12
-                                          : 12,
-                                      spreadRadius:
-                                          allComplete ? 4 : 0,
-                                    ),
-                                  ],
-                                ),
-                                child: ClipOval(
-                                  child: Padding(
-                                    padding: const EdgeInsets.all(10),
-                                    child: Image.asset(
-                                      "assets/logo/logo.png",
-                                      fit: BoxFit.contain,
-                                      errorBuilder: (_, __, ___) =>
-                                          const Center(
-                                        child: Text("GMD",
-                                            style: TextStyle(
-                                                fontWeight: FontWeight.w900,
-                                                fontSize: 18,
-                                                color:
-                                                    Color(0xFF0075C9))),
-                                      ),
-                                    ),
-                                  ),
-                                ),
-                              ),
+                // ── PUZZLE CIRCLE ──
+                AnimatedBuilder(
+                  animation: Listenable.merge([_shimmerCtrl, _pulseCtrl, _celebCtrl]),
+                  builder: (_, __) {
+                    final sc = complete ? _celebScale.value : 1.0;
+                    return Transform.scale(scale: sc, child: SizedBox(
+                      width: 310, height: 310,
+                      child: Stack(alignment: Alignment.center, children: [
+                        // The jigsaw ring
+                        CustomPaint(size: const Size(310, 310), painter: _JigsawRingPainter(
+                          count: 8, unlocked: unlocked,
+                          cats: pieces.map((p) => p["category"]!).toList(),
+                          labels: pieces.map((p) => p["label"]!.split(" ").first).toList(),
+                          icons: pieces.map((p) => p["icon"]!).toList(),
+                          colors: _pieceColors,
+                          shimmer: _shimmerAnim.value,
+                          pulse: _pulseAnim.value,
+                          allDone: complete,
+                        )),
+                        // Center logo — clean, polished
+                        Container(
+                          width: 86, height: 86,
+                          decoration: BoxDecoration(
+                            shape: BoxShape.circle,
+                            color: Colors.white,
+                            border: Border.all(
+                              color: complete ? const Color(0xFFFFC107) : const Color(0xFF0075C9).withValues(alpha: 0.5),
+                              width: complete ? 3 : 2),
+                            boxShadow: [
+                              // Inner depth shadow
+                              BoxShadow(color: Colors.black.withValues(alpha: 0.3), blurRadius: 8, offset: const Offset(0, 3)),
+                              // Outer glow
+                              BoxShadow(
+                                color: complete
+                                    ? Color.lerp(const Color(0xFFFFC107), const Color(0xFFFF6F00), _pulseAnim.value)!.withValues(alpha: 0.6)
+                                    : const Color(0xFF0075C9).withValues(alpha: 0.2 + _pulseAnim.value * 0.2),
+                                blurRadius: complete ? 20 + _pulseAnim.value * 10 : 10,
+                                spreadRadius: complete ? 4 : 0),
                             ],
                           ),
+                          child: ClipOval(child: Padding(
+                            padding: const EdgeInsets.all(14),
+                            child: Image.asset("assets/logo/logo.png", fit: BoxFit.contain,
+                              errorBuilder: (_, __, ___) => const Center(child: Text("GMD",
+                                  style: TextStyle(fontWeight: FontWeight.w900, fontSize: 20, color: Color(0xFF0075C9))))),
+                          )),
                         ),
-                      );
-                    },
-                  ),
+                      ]),
+                    ));
+                  },
+                ),
 
-                  const SizedBox(height: 24),
+                const SizedBox(height: 20),
 
-                  // ── Progress Bar — casino-style ──
-                  _buildProgressBar(unlockedCount),
+                // ── Progress ──
+                _progressBar(n, context),
 
-                  const SizedBox(height: 32),
+                const SizedBox(height: 20),
 
-                  // ── Milestone Badges ──
-                  _buildMilestoneBadges(unlockedCount),
+                // ── Milestones ──
+                _milestones(n),
 
-                  const SizedBox(height: 28),
+                const SizedBox(height: 28),
 
-                  // ── Spin or Status ──
-                  if (allComplete &&
-                      progress?.spinUsed != true) ...[
-                    _buildSpinSection(),
-                  ] else if (progress?.spinUsed == true) ...[
-                    _buildPrizeWonSection(progress?.prizeWon ?? ""),
-                  ] else ...[
-                    _buildLockedSection(unlockedCount),
-                  ],
+                // ── Spin / Status ──
+                if (complete && progress?.spinUsed != true) _spinSection()
+                else if (progress?.spinUsed == true) _wonSection(progress?.prizeWon ?? "")
+                else _lockedSection(n),
 
-                  const SizedBox(height: 40),
-                ],
+                const SizedBox(height: 40),
+              ]),
+            ),
+          ),
+        ),
+      );
+    });
+  }
+
+  Widget _progressBar(int n, BuildContext ctx) {
+    final w = MediaQuery.of(ctx).size.width - 40;
+    return Column(children: [
+      Row(mainAxisAlignment: MainAxisAlignment.spaceBetween, children: [
+        Text("$n / 8 PIECES", style: const TextStyle(color: Colors.white, fontSize: 15, fontWeight: FontWeight.w800, letterSpacing: 1)),
+        Text(n == 8 ? "COMPLETE!" : "${(n / 8 * 100).round()}%",
+            style: TextStyle(color: n >= 6 ? const Color(0xFFFFC107) : Colors.white38, fontSize: 13, fontWeight: FontWeight.w700)),
+      ]),
+      const SizedBox(height: 8),
+      Stack(children: [
+        Container(height: 12, decoration: BoxDecoration(
+          color: const Color(0xFF0D1B2A), borderRadius: BorderRadius.circular(6),
+          border: Border.all(color: Colors.white.withValues(alpha: 0.06)))),
+        AnimatedContainer(duration: const Duration(milliseconds: 500), curve: Curves.easeOut,
+          height: 12, width: w * (n / 8).clamp(0.0, 1.0),
+          decoration: BoxDecoration(
+            gradient: LinearGradient(colors: n >= 6
+                ? [const Color(0xFFFFC107), const Color(0xFFFF6F00)]
+                : [const Color(0xFFA6CE39), const Color(0xFF7A9A01)]),
+            borderRadius: BorderRadius.circular(6),
+            boxShadow: [BoxShadow(color: (n >= 6 ? const Color(0xFFFFC107) : const Color(0xFFA6CE39)).withValues(alpha: 0.5), blurRadius: 8)])),
+      ]),
+    ]);
+  }
+
+  Widget _milestones(int n) {
+    return Row(mainAxisAlignment: MainAxisAlignment.spaceEvenly, children: [
+      _badge("START", 1, n), _badge("HALF", 4, n), _badge("CLOSE", 6, n), _badge("WIN!", 8, n),
+    ]);
+  }
+
+  Widget _badge(String label, int th, int cur) {
+    final ok = cur >= th;
+    return Column(children: [
+      Container(width: 36, height: 36, decoration: BoxDecoration(
+        shape: BoxShape.circle, color: ok ? const Color(0xFFFFC107) : const Color(0xFF0D1B2A),
+        border: Border.all(color: ok ? const Color(0xFFFFC107) : Colors.white.withValues(alpha: 0.1), width: 2),
+        boxShadow: ok ? [BoxShadow(color: const Color(0xFFFFC107).withValues(alpha: 0.4), blurRadius: 8)] : []),
+        child: Center(child: ok ? const Icon(Icons.check, color: Colors.black, size: 18)
+            : Text("$th", style: TextStyle(color: Colors.white.withValues(alpha: 0.25), fontSize: 11, fontWeight: FontWeight.w700)))),
+      const SizedBox(height: 3),
+      Text(label, style: TextStyle(fontSize: 8, fontWeight: FontWeight.w700,
+          color: ok ? const Color(0xFFFFC107) : Colors.white24, letterSpacing: 0.5)),
+    ]);
+  }
+
+  Widget _spinSection() {
+    return Column(children: [
+      SizedBox(width: 270, height: 270, child: AnimatedBuilder(animation: _wheelAnim, builder: (_, __) {
+        return Transform.rotate(angle: _wheelAnim.value * (2 * pi * 5 + _landedSeg * (2 * pi / 8)),
+          child: CustomPaint(size: const Size(270, 270), painter: _WheelPainter(segments: PuzzleProvider.wheelSegments)));
+      })),
+      const SizedBox(height: 20),
+      AnimatedBuilder(animation: _heartAnim, builder: (_, __) {
+        return Transform.scale(scale: _spinning ? 1.0 : _heartAnim.value,
+          child: SizedBox(width: double.infinity, height: 64,
+            child: DecoratedBox(
+              decoration: BoxDecoration(
+                gradient: const LinearGradient(colors: [Color(0xFFFFC107), Color(0xFFFF6F00)]),
+                borderRadius: BorderRadius.circular(18),
+                boxShadow: [BoxShadow(color: const Color(0xFFFFC107).withValues(alpha: 0.5), blurRadius: 14, offset: const Offset(0, 4))]),
+              child: ElevatedButton(
+                onPressed: _spinning ? null : _spin,
+                style: ElevatedButton.styleFrom(backgroundColor: Colors.transparent, shadowColor: Colors.transparent,
+                    foregroundColor: Colors.black, shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(18))),
+                child: Text(_spinning ? "SPINNING..." : "\u{1F3B0} SPIN TO WIN! \u{1F3B0}",
+                    style: const TextStyle(fontSize: 22, fontWeight: FontWeight.w900, letterSpacing: 1)),
               ),
             ),
           ),
         );
-      },
-    );
+      }),
+      const SizedBox(height: 10),
+      Text("Prizes: \$100 \u2022 \$150 \u2022 \$200 \u2022 \$300 \u2022 \$500",
+          style: TextStyle(color: Colors.white.withValues(alpha: 0.4), fontSize: 11)),
+    ]);
   }
 
-  // ── Progress Bar ──────────────────────────────────────────────────────────
-
-  Widget _buildProgressBar(int count) {
-    return Column(
-      children: [
-        Row(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          children: [
-            Text("$count / 8",
-                style: const TextStyle(
-                    color: Colors.white,
-                    fontSize: 18,
-                    fontWeight: FontWeight.w900)),
-            Text(
-              count == 8
-                  ? "COMPLETE!"
-                  : "${((count / 8) * 100).round()}%",
-              style: TextStyle(
-                color: count >= 6
-                    ? const Color(0xFFFFC107)
-                    : Colors.white54,
-                fontSize: 14,
-                fontWeight: FontWeight.w700,
-              ),
-            ),
-          ],
-        ),
-        const SizedBox(height: 8),
-        Stack(
-          children: [
-            // Background
-            Container(
-              height: 14,
-              decoration: BoxDecoration(
-                color: const Color(0xFF1A2744),
-                borderRadius: BorderRadius.circular(7),
-                border:
-                    Border.all(color: Colors.white.withValues(alpha: 0.1)),
-              ),
-            ),
-            // Fill with animated gradient
-            AnimatedContainer(
-              duration: const Duration(milliseconds: 600),
-              curve: Curves.easeOut,
-              height: 14,
-              width: (MediaQuery.of(context).size.width - 32) *
-                  (count / 8).clamp(0.0, 1.0),
-              decoration: BoxDecoration(
-                gradient: LinearGradient(
-                  colors: count >= 6
-                      ? [const Color(0xFFFFC107), const Color(0xFFFF6F00)]
-                      : [const Color(0xFFA6CE39), const Color(0xFF7A9A01)],
-                ),
-                borderRadius: BorderRadius.circular(7),
-                boxShadow: [
-                  BoxShadow(
-                    color: (count >= 6
-                            ? const Color(0xFFFFC107)
-                            : const Color(0xFFA6CE39))
-                        .withValues(alpha: 0.5),
-                    blurRadius: 8,
-                  ),
-                ],
-              ),
-            ),
-          ],
-        ),
-      ],
-    );
-  }
-
-  // ── Milestone Badges ──────────────────────────────────────────────────────
-
-  Widget _buildMilestoneBadges(int count) {
-    return Row(
-      mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-      children: [
-        _badge("STARTED", 1, count),
-        _badge("HALFWAY", 4, count),
-        _badge("ALMOST", 6, count),
-        _badge("WINNER!", 8, count),
-      ],
-    );
-  }
-
-  Widget _badge(String label, int threshold, int current) {
-    final achieved = current >= threshold;
-    return Column(
-      children: [
-        Container(
-          width: 40,
-          height: 40,
-          decoration: BoxDecoration(
-            shape: BoxShape.circle,
-            color: achieved
-                ? const Color(0xFFFFC107)
-                : const Color(0xFF1A2744),
-            border: Border.all(
-              color: achieved
-                  ? const Color(0xFFFFC107)
-                  : Colors.white.withValues(alpha: 0.15),
-              width: 2,
-            ),
-            boxShadow: achieved
-                ? [
-                    BoxShadow(
-                      color: const Color(0xFFFFC107)
-                          .withValues(alpha: 0.4),
-                      blurRadius: 8,
-                    ),
-                  ]
-                : [],
-          ),
-          child: Center(
-            child: achieved
-                ? const Icon(Icons.check, color: Colors.black, size: 20)
-                : Text("$threshold",
-                    style: TextStyle(
-                        color: Colors.white.withValues(alpha: 0.3),
-                        fontSize: 12,
-                        fontWeight: FontWeight.w700)),
-          ),
-        ),
-        const SizedBox(height: 4),
-        Text(
-          label,
-          style: TextStyle(
-            fontSize: 9,
-            fontWeight: FontWeight.w700,
-            color: achieved ? const Color(0xFFFFC107) : Colors.white30,
-            letterSpacing: 0.5,
-          ),
-        ),
-      ],
-    );
-  }
-
-  // ── Spin Section ──────────────────────────────────────────────────────────
-
-  Widget _buildSpinSection() {
-    return Column(
-      children: [
-        // Wheel
-        SizedBox(
-          width: 280,
-          height: 280,
-          child: AnimatedBuilder(
-            animation: _wheelAnimation,
-            builder: (context, child) {
-              return Transform.rotate(
-                angle: _wheelAnimation.value *
-                    (2 * pi * 5 + _landedSegment * (2 * pi / 8)),
-                child: CustomPaint(
-                  size: const Size(280, 280),
-                  painter:
-                      _WheelPainter(segments: PuzzleProvider.wheelSegments),
-                ),
-              );
-            },
-          ),
-        ),
-        const SizedBox(height: 24),
-
-        // SPIN button — pulsing, dangerous
-        AnimatedBuilder(
-          animation: _heartbeatAnimation,
-          builder: (context, _) {
-            return Transform.scale(
-              scale: _spinning ? 1.0 : _heartbeatAnimation.value,
-              child: SizedBox(
-                width: double.infinity,
-                height: 68,
-                child: DecoratedBox(
-                  decoration: BoxDecoration(
-                    gradient: const LinearGradient(
-                      colors: [Color(0xFFFFC107), Color(0xFFFF6F00)],
-                    ),
-                    borderRadius: BorderRadius.circular(20),
-                    boxShadow: [
-                      BoxShadow(
-                        color: const Color(0xFFFFC107)
-                            .withValues(alpha: 0.6),
-                        blurRadius: 16,
-                        offset: const Offset(0, 4),
-                      ),
-                    ],
-                  ),
-                  child: ElevatedButton(
-                    onPressed: _spinning ? null : _spinWheel,
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: Colors.transparent,
-                      shadowColor: Colors.transparent,
-                      foregroundColor: Colors.black,
-                      shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(20)),
-                    ),
-                    child: Text(
-                      _spinning
-                          ? "SPINNING..."
-                          : "\u{1F3B0} SPIN TO WIN! \u{1F3B0}",
-                      style: const TextStyle(
-                        fontSize: 24,
-                        fontWeight: FontWeight.w900,
-                        letterSpacing: 1,
-                      ),
-                    ),
-                  ),
-                ),
-              ),
-            );
-          },
-        ),
-
-        const SizedBox(height: 12),
-        Text(
-          "Prizes: \$100 \u2022 \$150 \u2022 \$200 \u2022 \$300 \u2022 \$500 Gift Cards",
-          textAlign: TextAlign.center,
-          style: TextStyle(
-            color: Colors.white.withValues(alpha: 0.5),
-            fontSize: 11,
-          ),
-        ),
-      ],
-    );
-  }
-
-  // ── Prize Won ─────────────────────────────────────────────────────────────
-
-  Widget _buildPrizeWonSection(String prize) {
+  Widget _wonSection(String prize) {
     return Container(
       padding: const EdgeInsets.all(28),
       decoration: BoxDecoration(
-        gradient: const LinearGradient(
-          begin: Alignment.topLeft,
-          end: Alignment.bottomRight,
-          colors: [Color(0xFF1A2744), Color(0xFF0D1B2A)],
-        ),
+        gradient: const LinearGradient(colors: [Color(0xFF1A2744), Color(0xFF0D1B2A)]),
         borderRadius: BorderRadius.circular(24),
-        border: Border.all(
-          color: const Color(0xFFFFC107).withValues(alpha: 0.3),
-          width: 2,
-        ),
-        boxShadow: [
-          BoxShadow(
-            color: const Color(0xFFFFC107).withValues(alpha: 0.15),
-            blurRadius: 20,
-          ),
-        ],
-      ),
-      child: Column(
-        children: [
-          const Text("\u{1F3C6}",
-              style: TextStyle(fontSize: 48)),
-          const SizedBox(height: 8),
-          const Text("PRIZE CLAIMED",
-              style: TextStyle(
-                  color: Color(0xFFFFC107),
-                  fontSize: 14,
-                  fontWeight: FontWeight.w800,
-                  letterSpacing: 3)),
-          const SizedBox(height: 8),
-          Text(prize,
-              style: const TextStyle(
-                  color: Colors.white,
-                  fontSize: 32,
-                  fontWeight: FontWeight.w900)),
-        ],
-      ),
+        border: Border.all(color: const Color(0xFFFFC107).withValues(alpha: 0.3), width: 2),
+        boxShadow: [BoxShadow(color: const Color(0xFFFFC107).withValues(alpha: 0.12), blurRadius: 20)]),
+      child: Column(children: [
+        const Text("\u{1F3C6}", style: TextStyle(fontSize: 44)),
+        const SizedBox(height: 6),
+        const Text("PRIZE CLAIMED", style: TextStyle(color: Color(0xFFFFC107), fontSize: 12, fontWeight: FontWeight.w800, letterSpacing: 3)),
+        const SizedBox(height: 8),
+        Text(prize, style: const TextStyle(color: Colors.white, fontSize: 30, fontWeight: FontWeight.w900)),
+      ]),
     );
   }
 
-  // ── Locked Section ────────────────────────────────────────────────────────
-
-  Widget _buildLockedSection(int count) {
-    final remaining = 8 - count;
+  Widget _lockedSection(int n) {
+    final rem = 8 - n;
     return Container(
       padding: const EdgeInsets.all(24),
       decoration: BoxDecoration(
-        color: const Color(0xFF1A2744).withValues(alpha: 0.6),
+        color: const Color(0xFF0D1B2A).withValues(alpha: 0.8),
         borderRadius: BorderRadius.circular(20),
-        border: Border.all(
-          color: count >= 5
-              ? const Color(0xFFFFC107).withValues(alpha: 0.3)
-              : Colors.white.withValues(alpha: 0.08),
-        ),
-      ),
-      child: Column(
-        children: [
-          AnimatedBuilder(
-            animation: _pulseAnimation,
-            builder: (context, _) {
-              return Transform.scale(
-                scale: 1.0 + _pulseAnimation.value * 0.05,
-                child: const Text("\u{1F512}",
-                    style: TextStyle(fontSize: 40)),
-              );
-            },
-          ),
-          const SizedBox(height: 12),
-          Text(
-            remaining == 1
-                ? "JUST 1 MORE PIECE!"
-                : "$remaining pieces to go",
-            style: TextStyle(
-              color: count >= 5
-                  ? const Color(0xFFFFC107)
-                  : Colors.white,
-              fontSize: count >= 5 ? 20 : 16,
-              fontWeight: FontWeight.w800,
+        border: Border.all(color: n >= 5 ? const Color(0xFFFFC107).withValues(alpha: 0.25) : Colors.white.withValues(alpha: 0.06))),
+      child: Column(children: [
+        AnimatedBuilder(animation: _pulseAnim, builder: (_, __) {
+          return Transform.scale(scale: 1.0 + _pulseAnim.value * 0.04,
+              child: const Text("\u{1F512}", style: TextStyle(fontSize: 36)));
+        }),
+        const SizedBox(height: 10),
+        Text(rem == 1 ? "JUST 1 MORE PIECE!" : "$rem pieces to go",
+            style: TextStyle(color: n >= 5 ? const Color(0xFFFFC107) : Colors.white, fontSize: n >= 5 ? 20 : 16, fontWeight: FontWeight.w800)),
+        const SizedBox(height: 8),
+        Text("Browse deals to unlock pieces.\nEvery category = 1 piece closer to winning!",
+            textAlign: TextAlign.center, style: TextStyle(color: Colors.white.withValues(alpha: 0.4), fontSize: 12, height: 1.5)),
+        if (n >= 3) ...[
+          const SizedBox(height: 16),
+          SizedBox(width: double.infinity, height: 46,
+            child: OutlinedButton(
+              onPressed: () => Navigator.pop(context),
+              style: OutlinedButton.styleFrom(
+                side: BorderSide(color: n >= 6 ? const Color(0xFFFFC107) : const Color(0xFFA6CE39)),
+                foregroundColor: n >= 6 ? const Color(0xFFFFC107) : const Color(0xFFA6CE39),
+                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12))),
+              child: Text("BROWSE DEALS NOW \u{2192}", style: TextStyle(fontWeight: FontWeight.w800, fontSize: n >= 6 ? 15 : 13)),
             ),
           ),
-          const SizedBox(height: 8),
-          Text(
-            "Browse deals to unlock puzzle pieces.\nEvery category you shop = 1 piece closer to winning!",
-            textAlign: TextAlign.center,
-            style: TextStyle(
-              color: Colors.white.withValues(alpha: 0.5),
-              fontSize: 13,
-              height: 1.4,
-            ),
-          ),
-          if (count >= 4) ...[
-            const SizedBox(height: 16),
-            SizedBox(
-              width: double.infinity,
-              height: 48,
-              child: OutlinedButton(
-                onPressed: () => Navigator.pop(context),
-                style: OutlinedButton.styleFrom(
-                  side: BorderSide(
-                    color: count >= 6
-                        ? const Color(0xFFFFC107)
-                        : const Color(0xFFA6CE39),
-                  ),
-                  foregroundColor: count >= 6
-                      ? const Color(0xFFFFC107)
-                      : const Color(0xFFA6CE39),
-                  shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(12)),
-                ),
-                child: Text(
-                  "BROWSE DEALS NOW \u{2192}",
-                  style: TextStyle(
-                    fontWeight: FontWeight.w800,
-                    fontSize: count >= 6 ? 16 : 14,
-                  ),
-                ),
-              ),
-            ),
-          ],
         ],
-      ),
+      ]),
     );
   }
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
-// ── Puzzle Ring Painter ──────────────────────────────────────────────────────
+// JIGSAW RING PAINTER — Draws 8 interlocking wedge pieces with tabs/notches
 // ─────────────────────────────────────────────────────────────────────────────
 
-class _PuzzleRingPainter extends CustomPainter {
-  final int pieceCount;
-  final Set<String> unlockedSet;
-  final List<String> categories;
+class _JigsawRingPainter extends CustomPainter {
+  final int count;
+  final Set<String> unlocked;
+  final List<String> cats, labels, icons;
   final List<Color> colors;
-  final double shimmerValue;
-  final double pulseValue;
+  final double shimmer, pulse;
+  final bool allDone;
 
-  const _PuzzleRingPainter({
-    required this.pieceCount,
-    required this.unlockedSet,
-    required this.categories,
-    required this.colors,
-    required this.shimmerValue,
-    required this.pulseValue,
+  const _JigsawRingPainter({
+    required this.count, required this.unlocked, required this.cats,
+    required this.labels, required this.icons, required this.colors,
+    required this.shimmer, required this.pulse, required this.allDone,
   });
 
   @override
   void paint(Canvas canvas, Size size) {
-    final center = Offset(size.width / 2, size.height / 2);
-    final outerRadius = size.width / 2 - 12;
-    final innerRadius = outerRadius * 0.40;
-    final sweepAngle = 2 * pi / pieceCount;
-    final gap = 0.05;
+    final cx = size.width / 2;
+    final cy = size.height / 2;
+    final center = Offset(cx, cy);
+    final outerR = size.width / 2 - 10;
+    final innerR = outerR * 0.38;
+    final sweep = 2 * pi / count;
+    final gap = 0.045;
+    final tabSize = 9.0;
 
-    for (int i = 0; i < pieceCount; i++) {
-      final startAngle = (2 * pi * i / pieceCount) - pi / 2 + gap / 2;
-      final sweep = sweepAngle - gap;
-      final unlocked = unlockedSet.contains(categories[i]);
+    for (int i = 0; i < count; i++) {
+      final sa = (2 * pi * i / count) - pi / 2 + gap / 2;
+      final sw = sweep - gap;
+      final isOpen = unlocked.contains(cats[i]);
 
-      // Build wedge path
-      final path = Path();
-      path.arcTo(
-        Rect.fromCircle(center: center, radius: outerRadius),
-        startAngle,
-        sweep,
-        true,
-      );
-      final innerEndAngle = startAngle + sweep;
-      path.lineTo(
-        center.dx + innerRadius * cos(innerEndAngle),
-        center.dy + innerRadius * sin(innerEndAngle),
-      );
-      path.arcTo(
-        Rect.fromCircle(center: center, radius: innerRadius),
-        innerEndAngle,
-        -sweep,
-        false,
-      );
-      path.close();
+      // Build wedge path with jigsaw tabs
+      final path = _buildWedgePath(center, outerR, innerR, sa, sw, tabSize, i);
 
-      // Shadow
-      if (unlocked) {
-        canvas.drawShadow(path, colors[i], 10, false);
-      }
+      if (isOpen) {
+        // ── UNLOCKED: vibrant filled piece ──
+        canvas.drawShadow(path, colors[i].withValues(alpha: 0.8), 8, false);
 
-      // Fill
-      final paint = Paint()..style = PaintingStyle.fill;
-      if (unlocked) {
-        paint.shader = SweepGradient(
-          center: Alignment.center,
-          startAngle: startAngle,
-          endAngle: startAngle + sweep,
-          colors: [
-            colors[i],
-            Color.lerp(colors[i], Colors.white, 0.2)!,
-            colors[i],
-          ],
-        ).createShader(
-            Rect.fromCircle(center: center, radius: outerRadius));
+        // Gradient fill
+        final paint = Paint()..style = PaintingStyle.fill;
+        paint.shader = ui.Gradient.sweep(
+          center,
+          [colors[i], Color.lerp(colors[i], Colors.white, 0.15)!, colors[i]],
+          [0.0, 0.5, 1.0],
+          TileMode.clamp,
+          sa, sa + sw,
+        );
+        canvas.drawPath(path, paint);
+
+        // White border
+        canvas.drawPath(path, Paint()
+          ..style = PaintingStyle.stroke..strokeWidth = 2.5
+          ..color = Colors.white.withValues(alpha: 0.8));
+
+        // Category label on the piece
+        _drawLabel(canvas, center, outerR, innerR, sa, sw, labels[i], true);
+        // Emoji on the piece
+        _drawEmoji(canvas, center, outerR, innerR, sa, sw, icons[i], true);
       } else {
-        // Locked with shimmer
-        final shimmerPos = shimmerValue;
-        final angleFraction = i / pieceCount;
-        final shimmerHit =
-            (shimmerPos - angleFraction).abs() < 0.3;
+        // ── LOCKED: empty slot with shimmer ──
+        final shimDist = (shimmer - i / count).abs();
+        final shimFactor = shimDist < 0.35 ? (0.35 - shimDist) / 0.35 : 0.0;
 
-        paint.color = shimmerHit
-            ? Color.lerp(_lockedColor, const Color(0xFF2A3D5E),
-                (0.3 - (shimmerPos - angleFraction).abs()) / 0.3 * 0.6)!
-            : _lockedColor.withValues(
-                alpha: 0.5 + pulseValue * 0.15);
+        // Ghost fill
+        canvas.drawPath(path, Paint()
+          ..style = PaintingStyle.fill
+          ..color = Color.lerp(
+              const Color(0xFF0D1B2A).withValues(alpha: 0.4 + pulse * 0.1),
+              const Color(0xFF1E3A5F),
+              shimFactor * 0.5)!);
+
+        // Dashed-style border (solid but faint)
+        canvas.drawPath(path, Paint()
+          ..style = PaintingStyle.stroke..strokeWidth = 1.2
+          ..color = Colors.white.withValues(alpha: 0.06 + shimFactor * 0.12 + pulse * 0.03));
+
+        // Ghost label
+        _drawLabel(canvas, center, outerR, innerR, sa, sw, labels[i], false);
+        // Ghost emoji
+        _drawEmoji(canvas, center, outerR, innerR, sa, sw, icons[i], false);
       }
-      canvas.drawPath(path, paint);
-
-      // Border
-      final borderPaint = Paint()
-        ..style = PaintingStyle.stroke
-        ..strokeWidth = unlocked ? 2.5 : 1.0
-        ..color = unlocked
-            ? Colors.white.withValues(alpha: 0.85)
-            : Colors.white.withValues(alpha: 0.08 + pulseValue * 0.05);
-      canvas.drawPath(path, borderPaint);
-
-      // Jigsaw tab nubs
-      final midAngle = startAngle + sweep / 2;
-      final tabR = 8.0;
-
-      // Outer nub
-      final outerNub = Offset(
-        center.dx + (outerRadius + tabR * 0.3) * cos(midAngle),
-        center.dy + (outerRadius + tabR * 0.3) * sin(midAngle),
-      );
-      canvas.drawCircle(
-          outerNub,
-          tabR,
-          Paint()
-            ..color =
-                unlocked ? colors[i] : _lockedColor.withValues(alpha: 0.7)
-            ..style = PaintingStyle.fill);
-      canvas.drawCircle(
-          outerNub,
-          tabR,
-          Paint()
-            ..color = unlocked
-                ? Colors.white.withValues(alpha: 0.7)
-                : Colors.white.withValues(alpha: 0.08)
-            ..style = PaintingStyle.stroke
-            ..strokeWidth = unlocked ? 2.0 : 0.8);
-
-      // Inner nub
-      final innerNub = Offset(
-        center.dx + (innerRadius - tabR * 0.25) * cos(midAngle),
-        center.dy + (innerRadius - tabR * 0.25) * sin(midAngle),
-      );
-      canvas.drawCircle(
-          innerNub,
-          tabR * 0.65,
-          Paint()
-            ..color =
-                unlocked ? colors[i] : _lockedColor.withValues(alpha: 0.7)
-            ..style = PaintingStyle.fill);
-      canvas.drawCircle(
-          innerNub,
-          tabR * 0.65,
-          Paint()
-            ..color = unlocked
-                ? Colors.white.withValues(alpha: 0.6)
-                : Colors.white.withValues(alpha: 0.08)
-            ..style = PaintingStyle.stroke
-            ..strokeWidth = unlocked ? 1.5 : 0.5);
     }
   }
 
+  Path _buildWedgePath(Offset c, double oR, double iR, double sa, double sw, double tab, int idx) {
+    final path = Path();
+    final midAngle = sa + sw / 2;
+
+    // Outer arc — with a tab bump at the midpoint
+    path.arcTo(Rect.fromCircle(center: c, radius: oR), sa, sw / 2 - 0.06, true);
+    // Tab outward
+    final tabOut = Offset(c.dx + (oR + tab * 0.5) * cos(midAngle), c.dy + (oR + tab * 0.5) * sin(midAngle));
+    final preTab = Offset(c.dx + oR * cos(midAngle - 0.04), c.dy + oR * sin(midAngle - 0.04));
+    final postTab = Offset(c.dx + oR * cos(midAngle + 0.04), c.dy + oR * sin(midAngle + 0.04));
+    path.quadraticBezierTo(preTab.dx, preTab.dy, tabOut.dx, tabOut.dy);
+    path.quadraticBezierTo(postTab.dx, postTab.dy,
+        c.dx + oR * cos(sa + sw / 2 + 0.06), c.dy + oR * sin(sa + sw / 2 + 0.06));
+    // Rest of outer arc
+    path.arcTo(Rect.fromCircle(center: c, radius: oR), sa + sw / 2 + 0.06, sw / 2 - 0.06, false);
+
+    // Line to inner arc end
+    final ie = sa + sw;
+    path.lineTo(c.dx + iR * cos(ie), c.dy + iR * sin(ie));
+
+    // Inner arc — with notch inward at midpoint
+    path.arcTo(Rect.fromCircle(center: c, radius: iR), ie, -(sw / 2 - 0.06), false);
+    // Notch inward
+    final notchIn = Offset(c.dx + (iR - tab * 0.4) * cos(midAngle), c.dy + (iR - tab * 0.4) * sin(midAngle));
+    final preNotch = Offset(c.dx + iR * cos(midAngle + 0.04), c.dy + iR * sin(midAngle + 0.04));
+    final postNotch = Offset(c.dx + iR * cos(midAngle - 0.04), c.dy + iR * sin(midAngle - 0.04));
+    path.quadraticBezierTo(preNotch.dx, preNotch.dy, notchIn.dx, notchIn.dy);
+    path.quadraticBezierTo(postNotch.dx, postNotch.dy,
+        c.dx + iR * cos(sa + sw / 2 - 0.06), c.dy + iR * sin(sa + sw / 2 - 0.06));
+    path.arcTo(Rect.fromCircle(center: c, radius: iR), sa + sw / 2 - 0.06, -(sw / 2 - 0.06), false);
+
+    path.close();
+    return path;
+  }
+
+  void _drawLabel(Canvas canvas, Offset c, double oR, double iR, double sa, double sw, String label, bool lit) {
+    final midA = sa + sw / 2;
+    final labelR = (oR + iR) / 2 + 12;
+    final pos = Offset(c.dx + labelR * cos(midA), c.dy + labelR * sin(midA));
+
+    final tp = TextPainter(
+      text: TextSpan(text: label, style: TextStyle(
+        fontSize: 10, fontWeight: FontWeight.w800, letterSpacing: 0.5,
+        color: lit ? Colors.white : Colors.white.withValues(alpha: 0.2))),
+      textDirection: TextDirection.ltr,
+    )..layout();
+    tp.paint(canvas, Offset(pos.dx - tp.width / 2, pos.dy - tp.height / 2));
+  }
+
+  void _drawEmoji(Canvas canvas, Offset c, double oR, double iR, double sa, double sw, String emoji, bool lit) {
+    final midA = sa + sw / 2;
+    final emojiR = (oR + iR) / 2 - 8;
+    final pos = Offset(c.dx + emojiR * cos(midA), c.dy + emojiR * sin(midA));
+
+    final tp = TextPainter(
+      text: TextSpan(text: emoji, style: TextStyle(fontSize: lit ? 24 : 18)),
+      textDirection: TextDirection.ltr,
+    )..layout();
+    if (!lit) {
+      canvas.saveLayer(Rect.fromCenter(center: pos, width: 40, height: 40), Paint()..colorFilter = const ColorFilter.mode(Color(0xFF1A2744), BlendMode.saturation));
+    }
+    tp.paint(canvas, Offset(pos.dx - tp.width / 2, pos.dy - tp.height / 2));
+    if (!lit) canvas.restore();
+  }
+
   @override
-  bool shouldRepaint(covariant _PuzzleRingPainter old) =>
-      old.unlockedSet != unlockedSet ||
-      old.shimmerValue != shimmerValue ||
-      old.pulseValue != pulseValue;
+  bool shouldRepaint(covariant _JigsawRingPainter old) =>
+      old.unlocked != unlocked || old.shimmer != shimmer || old.pulse != pulse;
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
-// ── Wheel Painter ────────────────────────────────────────────────────────────
+// WHEEL PAINTER
 // ─────────────────────────────────────────────────────────────────────────────
 
 class _WheelPainter extends CustomPainter {
   final List<Map<String, dynamic>> segments;
   const _WheelPainter({required this.segments});
-
   @override
   void paint(Canvas canvas, Size size) {
-    final center = Offset(size.width / 2, size.height / 2);
-    final radius = size.width / 2;
-    final segmentAngle = 2 * pi / segments.length;
+    final c = Offset(size.width / 2, size.height / 2);
+    final r = size.width / 2;
+    final sa = 2 * pi / segments.length;
     final tp = TextPainter(textDirection: TextDirection.ltr);
-
     for (int i = 0; i < segments.length; i++) {
-      final start = i * segmentAngle - pi / 2;
-      canvas.drawArc(
-          Rect.fromCircle(center: center, radius: radius),
-          start,
-          segmentAngle,
-          true,
-          Paint()
-            ..color = Color(segments[i]["color"] as int)
-            ..style = PaintingStyle.fill);
-      canvas.drawArc(
-          Rect.fromCircle(center: center, radius: radius),
-          start,
-          segmentAngle,
-          true,
-          Paint()
-            ..color = Colors.white
-            ..style = PaintingStyle.stroke
-            ..strokeWidth = 2);
-
-      canvas.save();
-      canvas.translate(center.dx, center.dy);
-      canvas.rotate(start + segmentAngle / 2);
-      canvas.translate(radius * 0.6, 0);
-      tp.text = TextSpan(
-          text: segments[i]["label"] as String,
-          style: const TextStyle(
-              color: Colors.white,
-              fontSize: 11,
-              fontWeight: FontWeight.w700));
-      tp.layout();
-      tp.paint(canvas, Offset(-tp.width / 2, -tp.height / 2));
-      canvas.restore();
+      final a = i * sa - pi / 2;
+      canvas.drawArc(Rect.fromCircle(center: c, radius: r), a, sa, true,
+          Paint()..color = Color(segments[i]["color"] as int)..style = PaintingStyle.fill);
+      canvas.drawArc(Rect.fromCircle(center: c, radius: r), a, sa, true,
+          Paint()..color = Colors.white..style = PaintingStyle.stroke..strokeWidth = 2);
+      canvas.save(); canvas.translate(c.dx, c.dy); canvas.rotate(a + sa / 2); canvas.translate(r * 0.6, 0);
+      tp.text = TextSpan(text: segments[i]["label"] as String, style: const TextStyle(color: Colors.white, fontSize: 11, fontWeight: FontWeight.w700));
+      tp.layout(); tp.paint(canvas, Offset(-tp.width / 2, -tp.height / 2)); canvas.restore();
     }
-    canvas.drawCircle(center, 24, Paint()..color = Colors.white);
+    canvas.drawCircle(c, 24, Paint()..color = Colors.white);
   }
-
   @override
-  bool shouldRepaint(covariant CustomPainter oldDelegate) => false;
+  bool shouldRepaint(covariant CustomPainter old) => false;
 }
