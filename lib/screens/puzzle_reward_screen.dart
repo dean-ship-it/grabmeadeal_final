@@ -36,7 +36,7 @@ const _msgs = <int, List<String>>{
 };
 
 // ── DEMO MODE: set true to see fireworks, set false for production ──
-const _kDemoMode = true;
+const _kDemoMode = false;
 
 class PuzzleRewardScreen extends StatefulWidget {
   const PuzzleRewardScreen({super.key});
