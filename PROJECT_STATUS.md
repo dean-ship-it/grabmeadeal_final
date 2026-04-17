@@ -56,8 +56,9 @@
 - [x] Category chip on cards
 - [x] Deal detail screen with full info
 - [x] "View Deal" button with URL launcher — deal links fixed (reads `link` field)
-- [x] 45+ deals seeded across all categories with real Unsplash images
+- [x] 49 deals seeded across all categories with real Unsplash images
 - [x] Grocery deals seeded — HEB, Costco, Walmart (Texas mom demographic)
+- [x] Deal model `dealUrl` field reads `link` from Firestore (View Deal button active)
 
 ### Category System
 - [x] 11 categories in DealCategory enum with emoji icons (grocery, electronics, gaming, tools, furniture, automotive, beauty, apparel, petSupplies, homeGoods, fitness)
@@ -139,6 +140,40 @@
 - [x] Privacy policy HTML deployed and live
 - [x] Firebase service worker configured (firebase-messaging-sw.js)
 - [x] Google Sign-In OAuth client ID in web/index.html
+
+---
+
+## Firestore Deal Counts (as of April 17, 2026)
+
+| Category | Count |
+|----------|-------|
+| grocery | 8 |
+| electronics | 5 |
+| petSupplies | 4 |
+| beauty | 4 |
+| homeGoods | 4 |
+| tools | 4 |
+| fitness | 4 |
+| automotive | 4 |
+| gaming | 4 |
+| apparel | 4 |
+| furniture | 4 |
+| **TOTAL** | **49** |
+
+---
+
+## April 17 Session — Files Changed
+
+| Commit | Files | Description |
+|--------|-------|-------------|
+| `8e68f93` | `android/app/google-services.json` | Added client_type 1 Android OAuth client for com.grabmeadeal.app |
+| | `lib/models/deal.dart` | Fixed dealUrl to read `link` field; fixed imageUrl fallback |
+| | `lib/models/deal_category.dart` | Updated enum to 11 categories matching Firestore (added grocery) |
+| | `lib/screens/category_deals_screen.dart` | Removed orderBy to avoid composite index requirement |
+| `d5d63ae` | `lib/screens/deals_screen.dart` | Replaced logo Image.asset with styled text (logo has baked-in background) |
+| | `tools/seed_grocery.js` | Seed script for 4 grocery deals (HEB, Costco, Walmart) |
+| | `tools/test_cj.js` | CJ Affiliate API connectivity test (zero dependencies) |
+| `1ee1894` | `PROJECT_STATUS.md` | Day 3 progress update |
 
 ---
 
