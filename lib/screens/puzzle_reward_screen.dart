@@ -5,6 +5,21 @@ import "package:flutter/material.dart";
 import "package:provider/provider.dart";
 import "package:grabmeadeal_final/providers/puzzle_provider.dart";
 
+// ── Brand colors for the 8 puzzle pieces ──
+const _pieceColors = [
+  Color(0xFF0075C9), // Electronics — primary blue
+  Color(0xFF4E342E), // Furniture — warm brown
+  Color(0xFF37474F), // Tools — steel grey
+  Color(0xFF6A1B9A), // Gaming — purple
+  Color(0xFFAD1457), // Beauty — magenta
+  Color(0xFF2E7D32), // Pet Supplies — green
+  Color(0xFFE65100), // Apparel — orange
+  Color(0xFFC62828), // Automotive — red
+];
+
+const _lockedColor = Color(0xFF1A2744);
+const _lockedBorder = Color(0xFF2A3D5E);
+
 class PuzzleRewardScreen extends StatefulWidget {
   const PuzzleRewardScreen({super.key});
 
@@ -20,17 +35,14 @@ class _PuzzleRewardScreenState extends State<PuzzleRewardScreen>
   late Animation<double> _wheelAnimation;
   late Animation<double> _pulseAnimation;
   late Animation<double> _celebrationScale;
-  late Animation<double> _celebrationOpacity;
   bool _spinning = false;
   int _landedSegment = 0;
-  String? _prize;
   bool _celebrationPlayed = false;
 
   @override
   void initState() {
     super.initState();
 
-    // Wheel spin
     _wheelController = AnimationController(
       vsync: this,
       duration: const Duration(seconds: 4),
@@ -40,28 +52,21 @@ class _PuzzleRewardScreenState extends State<PuzzleRewardScreen>
       curve: Curves.easeOutCubic,
     );
 
-    // Locked pieces pulse
     _pulseController = AnimationController(
       vsync: this,
-      duration: const Duration(milliseconds: 1800),
+      duration: const Duration(milliseconds: 2000),
     )..repeat(reverse: true);
-    _pulseAnimation = Tween<double>(begin: 0.92, end: 1.0).animate(
+    _pulseAnimation = Tween<double>(begin: 0.85, end: 1.0).animate(
       CurvedAnimation(parent: _pulseController, curve: Curves.easeInOut),
     );
 
-    // Celebration animation
     _celebrationController = AnimationController(
       vsync: this,
-      duration: const Duration(milliseconds: 1200),
+      duration: const Duration(milliseconds: 1400),
     );
-    _celebrationScale = Tween<double>(begin: 0.8, end: 1.0).animate(
-      CurvedAnimation(parent: _celebrationController, curve: Curves.elasticOut),
-    );
-    _celebrationOpacity = Tween<double>(begin: 0.0, end: 1.0).animate(
+    _celebrationScale = Tween<double>(begin: 0.7, end: 1.0).animate(
       CurvedAnimation(
-        parent: _celebrationController,
-        curve: const Interval(0.0, 0.4, curve: Curves.easeIn),
-      ),
+          parent: _celebrationController, curve: Curves.elasticOut),
     );
   }
 
@@ -90,21 +95,15 @@ class _PuzzleRewardScreenState extends State<PuzzleRewardScreen>
     _landedSegment = random.nextInt(8);
 
     _wheelController.reset();
-    await _wheelController.animateTo(
-      1.0,
-      duration: const Duration(seconds: 4),
-    );
+    await _wheelController.animateTo(1.0,
+        duration: const Duration(seconds: 4));
 
     if (!mounted) return;
     final puzzle = context.read<PuzzleProvider>();
     final prize = await puzzle.recordSpin(_landedSegment);
 
     if (!mounted) return;
-    setState(() {
-      _prize = prize;
-      _spinning = false;
-    });
-
+    setState(() => _spinning = false);
     _showPrizeDialog(prize);
   }
 
@@ -113,6 +112,7 @@ class _PuzzleRewardScreenState extends State<PuzzleRewardScreen>
       context: context,
       barrierDismissible: false,
       builder: (ctx) => AlertDialog(
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
         title: const Text(
           "\u{1F389} You Won!",
           textAlign: TextAlign.center,
@@ -131,10 +131,8 @@ class _PuzzleRewardScreenState extends State<PuzzleRewardScreen>
               ),
             ),
             const SizedBox(height: 16),
-            const Text(
-              "Verify your phone number to claim your prize!",
-              textAlign: TextAlign.center,
-            ),
+            const Text("Verify your phone number to claim your prize!",
+                textAlign: TextAlign.center),
           ],
         ),
         actions: [
@@ -143,20 +141,15 @@ class _PuzzleRewardScreenState extends State<PuzzleRewardScreen>
             child: FilledButton(
               onPressed: () {
                 Navigator.pop(ctx);
-                Navigator.pushNamed(
-                  context,
-                  "/prize-claim",
-                  arguments: prize,
-                );
+                Navigator.pushNamed(context, "/prize-claim", arguments: prize);
               },
               style: FilledButton.styleFrom(
                 backgroundColor: const Color(0xFFA6CE39),
                 foregroundColor: Colors.black,
               ),
-              child: const Text(
-                "Claim My Prize",
-                style: TextStyle(fontWeight: FontWeight.w800, fontSize: 16),
-              ),
+              child: const Text("Claim My Prize",
+                  style:
+                      TextStyle(fontWeight: FontWeight.w800, fontSize: 16)),
             ),
           ),
         ],
@@ -172,8 +165,8 @@ class _PuzzleRewardScreenState extends State<PuzzleRewardScreen>
         final pieces = PuzzleProvider.pieces;
         final unlockedCount = progress?.unlockedCategories.length ?? 0;
         final allComplete = progress?.canSpin == true;
+        final unlockedSet = progress?.unlockedCategories ?? {};
 
-        // Trigger celebration on completion
         _checkCelebration(puzzle);
 
         return Scaffold(
@@ -191,11 +184,11 @@ class _PuzzleRewardScreenState extends State<PuzzleRewardScreen>
               gradient: LinearGradient(
                 begin: Alignment.topCenter,
                 end: Alignment.bottomCenter,
-                colors: [Color(0xFF003A7A), Color(0xFF0075C9)],
+                colors: [Color(0xFF002B5E), Color(0xFF004A8D)],
               ),
             ),
             child: SingleChildScrollView(
-              padding: const EdgeInsets.all(16),
+              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 20),
               child: Column(
                 children: [
                   // ── Header ──
@@ -204,116 +197,123 @@ class _PuzzleRewardScreenState extends State<PuzzleRewardScreen>
                     textAlign: TextAlign.center,
                     style: TextStyle(
                       color: Colors.white,
-                      fontSize: 16,
+                      fontSize: 17,
                       fontWeight: FontWeight.w600,
                       height: 1.4,
                     ),
                   ),
+                  const SizedBox(height: 24),
 
-                  const SizedBox(height: 28),
-
-                  // ── Puzzle Circle ──
+                  // ── Puzzle Ring ──
                   AnimatedBuilder(
-                    animation: allComplete
-                        ? _celebrationController
-                        : _pulseController,
-                    builder: (context, child) {
-                      final scale = allComplete
-                          ? _celebrationScale.value
-                          : 1.0;
-                      final opacity = allComplete
-                          ? _celebrationOpacity.value
-                          : 1.0;
+                    animation: Listenable.merge(
+                        [_pulseController, _celebrationController]),
+                    builder: (context, _) {
+                      final scale =
+                          allComplete ? _celebrationScale.value : 1.0;
 
-                      return Opacity(
-                        opacity: opacity.clamp(0.0, 1.0),
-                        child: Transform.scale(
-                          scale: scale,
-                          child: SizedBox(
-                            width: 320,
-                            height: 320,
-                            child: Stack(
-                              alignment: Alignment.center,
-                              children: [
-                                // Outer glow ring when complete
-                                if (allComplete)
-                                  Container(
-                                    width: 300,
-                                    height: 300,
-                                    decoration: BoxDecoration(
-                                      shape: BoxShape.circle,
-                                      boxShadow: [
-                                        BoxShadow(
-                                          color: const Color(0xFFA6CE39)
-                                              .withValues(alpha: 0.4),
-                                          blurRadius: 30,
-                                          spreadRadius: 5,
+                      return Transform.scale(
+                        scale: scale,
+                        child: SizedBox(
+                          width: 320,
+                          height: 320,
+                          child: Stack(
+                            alignment: Alignment.center,
+                            children: [
+                              // The painted puzzle ring
+                              CustomPaint(
+                                size: const Size(320, 320),
+                                painter: _PuzzleRingPainter(
+                                  pieceCount: 8,
+                                  unlockedSet: unlockedSet,
+                                  categories: pieces
+                                      .map((p) => p["category"]!)
+                                      .toList(),
+                                  colors: _pieceColors,
+                                  pulseValue: _pulseAnimation.value,
+                                ),
+                              ),
+
+                              // Emoji overlays on each piece
+                              ...List.generate(pieces.length, (i) {
+                                final angle =
+                                    (2 * pi * i / pieces.length) - pi / 2;
+                                const r = 105.0;
+                                final x = r * cos(angle);
+                                final y = r * sin(angle);
+                                final cat = pieces[i]["category"]!;
+                                final unlocked =
+                                    unlockedSet.contains(cat);
+
+                                return Transform.translate(
+                                  offset: Offset(x, y),
+                                  child: Column(
+                                    mainAxisSize: MainAxisSize.min,
+                                    children: [
+                                      Text(
+                                        pieces[i]["icon"]!,
+                                        style: TextStyle(
+                                          fontSize: unlocked ? 30 : 22,
                                         ),
-                                      ],
-                                    ),
-                                  ),
-
-                                // Center Logo
-                                Container(
-                                  width: 88,
-                                  height: 88,
-                                  decoration: BoxDecoration(
-                                    color: Colors.white,
-                                    shape: BoxShape.circle,
-                                    boxShadow: [
-                                      BoxShadow(
-                                        color: Colors.black.withValues(alpha: 0.35),
-                                        blurRadius: 16,
-                                        offset: const Offset(0, 4),
+                                      ),
+                                      const SizedBox(height: 1),
+                                      Text(
+                                        pieces[i]["label"]!.split(" ").first,
+                                        style: TextStyle(
+                                          fontSize: 9,
+                                          fontWeight: FontWeight.w700,
+                                          color: unlocked
+                                              ? Colors.white
+                                              : Colors.white
+                                                  .withValues(alpha: 0.35),
+                                        ),
                                       ),
                                     ],
                                   ),
-                                  child: ClipOval(
-                                    child: Padding(
-                                      padding: const EdgeInsets.all(12),
-                                      child: Image.asset(
-                                        "assets/logo/logo.png",
-                                        fit: BoxFit.contain,
-                                        errorBuilder: (_, __, ___) =>
-                                            const Center(
-                                          child: Text(
-                                            "GMD",
-                                            style: TextStyle(
-                                              fontWeight: FontWeight.w900,
-                                              fontSize: 18,
-                                              color: Color(0xFF0075C9),
-                                            ),
+                                );
+                              }),
+
+                              // Center logo
+                              Container(
+                                width: 80,
+                                height: 80,
+                                decoration: BoxDecoration(
+                                  color: Colors.white,
+                                  shape: BoxShape.circle,
+                                  boxShadow: [
+                                    BoxShadow(
+                                      color: allComplete
+                                          ? const Color(0xFFA6CE39)
+                                              .withValues(alpha: 0.6)
+                                          : Colors.black
+                                              .withValues(alpha: 0.4),
+                                      blurRadius: allComplete ? 20 : 12,
+                                      spreadRadius: allComplete ? 3 : 0,
+                                    ),
+                                  ],
+                                ),
+                                child: ClipOval(
+                                  child: Padding(
+                                    padding: const EdgeInsets.all(10),
+                                    child: Image.asset(
+                                      "assets/logo/logo.png",
+                                      fit: BoxFit.contain,
+                                      errorBuilder: (_, __, ___) =>
+                                          const Center(
+                                        child: Text(
+                                          "GMD",
+                                          style: TextStyle(
+                                            fontWeight: FontWeight.w900,
+                                            fontSize: 18,
+                                            color: Color(0xFF0075C9),
                                           ),
                                         ),
                                       ),
                                     ),
                                   ),
                                 ),
-
-                                // Puzzle Pieces
-                                ...List.generate(pieces.length, (i) {
-                                  final angle =
-                                      (2 * pi * i / pieces.length) - pi / 2;
-                                  const radius = 118.0;
-                                  final x = radius * cos(angle);
-                                  final y = radius * sin(angle);
-                                  final category = pieces[i]["category"]!;
-                                  final unlocked = progress
-                                          ?.unlockedCategories
-                                          .contains(category) ??
-                                      false;
-
-                                  return _buildPiece(
-                                    x: x,
-                                    y: y,
-                                    icon: pieces[i]["icon"]!,
-                                    label: pieces[i]["label"]!,
-                                    unlocked: unlocked,
-                                    index: i,
-                                  );
-                                }),
-                              ],
-                            ),
+                              ),
+                            ],
                           ),
                         ),
                       );
@@ -324,21 +324,19 @@ class _PuzzleRewardScreenState extends State<PuzzleRewardScreen>
 
                   // ── Progress ──
                   Text(
-                    "$unlockedCount / 8 pieces unlocked",
+                    "$unlockedCount / 8 pieces",
                     style: const TextStyle(
-                      color: Colors.white70,
-                      fontSize: 14,
-                      fontWeight: FontWeight.w500,
+                      color: Colors.white,
+                      fontSize: 16,
+                      fontWeight: FontWeight.w700,
                     ),
                   ),
-
-                  const SizedBox(height: 10),
-
+                  const SizedBox(height: 8),
                   ClipRRect(
                     borderRadius: BorderRadius.circular(6),
                     child: LinearProgressIndicator(
                       value: unlockedCount / 8,
-                      backgroundColor: const Color(0xFF004A8D),
+                      backgroundColor: const Color(0xFF002244),
                       valueColor: const AlwaysStoppedAnimation<Color>(
                           Color(0xFFA6CE39)),
                       minHeight: 10,
@@ -347,19 +345,18 @@ class _PuzzleRewardScreenState extends State<PuzzleRewardScreen>
 
                   const SizedBox(height: 32),
 
-                  // ── Spin Wheel or Status ──
+                  // ── Spin or Status ──
                   if (allComplete && progress?.spinUsed != true) ...[
                     const Text(
-                      "\u{1F389} Puzzle Complete! Spin to Win!",
+                      "\u{1F389} Puzzle Complete!",
                       style: TextStyle(
                         color: Color(0xFFA6CE39),
-                        fontSize: 22,
+                        fontSize: 24,
                         fontWeight: FontWeight.w900,
                       ),
                     ),
                     const SizedBox(height: 20),
 
-                    // Spin Wheel
                     SizedBox(
                       width: 280,
                       height: 280,
@@ -380,10 +377,9 @@ class _PuzzleRewardScreenState extends State<PuzzleRewardScreen>
                         },
                       ),
                     ),
-
                     const SizedBox(height: 20),
 
-                    // Spin Button — gradient, full width, large
+                    // Spin button
                     SizedBox(
                       width: double.infinity,
                       height: 64,
@@ -432,19 +428,17 @@ class _PuzzleRewardScreenState extends State<PuzzleRewardScreen>
                         color: Colors.white.withValues(alpha: 0.1),
                         borderRadius: BorderRadius.circular(20),
                         border: Border.all(
-                          color: const Color(0xFFA6CE39).withValues(alpha: 0.3),
+                          color:
+                              const Color(0xFFA6CE39).withValues(alpha: 0.3),
                         ),
                       ),
                       child: Column(
                         children: [
-                          const Text(
-                            "\u{1F3C6} Prize Won!",
-                            style: TextStyle(
-                              color: Color(0xFFA6CE39),
-                              fontSize: 22,
-                              fontWeight: FontWeight.w900,
-                            ),
-                          ),
+                          const Text("\u{1F3C6} Prize Won!",
+                              style: TextStyle(
+                                  color: Color(0xFFA6CE39),
+                                  fontSize: 22,
+                                  fontWeight: FontWeight.w900)),
                           const SizedBox(height: 8),
                           Text(
                             progress?.prizeWon ?? "",
@@ -461,24 +455,20 @@ class _PuzzleRewardScreenState extends State<PuzzleRewardScreen>
                     Container(
                       padding: const EdgeInsets.all(20),
                       decoration: BoxDecoration(
-                        color: Colors.white.withValues(alpha: 0.08),
+                        color: Colors.white.withValues(alpha: 0.06),
                         borderRadius: BorderRadius.circular(16),
                       ),
                       child: const Column(
                         children: [
-                          Text(
-                            "\u{1F512}",
-                            style: TextStyle(fontSize: 36),
-                          ),
+                          Text("\u{1F512}", style: TextStyle(fontSize: 36)),
                           SizedBox(height: 8),
                           Text(
-                            "Complete all 8 puzzle pieces to unlock the Spin to Win wheel!",
+                            "Complete all 8 puzzle pieces to unlock\nthe Spin to Win wheel!",
                             textAlign: TextAlign.center,
                             style: TextStyle(
-                              color: Colors.white70,
-                              fontSize: 14,
-                              height: 1.4,
-                            ),
+                                color: Colors.white70,
+                                fontSize: 14,
+                                height: 1.4),
                           ),
                         ],
                       ),
@@ -494,107 +484,160 @@ class _PuzzleRewardScreenState extends State<PuzzleRewardScreen>
       },
     );
   }
-
-  Widget _buildPiece({
-    required double x,
-    required double y,
-    required String icon,
-    required String label,
-    required bool unlocked,
-    required int index,
-  }) {
-    final piece = Transform.translate(
-      offset: Offset(x, y),
-      child: AnimatedContainer(
-        duration: const Duration(milliseconds: 500),
-        curve: Curves.easeOut,
-        width: unlocked ? 62 : 56,
-        height: unlocked ? 72 : 66,
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Container(
-              width: unlocked ? 56 : 50,
-              height: unlocked ? 56 : 50,
-              decoration: BoxDecoration(
-                color: unlocked
-                    ? Colors.white
-                    : const Color(0xFF002B5E),
-                borderRadius: BorderRadius.circular(14),
-                border: Border.all(
-                  color: unlocked
-                      ? const Color(0xFFFFC107)
-                      : Colors.white.withValues(alpha: 0.2),
-                  width: unlocked ? 3 : 1,
-                ),
-                boxShadow: unlocked
-                    ? [
-                        BoxShadow(
-                          color: const Color(0xFFFFC107)
-                              .withValues(alpha: 0.6),
-                          blurRadius: 14,
-                          spreadRadius: 2,
-                        ),
-                        BoxShadow(
-                          color: Colors.amber.withValues(alpha: 0.3),
-                          blurRadius: 8,
-                        ),
-                      ]
-                    : [
-                        BoxShadow(
-                          color: Colors.black.withValues(alpha: 0.3),
-                          blurRadius: 4,
-                          offset: const Offset(0, 2),
-                        ),
-                      ],
-              ),
-              child: Center(
-                child: Text(
-                  icon,
-                  style: TextStyle(
-                    fontSize: unlocked ? 28 : 22,
-                    color: unlocked ? null : Colors.white.withValues(alpha: 0.3),
-                  ),
-                ),
-              ),
-            ),
-            const SizedBox(height: 2),
-            Text(
-              label.split(" ").first,
-              maxLines: 1,
-              overflow: TextOverflow.ellipsis,
-              style: TextStyle(
-                fontSize: 9,
-                fontWeight: FontWeight.w700,
-                color: unlocked
-                    ? Colors.white
-                    : Colors.white.withValues(alpha: 0.4),
-              ),
-            ),
-          ],
-        ),
-      ),
-    );
-
-    // Locked pieces get a subtle floating pulse animation
-    if (!unlocked) {
-      return AnimatedBuilder(
-        animation: _pulseAnimation,
-        builder: (context, child) {
-          return Transform.scale(
-            scale: _pulseAnimation.value,
-            child: child,
-          );
-        },
-        child: piece,
-      );
-    }
-
-    return piece;
-  }
 }
 
-// ── Wheel Painter ─────────────────────────────────────────────────────────────
+// ─────────────────────────────────────────────────────────────────────────────
+// ── Puzzle Ring Painter — draws 8 jigsaw-style arc pieces ────────────────────
+// ─────────────────────────────────────────────────────────────────────────────
+
+class _PuzzleRingPainter extends CustomPainter {
+  final int pieceCount;
+  final Set<String> unlockedSet;
+  final List<String> categories;
+  final List<Color> colors;
+  final double pulseValue;
+
+  const _PuzzleRingPainter({
+    required this.pieceCount,
+    required this.unlockedSet,
+    required this.categories,
+    required this.colors,
+    required this.pulseValue,
+  });
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    final center = Offset(size.width / 2, size.height / 2);
+    final outerRadius = size.width / 2 - 8;
+    final innerRadius = outerRadius * 0.42;
+    final sweepAngle = 2 * pi / pieceCount;
+    final gap = 0.04; // small gap between pieces
+
+    for (int i = 0; i < pieceCount; i++) {
+      final startAngle = (2 * pi * i / pieceCount) - pi / 2 + gap / 2;
+      final sweep = sweepAngle - gap;
+      final unlocked = unlockedSet.contains(categories[i]);
+
+      final color = unlocked ? colors[i] : _lockedColor;
+
+      // Draw the arc wedge
+      final path = Path();
+      // Outer arc
+      path.arcTo(
+        Rect.fromCircle(center: center, radius: outerRadius),
+        startAngle,
+        sweep,
+        true,
+      );
+      // Line to inner arc end
+      final innerEndAngle = startAngle + sweep;
+      path.lineTo(
+        center.dx + innerRadius * cos(innerEndAngle),
+        center.dy + innerRadius * sin(innerEndAngle),
+      );
+      // Inner arc (reverse)
+      path.arcTo(
+        Rect.fromCircle(center: center, radius: innerRadius),
+        innerEndAngle,
+        -sweep,
+        false,
+      );
+      path.close();
+
+      // ── Shadow for unlocked pieces ──
+      if (unlocked) {
+        canvas.drawShadow(path, const Color(0xFFFFC107), 8, false);
+      }
+
+      // ── Fill ──
+      final paint = Paint()
+        ..style = PaintingStyle.fill;
+
+      if (unlocked) {
+        // Radial gradient for depth
+        paint.shader = RadialGradient(
+          center: Alignment.topLeft,
+          radius: 1.5,
+          colors: [
+            color.withValues(alpha: 1.0),
+            Color.lerp(color, Colors.black, 0.25)!,
+          ],
+        ).createShader(Rect.fromCircle(center: center, radius: outerRadius));
+      } else {
+        // Locked: muted with pulse opacity
+        final alpha = 0.4 + (pulseValue * 0.2);
+        paint.color = _lockedColor.withValues(alpha: alpha);
+      }
+      canvas.drawPath(path, paint);
+
+      // ── Border ──
+      final borderPaint = Paint()
+        ..style = PaintingStyle.stroke
+        ..strokeWidth = unlocked ? 2.5 : 1.0
+        ..color = unlocked
+            ? Colors.white.withValues(alpha: 0.8)
+            : _lockedBorder;
+      canvas.drawPath(path, borderPaint);
+
+      // ── Tab nubs (jigsaw connector bumps) ──
+      // Outer tab — bump outward at midpoint of outer arc
+      final midAngle = startAngle + sweep / 2;
+      final tabRadius = 7.0;
+      final outerTabCenter = Offset(
+        center.dx + (outerRadius + tabRadius * 0.4) * cos(midAngle),
+        center.dy + (outerRadius + tabRadius * 0.4) * sin(midAngle),
+      );
+      canvas.drawCircle(
+        outerTabCenter,
+        tabRadius,
+        Paint()
+          ..color = unlocked ? color : _lockedColor.withValues(alpha: 0.6)
+          ..style = PaintingStyle.fill,
+      );
+      canvas.drawCircle(
+        outerTabCenter,
+        tabRadius,
+        Paint()
+          ..color = unlocked
+              ? Colors.white.withValues(alpha: 0.7)
+              : _lockedBorder
+          ..style = PaintingStyle.stroke
+          ..strokeWidth = unlocked ? 2.0 : 1.0,
+      );
+
+      // Inner tab — bump inward toward center
+      final innerTabCenter = Offset(
+        center.dx + (innerRadius - tabRadius * 0.4) * cos(midAngle),
+        center.dy + (innerRadius - tabRadius * 0.4) * sin(midAngle),
+      );
+      canvas.drawCircle(
+        innerTabCenter,
+        tabRadius * 0.7,
+        Paint()
+          ..color = unlocked ? color : _lockedColor.withValues(alpha: 0.6)
+          ..style = PaintingStyle.fill,
+      );
+      canvas.drawCircle(
+        innerTabCenter,
+        tabRadius * 0.7,
+        Paint()
+          ..color = unlocked
+              ? Colors.white.withValues(alpha: 0.6)
+              : _lockedBorder
+          ..style = PaintingStyle.stroke
+          ..strokeWidth = unlocked ? 1.5 : 0.8,
+      );
+    }
+  }
+
+  @override
+  bool shouldRepaint(covariant _PuzzleRingPainter old) =>
+      old.unlockedSet != unlockedSet || old.pulseValue != pulseValue;
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// ── Wheel Painter ────────────────────────────────────────────────────────────
+// ─────────────────────────────────────────────────────────────────────────────
 
 class _WheelPainter extends CustomPainter {
   final List<Map<String, dynamic>> segments;
@@ -605,9 +648,7 @@ class _WheelPainter extends CustomPainter {
     final center = Offset(size.width / 2, size.height / 2);
     final radius = size.width / 2;
     final segmentAngle = 2 * pi / segments.length;
-    final textPainter = TextPainter(
-      textDirection: TextDirection.ltr,
-    );
+    final textPainter = TextPainter(textDirection: TextDirection.ltr);
 
     for (int i = 0; i < segments.length; i++) {
       final startAngle = i * segmentAngle - pi / 2;
@@ -623,7 +664,6 @@ class _WheelPainter extends CustomPainter {
         paint,
       );
 
-      // Border
       final borderPaint = Paint()
         ..color = Colors.white
         ..style = PaintingStyle.stroke
@@ -636,7 +676,6 @@ class _WheelPainter extends CustomPainter {
         borderPaint,
       );
 
-      // Label
       canvas.save();
       canvas.translate(center.dx, center.dy);
       canvas.rotate(startAngle + segmentAngle / 2);
@@ -652,18 +691,11 @@ class _WheelPainter extends CustomPainter {
       );
       textPainter.layout();
       textPainter.paint(
-        canvas,
-        Offset(-textPainter.width / 2, -textPainter.height / 2),
-      );
+          canvas, Offset(-textPainter.width / 2, -textPainter.height / 2));
       canvas.restore();
     }
 
-    // Center circle
-    canvas.drawCircle(
-      center,
-      24,
-      Paint()..color = Colors.white,
-    );
+    canvas.drawCircle(center, 24, Paint()..color = Colors.white);
   }
 
   @override
