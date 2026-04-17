@@ -35,6 +35,9 @@ const _msgs = <int, List<String>>{
   8: ["PUZZLE COMPLETE!", "SPIN THE WHEEL! \u{1F3B0}"],
 };
 
+// ── DEMO MODE: set true to see fireworks, set false for production ──
+const _kDemoMode = true;
+
 class PuzzleRewardScreen extends StatefulWidget {
   const PuzzleRewardScreen({super.key});
   @override
@@ -104,8 +107,11 @@ class _PuzzleRewardScreenState extends State<PuzzleRewardScreen>
   void _maybeCelebrate(bool canSpin) {
     if (!_celebPlayed && canSpin) {
       _celebPlayed = true;
-      _celebCtrl.forward();
-      _launchFireworks();
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (!mounted) return;
+        _celebCtrl.forward();
+        _launchFireworks();
+      });
     }
   }
 
@@ -263,9 +269,22 @@ class _PuzzleRewardScreenState extends State<PuzzleRewardScreen>
     return Consumer<PuzzleProvider>(builder: (context, puzzle, _) {
       final progress = puzzle.progress;
       final pieces = PuzzleProvider.pieces;
-      final n = progress?.unlockedCategories.length ?? 0;
-      final complete = progress?.canSpin == true;
-      final unlocked = progress?.unlockedCategories ?? {};
+
+      // Demo mode overrides
+      final Set<String> unlocked;
+      final int n;
+      final bool complete;
+      if (_kDemoMode) {
+        unlocked = {"electronics", "furniture", "tools", "gaming",
+                     "beauty", "petSupplies", "apparel", "automotive"};
+        n = 8;
+        complete = true;
+      } else {
+        unlocked = progress?.unlockedCategories ?? {};
+        n = progress?.unlockedCategories.length ?? 0;
+        complete = progress?.canSpin == true;
+      }
+
       final m = _msgs[n] ?? _msgs[0]!;
       _maybeCelebrate(complete);
 
@@ -367,9 +386,9 @@ class _PuzzleRewardScreenState extends State<PuzzleRewardScreen>
                 const SizedBox(height: 28),
 
                 // ── Spin / Status ──
-                if (complete && progress?.spinUsed != true) _spinSection()
-                else if (progress?.spinUsed == true) _wonSection(progress?.prizeWon ?? "")
-                else _lockedSection(n),
+                if (complete && (_kDemoMode || progress?.spinUsed != true)) _spinSection()
+                else if (!_kDemoMode && progress?.spinUsed == true) _wonSection(progress?.prizeWon ?? "")
+                else if (!complete) _lockedSection(n),
 
                 const SizedBox(height: 40),
               ]),
