@@ -54,9 +54,15 @@ class _PuzzleRewardScreenState extends State<PuzzleRewardScreen>
   late AnimationController _celebCtrl;
   late Animation<double> _celebScale;
 
+  // Fireworks particle system
+  late AnimationController _fireworksCtrl;
+  final List<_Particle> _particles = [];
+  final _rng = Random();
+
   bool _spinning = false;
   int _landedSeg = 0;
   bool _celebPlayed = false;
+  bool _showFireworks = false;
 
   @override
   void initState() {
@@ -79,6 +85,9 @@ class _PuzzleRewardScreenState extends State<PuzzleRewardScreen>
     _celebCtrl = AnimationController(vsync: this, duration: const Duration(milliseconds: 1500));
     _celebScale = Tween<double>(begin: 0.5, end: 1.0).animate(
         CurvedAnimation(parent: _celebCtrl, curve: Curves.elasticOut));
+
+    _fireworksCtrl = AnimationController(vsync: this, duration: const Duration(milliseconds: 4000));
+    _fireworksCtrl.addListener(_updateParticles);
   }
 
   @override
@@ -88,6 +97,7 @@ class _PuzzleRewardScreenState extends State<PuzzleRewardScreen>
     _pulseCtrl.dispose();
     _heartCtrl.dispose();
     _celebCtrl.dispose();
+    _fireworksCtrl.dispose();
     super.dispose();
   }
 
@@ -95,7 +105,104 @@ class _PuzzleRewardScreenState extends State<PuzzleRewardScreen>
     if (!_celebPlayed && canSpin) {
       _celebPlayed = true;
       _celebCtrl.forward();
+      _launchFireworks();
     }
+  }
+
+  // ── TEXAS FIREWORKS SYSTEM ──────────────────────────────────────────────
+
+  static const _fireworkColors = [
+    Color(0xFFFFC107), // gold
+    Color(0xFFFF6F00), // amber
+    Color(0xFFA6CE39), // lime
+    Color(0xFFD81B60), // hot pink
+    Color(0xFF42A5F5), // sky blue
+    Color(0xFFFFFFFF), // white
+    Color(0xFFFF5252), // red
+    Color(0xFF7C4DFF), // purple
+    Color(0xFF00E676), // neon green
+    Color(0xFFFFD740), // bright gold
+  ];
+
+  void _launchFireworks() {
+    setState(() => _showFireworks = true);
+    _particles.clear();
+
+    // Wave 1 — center burst (immediate)
+    _spawnBurst(0.5, 0.45, 80, 6.0);
+
+    // Wave 2 — left burst (delayed via velocity timing)
+    Future.delayed(const Duration(milliseconds: 400), () {
+      if (mounted) _spawnBurst(0.3, 0.35, 60, 5.0);
+    });
+
+    // Wave 3 — right burst (delayed)
+    Future.delayed(const Duration(milliseconds: 700), () {
+      if (mounted) _spawnBurst(0.7, 0.3, 60, 5.0);
+    });
+
+    // Wave 4 — big center finale
+    Future.delayed(const Duration(milliseconds: 1100), () {
+      if (mounted) _spawnBurst(0.5, 0.4, 120, 7.0);
+    });
+
+    // Wave 5 — confetti rain from top
+    Future.delayed(const Duration(milliseconds: 1500), () {
+      if (mounted) _spawnConfetti(100);
+    });
+
+    _fireworksCtrl.reset();
+    _fireworksCtrl.forward();
+
+    // Clean up after show
+    Future.delayed(const Duration(milliseconds: 4200), () {
+      if (mounted) setState(() => _showFireworks = false);
+    });
+  }
+
+  void _spawnBurst(double cx, double cy, int count, double speed) {
+    for (int i = 0; i < count; i++) {
+      final angle = _rng.nextDouble() * 2 * pi;
+      final v = (0.3 + _rng.nextDouble() * 0.7) * speed;
+      _particles.add(_Particle(
+        x: cx, y: cy,
+        vx: cos(angle) * v * (0.8 + _rng.nextDouble() * 0.4),
+        vy: sin(angle) * v * (0.8 + _rng.nextDouble() * 0.4),
+        color: _fireworkColors[_rng.nextInt(_fireworkColors.length)],
+        life: 0.6 + _rng.nextDouble() * 0.4,
+        size: 2.0 + _rng.nextDouble() * 4.0,
+        type: _rng.nextInt(3), // 0=circle, 1=star, 2=streak
+      ));
+    }
+  }
+
+  void _spawnConfetti(int count) {
+    for (int i = 0; i < count; i++) {
+      _particles.add(_Particle(
+        x: _rng.nextDouble(),
+        y: -0.05 - _rng.nextDouble() * 0.1,
+        vx: (_rng.nextDouble() - 0.5) * 1.5,
+        vy: 2.0 + _rng.nextDouble() * 3.0,
+        color: _fireworkColors[_rng.nextInt(_fireworkColors.length)],
+        life: 0.7 + _rng.nextDouble() * 0.3,
+        size: 3.0 + _rng.nextDouble() * 5.0,
+        type: 3, // confetti
+      ));
+    }
+  }
+
+  void _updateParticles() {
+    if (!mounted) return;
+    final dt = 0.016; // ~60fps
+    for (final p in _particles) {
+      p.x += p.vx * dt * 0.08;
+      p.y += p.vy * dt * 0.08;
+      p.vy += 0.8 * dt; // gravity
+      p.vx *= 0.99; // drag
+      p.life -= dt * 0.6;
+    }
+    _particles.removeWhere((p) => p.life <= 0);
+    setState(() {});
   }
 
   Future<void> _spin() async {
@@ -168,7 +275,9 @@ class _PuzzleRewardScreenState extends State<PuzzleRewardScreen>
           title: const Text("PUZZLE REWARDS", style: TextStyle(fontWeight: FontWeight.w900, letterSpacing: 2, fontSize: 16)),
           centerTitle: true, backgroundColor: Colors.transparent, foregroundColor: Colors.white, elevation: 0,
         ),
-        body: Container(
+        body: Stack(children: [
+          // Main content
+          Container(
           decoration: const BoxDecoration(gradient: LinearGradient(
             begin: Alignment.topCenter, end: Alignment.bottomCenter,
             colors: [Color(0xFF0A1628), Color(0xFF162A4A), Color(0xFF0A1628)])),
@@ -267,6 +376,29 @@ class _PuzzleRewardScreenState extends State<PuzzleRewardScreen>
             ),
           ),
         ),
+
+          // ── FIREWORKS OVERLAY ──
+          if (_showFireworks)
+            Positioned.fill(
+              child: IgnorePointer(
+                child: CustomPaint(
+                  painter: _FireworksPainter(particles: _particles),
+                ),
+              ),
+            ),
+
+          // ── SCREEN FLASH on celebration ──
+          if (_showFireworks && _celebCtrl.value < 0.3)
+            Positioned.fill(
+              child: IgnorePointer(
+                child: AnimatedOpacity(
+                  opacity: _celebCtrl.value < 0.15 ? 0.7 : 0.0,
+                  duration: const Duration(milliseconds: 200),
+                  child: Container(color: Colors.white),
+                ),
+              ),
+            ),
+        ]),
       );
     });
   }
@@ -559,6 +691,81 @@ class _JigsawRingPainter extends CustomPainter {
   @override
   bool shouldRepaint(covariant _JigsawRingPainter old) =>
       old.unlocked != unlocked || old.shimmer != shimmer || old.pulse != pulse;
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// PARTICLE — single firework/confetti particle
+// ─────────────────────────────────────────────────────────────────────────────
+
+class _Particle {
+  double x, y, vx, vy, life, size;
+  final Color color;
+  final int type; // 0=circle, 1=star, 2=streak, 3=confetti
+
+  _Particle({
+    required this.x, required this.y,
+    required this.vx, required this.vy,
+    required this.color, required this.life,
+    required this.size, required this.type,
+  });
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// FIREWORKS PAINTER — renders all particles
+// ─────────────────────────────────────────────────────────────────────────────
+
+class _FireworksPainter extends CustomPainter {
+  final List<_Particle> particles;
+  const _FireworksPainter({required this.particles});
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    for (final p in particles) {
+      final px = p.x * size.width;
+      final py = p.y * size.height;
+      final alpha = (p.life).clamp(0.0, 1.0);
+      final paint = Paint()
+        ..color = p.color.withValues(alpha: alpha)
+        ..style = PaintingStyle.fill;
+
+      switch (p.type) {
+        case 0: // Circle spark
+          canvas.drawCircle(Offset(px, py), p.size * alpha, paint);
+          // Glow
+          canvas.drawCircle(Offset(px, py), p.size * alpha * 2,
+              Paint()..color = p.color.withValues(alpha: alpha * 0.2)..maskFilter = const MaskFilter.blur(BlurStyle.normal, 4));
+          break;
+        case 1: // Star — draw a small cross
+          final s = p.size * alpha;
+          paint.strokeWidth = 1.5;
+          paint.style = PaintingStyle.stroke;
+          canvas.drawLine(Offset(px - s, py), Offset(px + s, py), paint);
+          canvas.drawLine(Offset(px, py - s), Offset(px, py + s), paint);
+          canvas.drawLine(Offset(px - s * 0.7, py - s * 0.7), Offset(px + s * 0.7, py + s * 0.7), paint);
+          canvas.drawLine(Offset(px + s * 0.7, py - s * 0.7), Offset(px - s * 0.7, py + s * 0.7), paint);
+          break;
+        case 2: // Streak — trail line
+          final trail = Offset(px - p.vx * 0.03 * size.width, py - p.vy * 0.03 * size.height);
+          paint.strokeWidth = p.size * alpha * 0.5;
+          paint.style = PaintingStyle.stroke;
+          paint.strokeCap = StrokeCap.round;
+          canvas.drawLine(trail, Offset(px, py), paint);
+          break;
+        case 3: // Confetti — small rectangles that rotate
+          canvas.save();
+          canvas.translate(px, py);
+          canvas.rotate(p.vx * p.life * 10);
+          final rect = Rect.fromCenter(center: Offset.zero,
+              width: p.size * 1.5, height: p.size * 0.6);
+          canvas.drawRect(rect, paint);
+          canvas.restore();
+          break;
+      }
+    }
+  }
+
+  @override
+  bool shouldRepaint(covariant _FireworksPainter old) => true;
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
