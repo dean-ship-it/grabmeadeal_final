@@ -7,10 +7,44 @@ import "package:grabmeadeal_final/models/deal.dart";
 import "package:grabmeadeal_final/models/deal_category.dart";
 import "package:grabmeadeal_final/providers/wishlist_provider.dart";
 import "package:grabmeadeal_final/screens/category_deals_screen.dart";
+import "package:grabmeadeal_final/services/deal_detective_service.dart";
 import "package:grabmeadeal_final/widgets/deal_card.dart";
 
-class DealsScreen extends StatelessWidget {
+class DealsScreen extends StatefulWidget {
   const DealsScreen({super.key});
+
+  @override
+  State<DealsScreen> createState() => _DealsScreenState();
+}
+
+class _DealsScreenState extends State<DealsScreen> {
+  bool _detectiveActive = false;
+
+  void _toggleDetective() async {
+    final detective = DealDetectiveService.instance;
+    if (_detectiveActive) {
+      await detective.stopDetecting();
+    } else {
+      await detective.startDetecting();
+    }
+    setState(() => _detectiveActive = detective.isActive);
+
+    if (mounted) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(
+            _detectiveActive
+                ? "🕵️ Deal Detective activated! I'm on the case — I'll find deals near you."
+                : "🕵️ Deal Detective is off the clock.",
+          ),
+          backgroundColor: _detectiveActive
+              ? const Color(0xFF0075C9)
+              : Colors.grey.shade700,
+          duration: const Duration(seconds: 3),
+        ),
+      );
+    }
+  }
 
   Stream<List<Deal>> _dealsStream() {
     return FirebaseFirestore.instance
@@ -38,6 +72,34 @@ class DealsScreen extends StatelessWidget {
         backgroundColor: Theme.of(context).colorScheme.primary,
         elevation: 0,
         actions: [
+          // Deal Detective toggle — detective in trench coat
+          GestureDetector(
+            onTap: _toggleDetective,
+            child: Container(
+              padding: const EdgeInsets.symmetric(horizontal: 8),
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Text(
+                    "🕵️",
+                    style: TextStyle(
+                      fontSize: 22,
+                      color: _detectiveActive ? null : Colors.white38,
+                    ),
+                  ),
+                  if (_detectiveActive)
+                    Container(
+                      width: 6,
+                      height: 6,
+                      decoration: const BoxDecoration(
+                        color: Color(0xFFA6CE39),
+                        shape: BoxShape.circle,
+                      ),
+                    ),
+                ],
+              ),
+            ),
+          ),
           IconButton(
             icon: const Icon(Icons.notifications_outlined),
             tooltip: "Notifications",
