@@ -188,12 +188,20 @@ class _DealsScreenState extends State<DealsScreen> {
                 }
                 return Consumer<WishlistProvider>(
                   builder: (context, wishlist, _) {
-                    final totalSavings = deals.fold<double>(0, (sum, deal) {
+                    // Calculate average savings per deal (not total — keeps it realistic)
+                    int dealsWithSavings = 0;
+                    double sumSavings = 0;
+                    for (final deal in deals) {
                       if (deal.originalPrice != null && deal.originalPrice! > deal.price) {
-                        return sum + (deal.originalPrice! - deal.price);
+                        sumSavings += (deal.originalPrice! - deal.price);
+                        dealsWithSavings++;
                       }
-                      return sum;
-                    });
+                    }
+                    // Show savings for a typical 5-item shopping trip
+                    final avgSavingsPerDeal = dealsWithSavings > 0
+                        ? sumSavings / dealsWithSavings
+                        : 0.0;
+                    final totalSavings = (avgSavingsPerDeal * 5).clamp(0, 999);
                     return SingleChildScrollView(
                       padding: const EdgeInsets.all(16),
                       child: Column(
@@ -229,7 +237,7 @@ class _DealsScreenState extends State<DealsScreen> {
                                           ),
                                         ),
                                         Text(
-                                          "You could save \$${totalSavings.toStringAsFixed(0)} today!",
+                                          "Save up to \$${totalSavings.toStringAsFixed(0)} on your next trip!",
                                           style: const TextStyle(
                                             color: Colors.white,
                                             fontSize: 18,
