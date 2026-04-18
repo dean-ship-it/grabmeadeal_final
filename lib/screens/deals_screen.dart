@@ -195,6 +195,16 @@ class DealsScreen extends StatelessWidget {
                                 ],
                               ),
                             ),
+                          // ── Deal Count ──
+                          Text(
+                            "${deals.length} deals found today",
+                            style: TextStyle(
+                              fontSize: 13,
+                              color: Colors.grey.shade600,
+                              fontWeight: FontWeight.w500,
+                            ),
+                          ),
+                          const SizedBox(height: 12),
                           // ── Featured Deal ──
                           Text(
                             "Featured Deal",

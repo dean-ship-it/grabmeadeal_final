@@ -3,7 +3,7 @@ const fs = require("fs");
 const path = require("path");
 const https = require("https");
 
-// Try to read .env
+// Read .env
 const envPath = path.resolve(__dirname, "../functions/.env");
 let CJ_API_KEY, CJ_WEBSITE_ID;
 if (fs.existsSync(envPath)) {
@@ -17,37 +17,68 @@ if (fs.existsSync(envPath)) {
 console.log("=== CJ Affiliate API Test ===");
 console.log(`CJ_API_KEY: ${CJ_API_KEY ? CJ_API_KEY.substring(0, 8) + "..." : "NOT SET"}`);
 console.log(`CJ_WEBSITE_ID: ${CJ_WEBSITE_ID || "NOT SET"}`);
-console.log(`.env file: ${fs.existsSync(envPath) ? "found" : "NOT FOUND"}`);
 
 if (!CJ_API_KEY || CJ_API_KEY === "your_cj_api_key_here") {
   console.log("\n❌ CJ API key not configured.");
-  console.log("\nTo activate the CJ scraper:");
-  console.log("1. Sign up at https://www.cj.com (free for publishers)");
-  console.log("2. Get your API key from Account → API Keys");
-  console.log("3. Get your Website ID from Account → Websites");
-  console.log("4. Create functions/.env (copy from functions/.env.example) with:");
-  console.log("   CJ_API_KEY=<your_personal_access_token>");
-  console.log("   CJ_WEBSITE_ID=<your_website_id>");
-  console.log("\nThe scraper at functions/scrapers/cj_scraper.js is ready — just add credentials.");
   process.exit(0);
 }
 
-const url = `https://product-search.api.cj.com/v2/product-search?website-id=${CJ_WEBSITE_ID}&keywords=deal&records-per-page=1`;
-const req = https.get(url, { headers: { Authorization: `Bearer ${CJ_API_KEY}` }, timeout: 10000 }, res => {
+// Test 1: REST Advertiser Lookup API
+console.log("\n--- Test 1: REST Advertiser Lookup API ---");
+const restUrl = `https://advertiser-lookup.api.cj.com/v2/advertiser-lookup?requestor-cid=${CJ_WEBSITE_ID}&records-per-page=5&advertiser-ids=joined`;
+const req1 = https.get(restUrl, { headers: { Authorization: `Bearer ${CJ_API_KEY}` }, timeout: 10000 }, res => {
   let data = "";
   res.on("data", chunk => data += chunk);
   res.on("end", () => {
+    console.log(`Status: ${res.statusCode}`);
     if (res.statusCode === 200) {
-      console.log(`\n✅ CJ API connected! Status: ${res.statusCode}`);
-    } else if (res.statusCode === 401) {
-      console.log(`\n❌ CJ API returned 401 — API key is invalid or expired`);
-    } else if (res.statusCode === 403) {
-      console.log(`\n❌ CJ API returned 403 — key lacks permission or website ID is wrong`);
+      console.log("✅ Advertiser Lookup API connected!");
+      console.log(data.substring(0, 500));
     } else {
-      console.log(`\n❌ CJ API returned ${res.statusCode}`);
+      console.log(`Response: ${data.substring(0, 300)}`);
     }
-    process.exit(0);
+
+    // Test 2: GraphQL Product Feed API
+    console.log("\n--- Test 2: GraphQL Product Feed API ---");
+    const query = JSON.stringify({
+      query: `{ products(companyId: "${CJ_WEBSITE_ID}", limit: 3) { totalCount resultList { title salePrice { amount currency } price { amount currency } advertiserName link imageLink } } }`
+    });
+    const options = {
+      hostname: "ads.api.cj.com",
+      path: "/query",
+      method: "POST",
+      headers: {
+        "Authorization": `Bearer ${CJ_API_KEY}`,
+        "Content-Type": "application/json",
+        "Content-Length": Buffer.byteLength(query),
+      },
+      timeout: 10000,
+    };
+    const req2 = https.request(options, res2 => {
+      let data2 = "";
+      res2.on("data", chunk => data2 += chunk);
+      res2.on("end", () => {
+        console.log(`Status: ${res2.statusCode}`);
+        if (res2.statusCode === 200) {
+          console.log("✅ Product Feed GraphQL API connected!");
+          try {
+            const parsed = JSON.parse(data2);
+            const total = parsed.data?.products?.totalCount || 0;
+            console.log(`Total products available: ${total}`);
+            const products = parsed.data?.products?.resultList || [];
+            products.forEach(p => console.log(`  - ${p.title} ($${p.salePrice}) — ${p.advertiserName}`));
+          } catch (e) {
+            console.log(data2.substring(0, 500));
+          }
+        } else {
+          console.log(`Response: ${data2.substring(0, 300)}`);
+        }
+        process.exit(0);
+      });
+    });
+    req2.on("error", err => { console.error(`Connection failed: ${err.message}`); process.exit(1); });
+    req2.write(query);
+    req2.end();
   });
 });
-req.on("error", err => { console.error(`\n❌ Connection failed: ${err.message}`); process.exit(1); });
-req.on("timeout", () => { req.destroy(); console.error("\n❌ Request timed out"); process.exit(1); });
+req1.on("error", err => { console.error(`Connection failed: ${err.message}`); process.exit(1); });
