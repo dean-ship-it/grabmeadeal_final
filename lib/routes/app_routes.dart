@@ -14,6 +14,7 @@ import "package:grabmeadeal_final/screens/search_results_screen.dart";
 import "package:grabmeadeal_final/screens/wishlist_screen.dart";
 import "package:grabmeadeal_final/screens/puzzle_reward_screen.dart";
 import "package:grabmeadeal_final/screens/prize_claim_screen.dart";
+import "package:grabmeadeal_final/screens/shopping_list_screen.dart";
 import "package:grabmeadeal_final/models/deal.dart";
 
 class AppRoutes {
@@ -33,6 +34,7 @@ class AppRoutes {
   static const String dealDetail    = "/deal-detail";
   static const String puzzle        = "/puzzle";
   static const String prizeClaim    = "/prize-claim";
+  static const String shoppingList  = "/shopping-list";
 
   static Route<dynamic> onGenerate(RouteSettings settings) {
     switch (settings.name) {
@@ -85,6 +87,10 @@ class AppRoutes {
       case puzzle:
         return MaterialPageRoute(
           builder: (_) => const PuzzleRewardScreen(),
+        );
+      case shoppingList:
+        return MaterialPageRoute(
+          builder: (_) => const ShoppingListScreen(),
         );
       case prizeClaim:
         final prize = settings.arguments is String

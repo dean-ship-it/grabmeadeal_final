@@ -37,6 +37,15 @@ class CategoryDealsScreen extends StatelessWidget {
           ],
         ),
         centerTitle: true,
+        actions: [
+          // Show shopping list button for grocery category
+          if (category == DealCategory.grocery)
+            IconButton(
+              icon: const Icon(Icons.checklist_rounded),
+              tooltip: "Shopping List",
+              onPressed: () => Navigator.pushNamed(context, "/shopping-list"),
+            ),
+        ],
       ),
       body: StreamBuilder<List<Deal>>(
         stream: _categoryStream(),
