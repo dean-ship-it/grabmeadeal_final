@@ -11,9 +11,12 @@ enum DealCategory {
   apparel(label: "Apparel",        icon: "👗", asset: "assets/category_icons/apparel.png"),
   petSupplies(label: "Pet Supplies", icon: "🐾", asset: "assets/category_icons/pet_supplies.png"),
   homeGoods(label: "Home Goods",    icon: "🏠", asset: "assets/category_icons/home_goods.png"),
-  fitness(label: "Fitness",         icon: "💪", asset: "assets/category_icons/fitness.png"),
+  food(label: "Food",               icon: "🍔", asset: "assets/category_icons/food.png"),
   insurance(label: "Insurance",     icon: "🛡️", asset: "assets/category_icons/insurance.png"),
-  energy(label: "Energy",           icon: "⚡", asset: "assets/category_icons/energy.png");
+  energy(label: "Energy",           icon: "⚡", asset: "assets/category_icons/energy.png"),
+  sports(label: "Sports",           icon: "🏈", asset: "assets/category_icons/sports.png"),
+  travel(label: "Travel",           icon: "✈️", asset: "assets/category_icons/travel.png"),
+  healthWellness(label: "Health & Wellness", icon: "💊", asset: "assets/category_icons/health_wellness.png");
 
   const DealCategory({required this.label, required this.icon, required this.asset});
 
