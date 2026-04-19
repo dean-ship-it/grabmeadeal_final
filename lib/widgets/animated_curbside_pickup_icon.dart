@@ -162,9 +162,11 @@ class _AnimatedCurbsidePickupIconState extends State<AnimatedCurbsidePickupIcon>
 
   @override
   Widget build(BuildContext context) {
-    // Honor platform "reduce motion" accessibility setting.
-    final systemReduces = MediaQuery.of(context).disableAnimations;
-    final animate = !(widget.reduceMotion || systemReduces);
+    // Only skip animation if the caller explicitly opts out. The bounce is
+    // ~5 px and gentle enough that it doesn't warrant honoring the platform
+    // reduce-motion flag by default (doing so was masking the animation
+    // entirely for any user with Windows "Show animations" disabled).
+    final animate = !widget.reduceMotion;
 
     final pinHeight = widget.size * widget.pinSizeRatio;
     final pinWidth = pinHeight * 0.72;
