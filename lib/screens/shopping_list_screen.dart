@@ -291,10 +291,10 @@ class _ShoppingListScreenState extends State<ShoppingListScreen> {
             Container(width: 40, height: 4, decoration: BoxDecoration(
               color: Colors.grey.shade300, borderRadius: BorderRadius.circular(2))),
             const SizedBox(height: 16),
-            const Row(children: [
-              Text("🚗", style: TextStyle(fontSize: 28)),
-              SizedBox(width: 12),
-              Expanded(child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+            Row(children: [
+              Image.asset("assets/icons/curbside.png", width: 56, height: 56, fit: BoxFit.contain),
+              const SizedBox(width: 12),
+              const Expanded(child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
                 Text("Order Curbside Pickup", style: TextStyle(fontSize: 18, fontWeight: FontWeight.w800)),
                 Text("They pick & pack — you just drive up!", style: TextStyle(fontSize: 13, color: Colors.grey)),
               ])),
@@ -434,7 +434,12 @@ class _ShoppingListScreenState extends State<ShoppingListScreen> {
                     // Curbside button
                     if (_currentTab == 0)
                       IconButton(
-                        icon: const Text("🚗", style: TextStyle(fontSize: 20)),
+                        icon: Image.asset(
+                          "assets/icons/curbside.png",
+                          width: 32,
+                          height: 32,
+                          fit: BoxFit.contain,
+                        ),
                         tooltip: "Order Curbside",
                         onPressed: _showCurbsideSheet,
                       )
