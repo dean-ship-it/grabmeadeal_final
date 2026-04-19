@@ -47,9 +47,8 @@ class AnimatedCurbsidePickupIcon extends StatefulWidget {
   // ── Sizing ──
   final double size;
 
-  // ── Base + pin images ──
+  // ── Base image ──
   final String basePngAsset;
-  final String pinPngAsset;
   final BoxFit baseFit;
 
   // ── Motion tuning ──
@@ -70,7 +69,6 @@ class AnimatedCurbsidePickupIcon extends StatefulWidget {
     this.onTap,
     this.size = 96,
     this.basePngAsset = "assets/icons/curbside_base.png",
-    this.pinPngAsset = "assets/icons/curbside_pin.png",
     this.baseFit = BoxFit.contain,
     this.bounceHeight = 6,
     this.bounceDuration = const Duration(milliseconds: 900),
@@ -157,9 +155,16 @@ class _AnimatedCurbsidePickupIconState extends State<AnimatedCurbsidePickupIcon>
 
     final pinHeight = widget.size * widget.pinSizeRatio;
 
-    final pin = SizedBox(
-      height: pinHeight,
-      child: Image.asset(widget.pinPngAsset, fit: BoxFit.contain),
+    // Classic red map pin with a soft drop shadow. Drawn with a Material
+    // Icon rather than an Image.asset so there's zero asset-caching risk
+    // and the pin always renders sharp at any size.
+    final pin = Icon(
+      Icons.location_on,
+      color: Colors.red.shade600,
+      size: pinHeight,
+      shadows: const [
+        Shadow(blurRadius: 4, color: Colors.black38, offset: Offset(0, 2)),
+      ],
     );
 
     final pinOverlay = Align(
