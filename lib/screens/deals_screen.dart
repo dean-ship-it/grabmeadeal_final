@@ -9,6 +9,7 @@ import "package:grabmeadeal_final/providers/wishlist_provider.dart";
 import "package:grabmeadeal_final/screens/category_deals_screen.dart";
 import "package:grabmeadeal_final/services/deal_detective_service.dart";
 import "package:grabmeadeal_final/widgets/deal_card.dart";
+import "package:grabmeadeal_final/widgets/hero_deal_card.dart";
 
 class DealsScreen extends StatefulWidget {
   const DealsScreen({super.key});
@@ -385,7 +386,7 @@ class _DealsScreenState extends State<DealsScreen> {
                                 ),
                               ),
                               const SizedBox(height: 12),
-                              DealCard(
+                              HeroDealCard(
                                 deal: heroDeal,
                                 isInWishlist:
                                     wishlist.isWishlisted(heroDeal.id),
