@@ -178,30 +178,6 @@ class DealCard extends StatelessWidget {
   }
 
   Widget _fallback() {
-    const Map<String, Color> categoryColors = {
-      "electronics": Color(0xFF1565C0),
-      "furniture": Color(0xFF4E342E),
-      "tools": Color(0xFF37474F),
-      "gaming": Color(0xFF6A1B9A),
-      "beauty": Color(0xFFAD1457),
-      "petSupplies": Color(0xFF2E7D32),
-      "apparel": Color(0xFF0075C9),
-      "automotive": Color(0xFF004A8D),
-      "grocery": Color(0xFF558B2F),
-      "homeGoods": Color(0xFFE65100),
-      "fitness": Color(0xFFC62828),
-      "food": Color(0xFFE65100),
-      "travel": Color(0xFF00838F),
-      "healthWellness": Color(0xFF2E7D32),
-      "sports": Color(0xFF1B5E20),
-      "insurance": Color(0xFF283593),
-      "energy": Color(0xFFEF6C00),
-      "petsupplies": Color(0xFF2E7D32),
-      "homegoods": Color(0xFFE65100),
-      "health_wellness": Color(0xFF2E7D32),
-      "home_goods": Color(0xFFE65100),
-      "pet_supplies": Color(0xFF2E7D32),
-    };
     const Map<String, String> categoryAssets = {
       "electronics": "assets/category_icons/electronics.png",
       "furniture": "assets/category_icons/furniture.png",
@@ -238,14 +214,19 @@ class DealCard extends StatelessWidget {
       "fitness": "\u{1F3CB}\u{FE0F}",
     };
     final key = deal.category;
-    final color = categoryColors[key] ?? const Color(0xFF0075C9);
     final asset = categoryAssets[key];
     return Container(
-      color: color,
+      decoration: const BoxDecoration(
+        gradient: LinearGradient(
+          begin: Alignment.topCenter,
+          end: Alignment.bottomCenter,
+          colors: [Color(0xFFF5F6F8), Color(0xFFEDEFF3)],
+        ),
+      ),
       child: Center(
         child: asset != null
             ? Padding(
-                padding: const EdgeInsets.all(12),
+                padding: const EdgeInsets.all(14),
                 child: Image.asset(
                   asset,
                   fit: BoxFit.contain,
