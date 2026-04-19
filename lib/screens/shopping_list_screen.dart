@@ -95,70 +95,98 @@ class _ShoppingListScreenState extends State<ShoppingListScreen> {
     super.dispose();
   }
 
-  // Collection reference based on selected list and tab
+  // Collection reference based on selected list and tab.
+  // Reads the uid live from FirebaseAuth on every access so we don't get
+  // stuck with a null uid if auth wasn't ready when initState ran.
   CollectionReference? get _listRef {
-    if (_uid == null) return null;
+    final uid = FirebaseAuth.instance.currentUser?.uid ?? _uid;
+    if (uid == null) return null;
     final collection = _currentTab == 1
         ? "pantryList"
         : _currentTab == 2
             ? "todoList"
             : "shoppingList_$_selectedList";
-    return _firestore.collection("users").doc(_uid).collection(collection);
+    return _firestore.collection("users").doc(uid).collection(collection);
   }
 
   // ── Add Item ──
 
   Future<void> _addItem(String name) async {
-    if (name.trim().isEmpty || _listRef == null) return;
     final trimmed = name.trim();
+    if (trimmed.isEmpty) return;
 
-    // Check for duplicate
-    final existing = await _listRef!
-        .where("name", isEqualTo: trimmed.toLowerCase())
-        .limit(1)
-        .get();
-    if (existing.docs.isNotEmpty) {
-      final doc = existing.docs.first;
-      final currentQty = (doc["qty"] as num?)?.toInt() ?? 1;
-      await _listRef!.doc(doc.id).update({"qty": currentQty + 1});
+    final listRef = _listRef;
+    if (listRef == null) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text("\"$trimmed\" qty → ${currentQty + 1}")),
+          const SnackBar(
+            content: Text("Sign in required to add items"),
+            backgroundColor: Colors.redAccent,
+          ),
         );
       }
-      _addController.clear();
       return;
     }
 
-    final category = _autoCategory(trimmed);
-    final matchingDeal = await _findMatchingDeal(trimmed);
+    try {
+      // Check for duplicate
+      final existing = await listRef
+          .where("name", isEqualTo: trimmed.toLowerCase())
+          .limit(1)
+          .get();
+      if (existing.docs.isNotEmpty) {
+        final doc = existing.docs.first;
+        final currentQty = (doc["qty"] as num?)?.toInt() ?? 1;
+        await listRef.doc(doc.id).update({"qty": currentQty + 1});
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(content: Text("\"$trimmed\" qty → ${currentQty + 1}")),
+          );
+        }
+        _addController.clear();
+        return;
+      }
 
-    await _listRef!.add({
-      "name": trimmed.toLowerCase(),
-      "displayName": trimmed,
-      "category": category,
-      "qty": 1,
-      "estimatedPrice": matchingDeal?["price"],
-      "checked": false,
-      "addedAt": FieldValue.serverTimestamp(),
-      "matchedDealTitle": matchingDeal?["title"],
-      "matchedDealPrice": matchingDeal?["price"],
-      "matchedDealOriginalPrice": matchingDeal?["originalPrice"],
-      "matchedDealVendor": matchingDeal?["vendor"],
-    });
+      final category = _autoCategory(trimmed);
+      final matchingDeal = await _findMatchingDeal(trimmed);
 
-    _addController.clear();
+      await listRef.add({
+        "name": trimmed.toLowerCase(),
+        "displayName": trimmed,
+        "category": category,
+        "qty": 1,
+        "estimatedPrice": matchingDeal?["price"],
+        "checked": false,
+        "addedAt": FieldValue.serverTimestamp(),
+        "matchedDealTitle": matchingDeal?["title"],
+        "matchedDealPrice": matchingDeal?["price"],
+        "matchedDealOriginalPrice": matchingDeal?["originalPrice"],
+        "matchedDealVendor": matchingDeal?["vendor"],
+      });
 
-    if (mounted && matchingDeal != null) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text(
-            "🔥 ${matchingDeal["vendor"]} has ${matchingDeal["title"]} on sale!",
+      _addController.clear();
+
+      if (mounted && matchingDeal != null) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(
+              "🔥 ${matchingDeal["vendor"]} has ${matchingDeal["title"]} on sale!",
+            ),
+            backgroundColor: const Color(0xFF0075C9),
+            duration: const Duration(seconds: 3),
           ),
-          backgroundColor: const Color(0xFF0075C9),
-          duration: const Duration(seconds: 3),
-        ),
-      );
+        );
+      }
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text("Couldn't add \"$trimmed\": $e"),
+            backgroundColor: Colors.redAccent,
+            duration: const Duration(seconds: 4),
+          ),
+        );
+      }
     }
   }
 
