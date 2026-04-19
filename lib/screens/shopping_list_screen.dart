@@ -555,6 +555,22 @@ class _ShoppingListScreenState extends State<ShoppingListScreen> {
                           ),
                         ),
                       ),
+                      const SizedBox(width: 8),
+                      // Explicit "Add" button — users shouldn't have to know
+                      // that Enter submits. Lime circle + white plus.
+                      Material(
+                        color: const Color(0xFFA6CE39),
+                        shape: const CircleBorder(),
+                        elevation: 2,
+                        child: InkWell(
+                          customBorder: const CircleBorder(),
+                          onTap: () => _addItem(_addController.text),
+                          child: const Padding(
+                            padding: EdgeInsets.all(10),
+                            child: Icon(Icons.add, color: Color(0xFF062245), size: 24),
+                          ),
+                        ),
+                      ),
                     ],
                   ),
                 ),
