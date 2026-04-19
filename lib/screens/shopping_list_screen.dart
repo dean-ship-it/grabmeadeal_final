@@ -1,6 +1,7 @@
 // lib/screens/shopping_list_screen.dart
-// Smart Shopping List — inspired by Out of Milk with deal matching
-// Multiple lists, pantry tracker, aisle categories, curbside pickup
+// Smart Shopping List with inline deal matching — each item shows the
+// matched active deal's savings, vendor, and price comparison inline.
+// Multiple lists, pantry tracker, aisle categories, curbside pickup.
 
 import "package:cloud_firestore/cloud_firestore.dart";
 import "package:firebase_auth/firebase_auth.dart";
@@ -804,7 +805,19 @@ class _ShoppingListScreenState extends State<ShoppingListScreen> {
     final qty = (data["qty"] as num?)?.toInt() ?? 1;
     final matchedDeal = data["matchedDealTitle"];
     final matchedVendor = data["matchedDealVendor"];
-    final matchedPrice = data["matchedDealPrice"];
+    final matchedPrice = (data["matchedDealPrice"] as num?)?.toDouble();
+    final matchedOriginal = (data["matchedDealOriginalPrice"] as num?)?.toDouble();
+    final hasDeal = matchedDeal != null && matchedPrice != null && !isChecked;
+    final savings = (matchedOriginal != null && matchedPrice != null && matchedOriginal > matchedPrice)
+        ? matchedOriginal - matchedPrice
+        : null;
+
+    // Row background: checked = faint blue, matched = faint lime tint, else white.
+    final rowColor = isChecked
+        ? const Color(0xFF0075C9).withValues(alpha: 0.06)
+        : hasDeal
+            ? const Color(0xFFA6CE39).withValues(alpha: 0.10)
+            : Colors.white;
 
     return Dismissible(
       key: Key(doc.id),
@@ -817,99 +830,141 @@ class _ShoppingListScreenState extends State<ShoppingListScreen> {
       ),
       onDismissed: (_) => _listRef?.doc(doc.id).delete(),
       child: Container(
-        color: isChecked
-            ? const Color(0xFF0075C9).withValues(alpha: 0.06)
-            : Colors.white,
-        child: InkWell(
-          onTap: () => _toggleChecked(doc.id, isChecked),
-          child: Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-            child: Row(
-              children: [
-                // Checkbox
-                SizedBox(
-                  width: 28, height: 28,
-                  child: Checkbox(
-                    value: isChecked,
-                    onChanged: (_) => _toggleChecked(doc.id, isChecked),
-                    activeColor: const Color(0xFF0075C9),
-                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(4)),
-                  ),
-                ),
-                const SizedBox(width: 12),
-                // Item name + deal
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
+        color: rowColor,
+        // Lime left-edge stripe when a deal is matched — the visual anchor that
+        // makes deal-matched rows pop down the length of a long list.
+        child: Row(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            if (hasDeal)
+              Container(width: 4, color: const Color(0xFFA6CE39))
+            else
+              const SizedBox(width: 4),
+            Expanded(
+              child: InkWell(
+                onTap: () => _toggleChecked(doc.id, isChecked),
+                child: Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
+                  child: Row(
                     children: [
-                      Text(
-                        qty > 1 ? "$displayName (x$qty)" : displayName,
-                        style: TextStyle(
-                          fontSize: 15,
-                          fontWeight: FontWeight.w500,
-                          decoration: isChecked ? TextDecoration.lineThrough : null,
-                          color: isChecked ? Colors.grey : Colors.black87,
+                      SizedBox(
+                        width: 28, height: 28,
+                        child: Checkbox(
+                          value: isChecked,
+                          onChanged: (_) => _toggleChecked(doc.id, isChecked),
+                          activeColor: const Color(0xFF0075C9),
+                          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(4)),
                         ),
                       ),
-                      if (matchedDeal != null && !isChecked)
-                        Text(
-                          "🔥 $matchedVendor — \$${(matchedPrice as num?)?.toStringAsFixed(2) ?? ''}",
-                          style: const TextStyle(
-                            color: Color(0xFF0075C9), fontSize: 11, fontWeight: FontWeight.w600),
-                          maxLines: 1, overflow: TextOverflow.ellipsis,
+                      const SizedBox(width: 10),
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              qty > 1 ? "$displayName (x$qty)" : displayName,
+                              style: TextStyle(
+                                fontSize: 15,
+                                fontWeight: FontWeight.w600,
+                                decoration: isChecked ? TextDecoration.lineThrough : null,
+                                color: isChecked ? Colors.grey : Colors.black87,
+                              ),
+                            ),
+                            if (hasDeal) ...[
+                              const SizedBox(height: 2),
+                              // SAVE banner — the headline
+                              Row(
+                                children: [
+                                  if (savings != null)
+                                    Container(
+                                      padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                                      decoration: BoxDecoration(
+                                        color: const Color(0xFFA6CE39),
+                                        borderRadius: BorderRadius.circular(4),
+                                      ),
+                                      child: Text(
+                                        "SAVE \$${savings.toStringAsFixed(2)}",
+                                        style: const TextStyle(
+                                          fontSize: 11, fontWeight: FontWeight.w800,
+                                          color: Color(0xFF062245), letterSpacing: 0.3),
+                                      ),
+                                    ),
+                                  if (savings != null) const SizedBox(width: 6),
+                                  Flexible(
+                                    child: Text(
+                                      "at $matchedVendor",
+                                      style: const TextStyle(
+                                        fontSize: 12, fontWeight: FontWeight.w600,
+                                        color: Color(0xFF062245)),
+                                      maxLines: 1, overflow: TextOverflow.ellipsis,
+                                    ),
+                                  ),
+                                ],
+                              ),
+                              const SizedBox(height: 1),
+                              // Price comparison line
+                              Row(
+                                children: [
+                                  Text(
+                                    "\$${matchedPrice.toStringAsFixed(2)}",
+                                    style: const TextStyle(
+                                      fontSize: 13, fontWeight: FontWeight.w700, color: Colors.black87),
+                                  ),
+                                  if (matchedOriginal != null && matchedOriginal > matchedPrice) ...[
+                                    const SizedBox(width: 6),
+                                    Text(
+                                      "\$${matchedOriginal.toStringAsFixed(2)}",
+                                      style: TextStyle(
+                                        fontSize: 12, color: Colors.grey.shade500,
+                                        decoration: TextDecoration.lineThrough),
+                                    ),
+                                  ],
+                                ],
+                              ),
+                            ],
+                          ],
                         ),
+                      ),
+                      if (!isChecked) ...[
+                        Container(
+                          decoration: BoxDecoration(
+                            color: Colors.white,
+                            borderRadius: BorderRadius.circular(8),
+                            border: Border.all(color: Colors.grey.shade200),
+                          ),
+                          child: Row(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              InkWell(
+                                onTap: () => _updateQty(doc.id, qty - 1),
+                                child: const Padding(
+                                  padding: EdgeInsets.all(4),
+                                  child: Icon(Icons.remove, size: 14, color: Colors.grey),
+                                ),
+                              ),
+                              Padding(
+                                padding: const EdgeInsets.symmetric(horizontal: 6),
+                                child: Text("$qty", style: const TextStyle(fontWeight: FontWeight.w700, fontSize: 13)),
+                              ),
+                              InkWell(
+                                onTap: () => _updateQty(doc.id, qty + 1),
+                                child: const Padding(
+                                  padding: EdgeInsets.all(4),
+                                  child: Icon(Icons.add, size: 14, color: Color(0xFF0075C9)),
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                        const SizedBox(width: 4),
+                        Icon(Icons.drag_handle, size: 18, color: Colors.grey.shade300),
+                      ],
                     ],
                   ),
                 ),
-                // Qty controls + reorder handle
-                if (!isChecked) ...[
-                  if (matchedDeal != null)
-                    Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 5, vertical: 2),
-                      margin: const EdgeInsets.only(right: 8),
-                      decoration: BoxDecoration(
-                        color: const Color(0xFFA6CE39),
-                        borderRadius: BorderRadius.circular(6),
-                      ),
-                      child: const Text("DEAL", style: TextStyle(
-                        fontSize: 9, fontWeight: FontWeight.w800, color: Colors.black87)),
-                    ),
-                  // Qty stepper
-                  Container(
-                    decoration: BoxDecoration(
-                      color: Colors.grey.shade100,
-                      borderRadius: BorderRadius.circular(8),
-                    ),
-                    child: Row(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        InkWell(
-                          onTap: () => _updateQty(doc.id, qty - 1),
-                          child: const Padding(
-                            padding: EdgeInsets.all(4),
-                            child: Icon(Icons.remove, size: 14, color: Colors.grey),
-                          ),
-                        ),
-                        Padding(
-                          padding: const EdgeInsets.symmetric(horizontal: 6),
-                          child: Text("$qty", style: const TextStyle(fontWeight: FontWeight.w700, fontSize: 13)),
-                        ),
-                        InkWell(
-                          onTap: () => _updateQty(doc.id, qty + 1),
-                          child: const Padding(
-                            padding: EdgeInsets.all(4),
-                            child: Icon(Icons.add, size: 14, color: Color(0xFF0075C9)),
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                  const SizedBox(width: 4),
-                  Icon(Icons.drag_handle, size: 18, color: Colors.grey.shade300),
-                ],
-              ],
+              ),
             ),
-          ),
+          ],
         ),
       ),
     );
