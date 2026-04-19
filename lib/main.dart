@@ -47,6 +47,20 @@ class GrabMeADealApp extends StatelessWidget {
         debugShowCheckedModeBanner: false,
         initialRoute: AppRoutes.root,
         onGenerateRoute: AppRoutes.onGenerate,
+        // Constrain to phone-width on wide screens (web/desktop) so the
+        // mobile-first layout doesn't stretch awkwardly. On phones this
+        // is a no-op (screen width < maxWidth).
+        builder: (context, child) {
+          return ColoredBox(
+            color: const Color(0xFFE8E8E8),
+            child: Center(
+              child: ConstrainedBox(
+                constraints: const BoxConstraints(maxWidth: 480),
+                child: ClipRect(child: child ?? const SizedBox.shrink()),
+              ),
+            ),
+          );
+        },
         theme: ThemeData(
           colorScheme: ColorScheme.fromSeed(
             seedColor: const Color(0xFF0075C9),
