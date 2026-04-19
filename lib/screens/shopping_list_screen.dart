@@ -7,6 +7,9 @@ import "package:firebase_auth/firebase_auth.dart";
 import "package:flutter/material.dart";
 import "package:url_launcher/url_launcher.dart";
 
+import "../services/barcode_lookup.dart";
+import "barcode_scanner_screen.dart";
+
 // ── Auto-categorize items ────────────────────────────────────────────────────
 
 String _autoCategory(String item) {
@@ -155,6 +158,41 @@ class _ShoppingListScreenState extends State<ShoppingListScreen> {
         ),
       );
     }
+  }
+
+  Future<void> _scanBarcode() async {
+    final barcode = await Navigator.of(context).push<String>(
+      MaterialPageRoute(builder: (_) => const BarcodeScannerScreen()),
+    );
+    if (!mounted || barcode == null || barcode.isEmpty) return;
+
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Row(
+          children: [
+            const SizedBox(
+              width: 16, height: 16,
+              child: CircularProgressIndicator(strokeWidth: 2, color: Colors.white),
+            ),
+            const SizedBox(width: 12),
+            Text("Looking up $barcode…"),
+          ],
+        ),
+        duration: const Duration(seconds: 2),
+      ),
+    );
+
+    final name = await lookupProductName(barcode);
+    if (!mounted) return;
+    await _addItem(name ?? barcode);
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text(name != null
+            ? "Added \"$name\""
+            : "No match for $barcode — added the barcode (tap to rename)"),
+        duration: const Duration(seconds: 3),
+      ),
+    );
   }
 
   Future<Map<String, dynamic>?> _findMatchingDeal(String itemName) async {
@@ -431,35 +469,64 @@ class _ShoppingListScreenState extends State<ShoppingListScreen> {
                       Text(listLabel, style: const TextStyle(
                         color: Colors.white, fontWeight: FontWeight.w700, fontSize: 16)),
                     const Spacer(),
-                    // Curbside button
+                    // Quick actions — Curbside + Scan, stacked vertically
                     if (_currentTab == 0)
-                      InkWell(
-                        onTap: _showCurbsideSheet,
-                        borderRadius: BorderRadius.circular(10),
-                        child: Padding(
-                          padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 4),
-                          child: Column(
-                            mainAxisSize: MainAxisSize.min,
-                            children: [
-                              Image.asset(
-                                "assets/icons/curbside.png",
-                                width: 40,
-                                height: 40,
-                                fit: BoxFit.contain,
+                      Column(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          InkWell(
+                            onTap: _showCurbsideSheet,
+                            borderRadius: BorderRadius.circular(10),
+                            child: Padding(
+                              padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                              child: Column(
+                                mainAxisSize: MainAxisSize.min,
+                                children: [
+                                  Image.asset(
+                                    "assets/icons/curbside.png",
+                                    width: 50,
+                                    height: 50,
+                                    fit: BoxFit.contain,
+                                  ),
+                                  const SizedBox(height: 2),
+                                  const Text(
+                                    "Order Curbside",
+                                    style: TextStyle(
+                                      color: Colors.white,
+                                      fontSize: 10,
+                                      fontWeight: FontWeight.w700,
+                                      letterSpacing: 0.2,
+                                    ),
+                                  ),
+                                ],
                               ),
-                              const SizedBox(height: 2),
-                              const Text(
-                                "Order Curbside",
-                                style: TextStyle(
-                                  color: Colors.white,
-                                  fontSize: 10,
-                                  fontWeight: FontWeight.w700,
-                                  letterSpacing: 0.2,
-                                ),
-                              ),
-                            ],
+                            ),
                           ),
-                        ),
+                          const SizedBox(height: 4),
+                          InkWell(
+                            onTap: _scanBarcode,
+                            borderRadius: BorderRadius.circular(10),
+                            child: Padding(
+                              padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                              child: Column(
+                                mainAxisSize: MainAxisSize.min,
+                                children: const [
+                                  Icon(Icons.qr_code_scanner, color: Colors.white, size: 40),
+                                  SizedBox(height: 2),
+                                  Text(
+                                    "Scan Barcode",
+                                    style: TextStyle(
+                                      color: Colors.white,
+                                      fontSize: 10,
+                                      fontWeight: FontWeight.w700,
+                                      letterSpacing: 0.2,
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
+                          ),
+                        ],
                       )
                     else
                       const SizedBox(width: 48),
@@ -499,11 +566,7 @@ class _ShoppingListScreenState extends State<ShoppingListScreen> {
                                 ),
                                 IconButton(
                                   icon: Icon(Icons.qr_code_scanner, color: Colors.grey.shade500, size: 22),
-                                  onPressed: () {
-                                    ScaffoldMessenger.of(context).showSnackBar(
-                                      const SnackBar(content: Text("Barcode scanner coming soon!")),
-                                    );
-                                  },
+                                  onPressed: _scanBarcode,
                                 ),
                               ],
                             ),

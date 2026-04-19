@@ -36,5 +36,9 @@
 	<!-- Notifications -->
 	<key>NSUserNotificationAlertStyle</key>
 	<string>alert</string>
+
+	<!-- Camera (barcode scanner) -->
+	<key>NSCameraUsageDescription</key>
+	<string>We use your camera to scan barcodes for your shopping list.</string>
 </dict>
 </plist>
