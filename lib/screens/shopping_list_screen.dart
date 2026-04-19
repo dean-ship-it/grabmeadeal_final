@@ -8,6 +8,7 @@ import "package:flutter/material.dart";
 import "package:url_launcher/url_launcher.dart";
 
 import "../services/barcode_lookup.dart";
+import "../widgets/animated_curbside_pickup_icon.dart";
 import "barcode_scanner_screen.dart";
 
 // ── Auto-categorize items ────────────────────────────────────────────────────
@@ -330,7 +331,13 @@ class _ShoppingListScreenState extends State<ShoppingListScreen> {
               color: Colors.grey.shade300, borderRadius: BorderRadius.circular(2))),
             const SizedBox(height: 16),
             Row(children: [
-              Image.asset("assets/icons/curbside.png", width: 56, height: 56, fit: BoxFit.contain),
+              const AnimatedCurbsidePickupIcon(
+                size: 64,
+                basePngAsset: "assets/icons/curbside_base.png",
+                pinAlignment: Alignment(-0.15, -0.45),
+                pinSizeRatio: 0.34,
+                bounceHeight: 5,
+              ),
               const SizedBox(width: 12),
               const Expanded(child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
                 Text("Order Curbside Pickup", style: TextStyle(fontSize: 18, fontWeight: FontWeight.w800)),
@@ -471,32 +478,32 @@ class _ShoppingListScreenState extends State<ShoppingListScreen> {
                     const Spacer(),
                     // Curbside button
                     if (_currentTab == 0)
-                      InkWell(
-                        onTap: _showCurbsideSheet,
-                        borderRadius: BorderRadius.circular(10),
-                        child: Padding(
-                          padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
-                          child: Column(
-                            mainAxisSize: MainAxisSize.min,
-                            children: [
-                              Image.asset(
-                                "assets/icons/curbside.png",
-                                width: 50,
-                                height: 50,
-                                fit: BoxFit.contain,
+                      Padding(
+                        padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                        child: Column(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            AnimatedCurbsidePickupIcon(
+                              size: 50,
+                              basePngAsset: "assets/icons/curbside_base.png",
+                              onTap: _showCurbsideSheet,
+                              pinAlignment: const Alignment(-0.15, -0.45),
+                              pinSizeRatio: 0.34,
+                              bounceHeight: 5,
+                              bounceDuration: const Duration(milliseconds: 900),
+                              pauseDuration: const Duration(milliseconds: 700),
+                            ),
+                            const SizedBox(height: 2),
+                            const Text(
+                              "Order Curbside",
+                              style: TextStyle(
+                                color: Colors.white,
+                                fontSize: 10,
+                                fontWeight: FontWeight.w700,
+                                letterSpacing: 0.2,
                               ),
-                              const SizedBox(height: 2),
-                              const Text(
-                                "Order Curbside",
-                                style: TextStyle(
-                                  color: Colors.white,
-                                  fontSize: 10,
-                                  fontWeight: FontWeight.w700,
-                                  letterSpacing: 0.2,
-                                ),
-                              ),
-                            ],
-                          ),
+                            ),
+                          ],
                         ),
                       )
                     else
