@@ -1,9 +1,10 @@
 // lib/widgets/animated_curbside_pickup_icon.dart
 //
 // Reusable curbside-pickup brand icon with a single animated element:
-// the lime green location pin gently bounces up and down in the upper
-// corner while the rest of the illustration (car, bag, curb, road,
-// navy background) stays completely static.
+// a 3D-illustrated location pin that gently bounces up and down over a
+// static base scene (car + bag + curb + sky). Both layers are PNG so
+// the pin and base share the same rendering style — no pasted-sticker
+// look.
 //
 // ─────────────────────────────────────────────────────────────────────
 // USAGE
@@ -14,11 +15,8 @@
 //     onTap: () => showCurbsideSheet(),
 //   )
 //
-// The animated pin is drawn in Flutter (CustomPainter) on top of a
-// static PNG base. For the cleanest effect, the base PNG should be a
-// pin-less version of the curbside illustration — otherwise the
-// baked-in pin will briefly peek out from behind the animated one at
-// the top of each bounce. Pass `basePngAsset` to swap images.
+// The base PNG must be pin-less — the pin is a separate sprite layered
+// on top. Pass `basePngAsset` / `pinPngAsset` to swap art.
 //
 // ─────────────────────────────────────────────────────────────────────
 // TUNING KNOBS
@@ -28,20 +26,15 @@
 //                       Taste: 4 = whisper, 8 = noticeable, >10 loses
 //                       the "premium micro" feel.
 //   bounceDuration    — time for one up-down motion. Default 900ms.
-//                       Shorter feels urgent; longer feels floaty.
 //   pauseDuration     — rest at the low point between cycles.
-//                       Default 600ms. This is what separates a
-//                       breathing loop from a nervous wiggle.
-//   pinAlignment      — where the pin sits in the icon. Defaults to
-//                       roughly the upper-left area of the curbside
-//                       composite. Adjust x∈[-1,1], y∈[-1,1] to
-//                       match a different base image.
+//                       Default 600ms.
+//   pinAlignment      — where the pin sits in the icon. x∈[-1,1],
+//                       y∈[-1,1]. Default (-0.1, -0.45) — upper-
+//                       center over the car.
 //   pinSizeRatio      — pin height as a fraction of the widget size.
-//                       Default 0.32.
+//                       Default 0.36.
 //   reduceMotion      — force-disable the animation at the widget
-//                       level. The widget also auto-honors the
-//                       platform's "reduce motion" accessibility
-//                       setting via MediaQuery.disableAnimations.
+//                       level.
 //
 // ─────────────────────────────────────────────────────────────────────
 
@@ -54,8 +47,9 @@ class AnimatedCurbsidePickupIcon extends StatefulWidget {
   // ── Sizing ──
   final double size;
 
-  // ── Base image ──
+  // ── Base + pin images ──
   final String basePngAsset;
+  final String pinPngAsset;
   final BoxFit baseFit;
 
   // ── Motion tuning ──
@@ -67,11 +61,6 @@ class AnimatedCurbsidePickupIcon extends StatefulWidget {
   final Alignment pinAlignment;
   final double pinSizeRatio;
 
-  // ── Palette ──
-  final Color pinColor;        // lime green body — default #A6CE39
-  final Color pinShadowColor;  // navy accents   — default #062245
-  final Color pinCenterColor;  // hollow center  — default white
-
   // ── Accessibility ──
   final bool reduceMotion;
   final String? semanticLabel;
@@ -80,16 +69,14 @@ class AnimatedCurbsidePickupIcon extends StatefulWidget {
     super.key,
     this.onTap,
     this.size = 96,
-    this.basePngAsset = "assets/icons/curbside.png",
+    this.basePngAsset = "assets/icons/curbside_base.png",
+    this.pinPngAsset = "assets/icons/curbside_pin.png",
     this.baseFit = BoxFit.contain,
     this.bounceHeight = 6,
     this.bounceDuration = const Duration(milliseconds: 900),
     this.pauseDuration = const Duration(milliseconds: 600),
     this.pinAlignment = const Alignment(-0.1, -0.45),
-    this.pinSizeRatio = 0.32,
-    this.pinColor = const Color(0xFFA6CE39),
-    this.pinShadowColor = const Color(0xFF062245),
-    this.pinCenterColor = Colors.white,
+    this.pinSizeRatio = 0.36,
     this.reduceMotion = false,
     this.semanticLabel = "Curbside pickup",
   });
@@ -169,14 +156,10 @@ class _AnimatedCurbsidePickupIconState extends State<AnimatedCurbsidePickupIcon>
     final animate = !widget.reduceMotion;
 
     final pinHeight = widget.size * widget.pinSizeRatio;
-    final pinWidth = pinHeight * 0.72;
 
-    final pin = _Pin(
-      width: pinWidth,
+    final pin = SizedBox(
       height: pinHeight,
-      color: widget.pinColor,
-      shadowColor: widget.pinShadowColor,
-      centerColor: widget.pinCenterColor,
+      child: Image.asset(widget.pinPngAsset, fit: BoxFit.contain),
     );
 
     final pinOverlay = Align(
@@ -227,112 +210,3 @@ class _AnimatedCurbsidePickupIconState extends State<AnimatedCurbsidePickupIcon>
   }
 }
 
-// ── Pin primitive (teardrop body, hollow center, soft drop shadow) ──
-
-class _Pin extends StatelessWidget {
-  final double width;
-  final double height;
-  final Color color;
-  final Color shadowColor;
-  final Color centerColor;
-
-  const _Pin({
-    required this.width,
-    required this.height,
-    required this.color,
-    required this.shadowColor,
-    required this.centerColor,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    return CustomPaint(
-      size: Size(width, height),
-      painter: _PinPainter(
-        color: color,
-        shadowColor: shadowColor,
-        centerColor: centerColor,
-      ),
-    );
-  }
-}
-
-class _PinPainter extends CustomPainter {
-  final Color color;
-  final Color shadowColor;
-  final Color centerColor;
-
-  const _PinPainter({
-    required this.color,
-    required this.shadowColor,
-    required this.centerColor,
-  });
-
-  @override
-  void paint(Canvas canvas, Size size) {
-    final w = size.width;
-    final h = size.height;
-    final headRadius = w / 2;
-    final headCenter = Offset(w / 2, headRadius);
-
-    // Teardrop path: semicircular head on top, tapered tail ending in a
-    // point at the bottom-center. Control points at (w, w*0.85) /
-    // (0, w*0.85) keep the tail tangent-smooth against the head.
-    final body = Path()
-      ..moveTo(0, headRadius)
-      ..arcToPoint(
-        Offset(w, headRadius),
-        radius: Radius.circular(headRadius),
-        clockwise: true,
-      )
-      ..quadraticBezierTo(w, w * 0.85, w / 2, h)
-      ..quadraticBezierTo(0, w * 0.85, 0, headRadius)
-      ..close();
-
-    // Soft drop shadow behind the pin
-    canvas.save();
-    canvas.translate(0, h * 0.03);
-    canvas.drawPath(
-      body,
-      Paint()
-        ..color = shadowColor.withValues(alpha: 0.28)
-        ..maskFilter = const MaskFilter.blur(BlurStyle.normal, 2.2),
-    );
-    canvas.restore();
-
-    // Lime body fill
-    canvas.drawPath(body, Paint()..color = color);
-
-    // Subtle navy outline for depth
-    canvas.drawPath(
-      body,
-      Paint()
-        ..color = shadowColor.withValues(alpha: 0.25)
-        ..style = PaintingStyle.stroke
-        ..strokeWidth = w * 0.035,
-    );
-
-    // Hollow white center
-    canvas.drawCircle(
-      headCenter,
-      headRadius * 0.42,
-      Paint()..color = centerColor,
-    );
-
-    // Thin navy ring around the hollow — matches the reference art
-    canvas.drawCircle(
-      headCenter,
-      headRadius * 0.42,
-      Paint()
-        ..color = shadowColor.withValues(alpha: 0.35)
-        ..style = PaintingStyle.stroke
-        ..strokeWidth = w * 0.025,
-    );
-  }
-
-  @override
-  bool shouldRepaint(covariant _PinPainter old) =>
-      old.color != color ||
-      old.shadowColor != shadowColor ||
-      old.centerColor != centerColor;
-}
