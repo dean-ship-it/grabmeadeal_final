@@ -686,10 +686,19 @@ class _ShoppingListScreenState extends State<ShoppingListScreen> {
                 padding: const EdgeInsets.symmetric(horizontal: 12),
                 children: [
                   for (final item in const [
-                    "Milk", "Eggs", "Bread", "Butter", "Chicken", "Rice",
-                    "Tortillas", "Cheese", "Bananas", "Coffee", "Bacon",
-                    "Avocados", "Ground Beef", "Pasta", "Onions", "Chips",
-                    "Juice", "Paper Towels", "Cereal", "Tomatoes",
+                    "Apples", "Avocados", "Bacon", "Bagels", "Bananas",
+                    "Berries", "Bread", "Broccoli", "Butter", "Carrots",
+                    "Cereal", "Cheese", "Chicken", "Chips", "Coffee",
+                    "Cookies", "Crackers", "Cream Cheese", "Detergent",
+                    "Dish Soap", "Eggs", "Flour", "Garlic", "Ground Beef",
+                    "Ham", "Honey", "Ice Cream", "Jelly", "Juice", "Ketchup",
+                    "Lemons", "Lettuce", "Mayo", "Milk", "Mushrooms",
+                    "Mustard", "Oats", "Onions", "Oranges", "Pasta",
+                    "Paper Towels", "Peanut Butter", "Peppers", "Pizza",
+                    "Potatoes", "Rice", "Salmon", "Salsa", "Sausage",
+                    "Soda", "Soup", "Sour Cream", "Spinach", "Strawberries",
+                    "Sugar", "Tea", "Toilet Paper", "Tomatoes", "Tortillas",
+                    "Trash Bags", "Turkey", "Water", "Yogurt",
                   ])
                     Padding(
                       padding: const EdgeInsets.only(right: 6),
