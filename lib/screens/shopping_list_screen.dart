@@ -6,6 +6,7 @@
 import "package:cloud_firestore/cloud_firestore.dart";
 import "package:firebase_auth/firebase_auth.dart";
 import "package:flutter/material.dart";
+import "package:flutter/services.dart";
 import "package:speech_to_text/speech_to_text.dart";
 import "package:url_launcher/url_launcher.dart";
 
@@ -387,8 +388,16 @@ class _ShoppingListScreenState extends State<ShoppingListScreen> {
       }
       return;
     }
-    final query = items.take(5).join(" ");
-    final q = Uri.encodeComponent(query);
+    final query = items.join(", ");
+    final q = Uri.encodeComponent(items.take(5).join(" "));
+
+    // Copy the full list to the clipboard so the user can paste into the
+    // store's search/cart if the URL-based search doesn't surface all items.
+    // This is the honest workaround — none of HEB/Walmart/Target/Amazon/
+    // Instacart/Costco expose a public "accept my cart" URL for unaffiliated
+    // third parties.
+    await Clipboard.setData(ClipboardData(text: query));
+
     Uri url;
     // HEB and Costco are unmonetized goodwill — neither has a public
     // affiliate program. The other four are affiliate targets and will
@@ -422,11 +431,27 @@ class _ShoppingListScreenState extends State<ShoppingListScreen> {
         return;
     }
     try {
-      if (await canLaunchUrl(url)) {
-        await launchUrl(url, mode: LaunchMode.externalApplication);
+      final launched = await launchUrl(url, mode: LaunchMode.platformDefault);
+      if (!launched && mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text("Couldn't open $store — URL: $url")),
+        );
+        return;
+      }
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text("List copied to clipboard · ${items.length} items"),
+            duration: const Duration(seconds: 3),
+          ),
+        );
       }
     } catch (e) {
-      debugPrint("[ShoppingList] Launch error: $e");
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text("Launch failed: $e")),
+        );
+      }
     }
   }
 
