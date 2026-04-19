@@ -606,10 +606,18 @@ class _ShoppingListScreenState extends State<ShoppingListScreen> {
                     child: Column(
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
-                        Text(
-                          _currentTab == 1 ? "🏠" : _currentTab == 2 ? "✅" : "🛒",
-                          style: const TextStyle(fontSize: 56),
-                        ),
+                        if (_currentTab == 0)
+                          Image.asset(
+                            "assets/category_icons/grocery.png",
+                            width: 96,
+                            height: 96,
+                            fit: BoxFit.contain,
+                          )
+                        else
+                          Text(
+                            _currentTab == 1 ? "🏠" : "✅",
+                            style: const TextStyle(fontSize: 56),
+                          ),
                         const SizedBox(height: 12),
                         Text(
                           _currentTab == 1
