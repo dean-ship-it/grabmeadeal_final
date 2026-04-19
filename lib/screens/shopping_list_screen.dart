@@ -91,14 +91,16 @@ class _ShoppingListScreenState extends State<ShoppingListScreen> {
   void initState() {
     super.initState();
     _uid = FirebaseAuth.instance.currentUser?.uid;
-    _initSpeech();
   }
 
-  Future<void> _initSpeech() async {
+  // Lazy init on first tap — some browsers only expose the speech API
+  // inside a user-gesture callback, so initializing on mount falsely
+  // reports the API as unavailable.
+  Future<bool> _ensureSpeechReady() async {
+    if (_speechReady) return true;
     try {
       final available = await _speech.initialize(
         onStatus: (status) {
-          // Called with "listening", "notListening", "done".
           if (mounted && status == "notListening" && _isListening) {
             setState(() => _isListening = false);
           }
@@ -113,30 +115,36 @@ class _ShoppingListScreenState extends State<ShoppingListScreen> {
         },
       );
       if (mounted) setState(() => _speechReady = available);
-    } catch (_) {
-      // Device doesn't support it (e.g., some embedded browsers). Leave
-      // _speechReady = false; the mic button will show a polite snackbar.
+      return available;
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text("Voice init failed: $e")),
+        );
+      }
+      return false;
     }
   }
 
   Future<void> _toggleListening() async {
-    if (!_speechReady) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text("Voice input not supported on this device/browser")),
-      );
-      return;
-    }
     if (_isListening) {
       await _speech.stop();
       setState(() => _isListening = false);
       return;
     }
+    final ok = await _ensureSpeechReady();
+    if (!ok) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text("Voice input not supported on this device/browser")),
+        );
+      }
+      return;
+    }
     setState(() => _isListening = true);
     await _speech.listen(
       onResult: (result) {
-        // Show the transcript live in the input field.
         _addController.text = result.recognizedWords;
-        // When the user stops speaking, commit it.
         if (result.finalResult && result.recognizedWords.trim().isNotEmpty) {
           _addItem(result.recognizedWords);
         }
