@@ -333,8 +333,6 @@ class _ShoppingListScreenState extends State<ShoppingListScreen> {
             Row(children: [
               const AnimatedCurbsidePickupIcon(
                 size: 64,
-                basePngAsset: "assets/icons/curbside_base.png",
-                pinAlignment: Alignment(-0.15, -0.45),
                 pinSizeRatio: 0.34,
                 bounceHeight: 5,
               ),
@@ -485,9 +483,7 @@ class _ShoppingListScreenState extends State<ShoppingListScreen> {
                           children: [
                             AnimatedCurbsidePickupIcon(
                               size: 50,
-                              basePngAsset: "assets/icons/curbside_base.png",
                               onTap: _showCurbsideSheet,
-                              pinAlignment: const Alignment(-0.15, -0.45),
                               pinSizeRatio: 0.34,
                               bounceHeight: 5,
                               bounceDuration: const Duration(milliseconds: 900),

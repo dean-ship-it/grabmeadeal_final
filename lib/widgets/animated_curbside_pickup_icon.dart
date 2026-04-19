@@ -73,7 +73,7 @@ class AnimatedCurbsidePickupIcon extends StatefulWidget {
     this.bounceHeight = 6,
     this.bounceDuration = const Duration(milliseconds: 900),
     this.pauseDuration = const Duration(milliseconds: 600),
-    this.pinAlignment = const Alignment(-0.1, -0.45),
+    this.pinAlignment = const Alignment(0.0, -0.45),
     this.pinSizeRatio = 0.36,
     this.reduceMotion = false,
     this.semanticLabel = "Curbside pickup",
@@ -160,10 +160,10 @@ class _AnimatedCurbsidePickupIconState extends State<AnimatedCurbsidePickupIcon>
     // and the pin always renders sharp at any size.
     final pin = Icon(
       Icons.location_on,
-      color: Colors.red.shade600,
+      color: const Color(0xFFA6CE39), // brand lime green
       size: pinHeight,
       shadows: const [
-        Shadow(blurRadius: 4, color: Colors.black38, offset: Offset(0, 2)),
+        Shadow(blurRadius: 4, color: Colors.black54, offset: Offset(0, 2)),
       ],
     );
 
