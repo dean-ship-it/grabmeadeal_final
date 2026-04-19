@@ -54,8 +54,8 @@ const List<StoreLocation> _texasStores = [
   StoreLocation(name: "Home Depot", category: "tools", lat: 29.7503, lng: -95.3663, city: "Houston"),
   StoreLocation(name: "Home Depot", category: "tools", lat: 29.7764, lng: -95.4539, city: "Houston"),
   // Academy Sports
-  StoreLocation(name: "Academy Sports", category: "fitness", lat: 29.7228, lng: -95.4378, city: "Houston"),
-  StoreLocation(name: "Academy Sports", category: "fitness", lat: 29.8142, lng: -95.4060, city: "Houston"),
+  StoreLocation(name: "Academy Sports", category: "sports", lat: 29.7228, lng: -95.4378, city: "Houston"),
+  StoreLocation(name: "Academy Sports", category: "sports", lat: 29.8142, lng: -95.4060, city: "Houston"),
   // Costco
   StoreLocation(name: "Costco", category: "grocery", lat: 29.7285, lng: -95.4630, city: "Houston"),
   StoreLocation(name: "Costco", category: "grocery", lat: 29.7922, lng: -95.4658, city: "Houston"),
@@ -67,8 +67,8 @@ const List<StoreLocation> _texasStores = [
   StoreLocation(name: "Ulta Beauty", category: "beauty", lat: 29.7389, lng: -95.4139, city: "Houston"),
   // IKEA
   StoreLocation(name: "IKEA", category: "furniture", lat: 29.6856, lng: -95.4712, city: "Houston"),
-  // GameStop
-  StoreLocation(name: "GameStop", category: "gaming", lat: 29.7358, lng: -95.4135, city: "Houston"),
+  // GameStop (gaming category retired 2026-04-19; folded into Electronics)
+  StoreLocation(name: "GameStop", category: "electronics", lat: 29.7358, lng: -95.4135, city: "Houston"),
 
   // ── Dallas ──
   StoreLocation(name: "Walmart", category: "grocery", lat: 32.7767, lng: -96.7970, city: "Dallas"),
@@ -76,7 +76,7 @@ const List<StoreLocation> _texasStores = [
   StoreLocation(name: "Target", category: "homeGoods", lat: 32.7944, lng: -96.8064, city: "Dallas"),
   StoreLocation(name: "Best Buy", category: "electronics", lat: 32.7936, lng: -96.7888, city: "Dallas"),
   StoreLocation(name: "Home Depot", category: "tools", lat: 32.8119, lng: -96.7984, city: "Dallas"),
-  StoreLocation(name: "Academy Sports", category: "fitness", lat: 32.7709, lng: -96.8262, city: "Dallas"),
+  StoreLocation(name: "Academy Sports", category: "sports", lat: 32.7709, lng: -96.8262, city: "Dallas"),
   StoreLocation(name: "Costco", category: "grocery", lat: 32.8607, lng: -96.7684, city: "Dallas"),
 
   // ── San Antonio ──
@@ -85,7 +85,7 @@ const List<StoreLocation> _texasStores = [
   StoreLocation(name: "Walmart", category: "grocery", lat: 29.4564, lng: -98.5140, city: "San Antonio"),
   StoreLocation(name: "Target", category: "homeGoods", lat: 29.5108, lng: -98.5250, city: "San Antonio"),
   StoreLocation(name: "Best Buy", category: "electronics", lat: 29.5079, lng: -98.5234, city: "San Antonio"),
-  StoreLocation(name: "Academy Sports", category: "fitness", lat: 29.5191, lng: -98.4990, city: "San Antonio"),
+  StoreLocation(name: "Academy Sports", category: "sports", lat: 29.5191, lng: -98.4990, city: "San Antonio"),
 
   // ── Austin ──
   StoreLocation(name: "HEB", category: "grocery", lat: 30.2672, lng: -97.7431, city: "Austin"),
@@ -94,7 +94,7 @@ const List<StoreLocation> _texasStores = [
   StoreLocation(name: "Target", category: "homeGoods", lat: 30.3035, lng: -97.7369, city: "Austin"),
   StoreLocation(name: "Best Buy", category: "electronics", lat: 30.3610, lng: -97.7280, city: "Austin"),
   StoreLocation(name: "Costco", category: "grocery", lat: 30.4014, lng: -97.7244, city: "Austin"),
-  StoreLocation(name: "Academy Sports", category: "fitness", lat: 30.3530, lng: -97.7354, city: "Austin"),
+  StoreLocation(name: "Academy Sports", category: "sports", lat: 30.3530, lng: -97.7354, city: "Austin"),
 ];
 
 // ── Deal Detective Service ───────────────────────────────────────────────────
@@ -377,7 +377,7 @@ class DealDetectiveService {
       "tools": "tools and hardware",
       "automotive": "automotive",
       "furniture": "furniture",
-      "fitness": "fitness and sports",
+      "sports": "sports and fitness equipment",
       "gaming": "gaming",
       "petSupplies": "pet supplies",
       "homeGoods": "home and kitchen",

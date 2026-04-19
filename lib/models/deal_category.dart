@@ -3,7 +3,6 @@
 enum DealCategory {
   grocery(label: "Grocery",         icon: "🛒", asset: "assets/category_icons/grocery.png"),
   electronics(label: "Electronics", icon: "📱", asset: "assets/category_icons/electronics.png"),
-  gaming(label: "Gaming",          icon: "🎮", asset: "assets/category_icons/gaming.png"),
   tools(label: "Tools",            icon: "🔧", asset: "assets/category_icons/tools.png"),
   furniture(label: "Furniture",     icon: "🛋️", asset: "assets/category_icons/furniture.png"),
   automotive(label: "Automotive",   icon: "🚗", asset: "assets/category_icons/automotive.png"),
