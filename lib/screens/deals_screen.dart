@@ -330,8 +330,11 @@ class _CategoryBanner extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final categories = DealCategory.values;
+    // Banner shows the first 11 categories in a 6 + 5 grid + a "More" tile.
+    // Any categories beyond index 10 (e.g., Insurance, Energy) are reachable
+    // via the "More" tile → full Categories tab.
     final row1 = categories.take(6).toList();
-    final row2 = categories.skip(6).toList(); // 5 categories
+    final row2 = categories.skip(6).take(5).toList();
 
     return Container(
       color: const Color(0xFF0075C9),
