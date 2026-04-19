@@ -65,25 +65,12 @@ class _DealsScreenState extends State<DealsScreen> {
         toolbarHeight: 64,
         title: Row(
           children: [
-            Container(
-              width: 44,
-              height: 44,
-              decoration: BoxDecoration(
-                borderRadius: BorderRadius.circular(10),
-                boxShadow: [
-                  BoxShadow(
-                    color: const Color(0xFFF5C518).withValues(alpha: 0.3),
-                    blurRadius: 8,
-                    offset: const Offset(0, 2),
-                  ),
-                ],
-              ),
-              child: ClipRRect(
-                borderRadius: BorderRadius.circular(10),
-                child: Image.asset(
-                  "assets/logo/launcher_v2_cropped.png",
-                  fit: BoxFit.cover,
-                ),
+            SizedBox(
+              width: 48,
+              height: 48,
+              child: Image.asset(
+                "assets/logo/gmd_logo_v3.png",
+                fit: BoxFit.contain,
               ),
             ),
             const SizedBox(width: 12),

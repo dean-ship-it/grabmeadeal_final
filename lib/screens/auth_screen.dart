@@ -100,27 +100,26 @@ class _AuthScreenState extends State<AuthScreen> {
               Center(
                 child: Column(
                   children: [
-                    Container(
-                      width: 80,
-                      height: 80,
-                      decoration: BoxDecoration(
-                        color: Colors.white,
-                        borderRadius: BorderRadius.circular(20),
-                        boxShadow: [
-                          BoxShadow(
-                            color: Colors.black.withOpacity(0.2),
-                            blurRadius: 12,
-                            offset: const Offset(0, 4),
+                    SizedBox(
+                      width: 112,
+                      height: 112,
+                      child: Image.asset(
+                        "assets/logo/gmd_logo_v3.png",
+                        fit: BoxFit.contain,
+                        errorBuilder: (_, __, ___) => Container(
+                          decoration: BoxDecoration(
+                            color: Colors.white,
+                            borderRadius: BorderRadius.circular(20),
                           ),
-                        ],
-                      ),
-                      child: const Center(
-                        child: Text(
-                          "GMD",
-                          style: TextStyle(
-                            fontSize: 22,
-                            fontWeight: FontWeight.w900,
-                            color: Color(0xFF0075C9),
+                          child: const Center(
+                            child: Text(
+                              "GMD",
+                              style: TextStyle(
+                                fontSize: 22,
+                                fontWeight: FontWeight.w900,
+                                color: Color(0xFF0075C9),
+                              ),
+                            ),
                           ),
                         ),
                       ),
