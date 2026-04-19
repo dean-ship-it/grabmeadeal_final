@@ -30,12 +30,5 @@
                 android:name="flutterEmbedding"
                 android:value="2" />
         </activity>
-
-        <!-- Needed for background geofencing -->
-        <service
-            android:name="io.flutter.embedding.engine.FlutterEngine"
-            android:enabled="true"
-            android:exported="false"
-            android:foregroundServiceType="location"/>
     </application>
 </manifest>
