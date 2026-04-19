@@ -178,20 +178,53 @@ class DealCard extends StatelessWidget {
   }
 
   Widget _fallback() {
-    final Map<String, Color> categoryColors = {
-      "electronics": const Color(0xFF1565C0),
-      "furniture": const Color(0xFF4E342E),
-      "tools": const Color(0xFF37474F),
-      "gaming": const Color(0xFF6A1B9A),
-      "beauty": const Color(0xFFAD1457),
-      "petSupplies": const Color(0xFF2E7D32),
-      "apparel": const Color(0xFF0075C9),
-      "automotive": const Color(0xFF004A8D),
-      "grocery": const Color(0xFF558B2F),
-      "homeGoods": const Color(0xFFE65100),
-      "fitness": const Color(0xFFC62828),
+    const Map<String, Color> categoryColors = {
+      "electronics": Color(0xFF1565C0),
+      "furniture": Color(0xFF4E342E),
+      "tools": Color(0xFF37474F),
+      "gaming": Color(0xFF6A1B9A),
+      "beauty": Color(0xFFAD1457),
+      "petSupplies": Color(0xFF2E7D32),
+      "apparel": Color(0xFF0075C9),
+      "automotive": Color(0xFF004A8D),
+      "grocery": Color(0xFF558B2F),
+      "homeGoods": Color(0xFFE65100),
+      "fitness": Color(0xFFC62828),
+      "food": Color(0xFFE65100),
+      "travel": Color(0xFF00838F),
+      "healthWellness": Color(0xFF2E7D32),
+      "sports": Color(0xFF1B5E20),
+      "insurance": Color(0xFF283593),
+      "energy": Color(0xFFEF6C00),
+      "petsupplies": Color(0xFF2E7D32),
+      "homegoods": Color(0xFFE65100),
+      "health_wellness": Color(0xFF2E7D32),
+      "home_goods": Color(0xFFE65100),
+      "pet_supplies": Color(0xFF2E7D32),
     };
-    final Map<String, String> categoryIcons = {
+    const Map<String, String> categoryAssets = {
+      "electronics": "assets/category_icons/electronics.png",
+      "furniture": "assets/category_icons/furniture.png",
+      "tools": "assets/category_icons/tools.png",
+      "beauty": "assets/category_icons/beauty.png",
+      "petSupplies": "assets/category_icons/pet_supplies.png",
+      "pet_supplies": "assets/category_icons/pet_supplies.png",
+      "petsupplies": "assets/category_icons/pet_supplies.png",
+      "apparel": "assets/category_icons/apparel.png",
+      "automotive": "assets/category_icons/automotive.png",
+      "grocery": "assets/category_icons/grocery.png",
+      "homeGoods": "assets/category_icons/home_goods.png",
+      "home_goods": "assets/category_icons/home_goods.png",
+      "homegoods": "assets/category_icons/home_goods.png",
+      "food": "assets/category_icons/food.png",
+      "travel": "assets/category_icons/travel.png",
+      "healthWellness": "assets/category_icons/health_wellness.png",
+      "health_wellness": "assets/category_icons/health_wellness.png",
+      "sports": "assets/category_icons/sports.png",
+      "insurance": "assets/category_icons/insurance.png",
+      "energy": "assets/category_icons/energy.png",
+    };
+    const Map<String, String> categoryEmoji = {
       "electronics": "\u{1F4BB}",
       "furniture": "\u{1F6CB}",
       "tools": "\u{1F6E0}",
@@ -204,12 +237,28 @@ class DealCard extends StatelessWidget {
       "homeGoods": "\u{1F3E0}",
       "fitness": "\u{1F3CB}\u{FE0F}",
     };
-    final color = categoryColors[deal.category] ?? const Color(0xFF0075C9);
-    final icon = categoryIcons[deal.category] ?? "\u{1F3F7}";
+    final key = deal.category;
+    final color = categoryColors[key] ?? const Color(0xFF0075C9);
+    final asset = categoryAssets[key];
     return Container(
       color: color,
       child: Center(
-        child: Text(icon, style: const TextStyle(fontSize: 40)),
+        child: asset != null
+            ? Padding(
+                padding: const EdgeInsets.all(12),
+                child: Image.asset(
+                  asset,
+                  fit: BoxFit.contain,
+                  errorBuilder: (_, __, ___) => Text(
+                    categoryEmoji[key] ?? "\u{1F3F7}",
+                    style: const TextStyle(fontSize: 40),
+                  ),
+                ),
+              )
+            : Text(
+                categoryEmoji[key] ?? "\u{1F3F7}",
+                style: const TextStyle(fontSize: 40),
+              ),
       ),
     );
   }
