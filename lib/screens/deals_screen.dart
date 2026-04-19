@@ -233,105 +233,212 @@ class _DealsScreenState extends State<DealsScreen> {
                 }
                 return Consumer<WishlistProvider>(
                   builder: (context, wishlist, _) {
-                    // Pick featured deal: biggest discount % among deals
-                    // that have a real product image AND a real discount.
-                    // Falls back to deals.first if nothing qualifies (e.g.,
-                    // all deals are missing images). This auto-rotates as
-                    // the underlying data changes — no more permanent green
-                    // KONG placeholder.
-                    Deal featuredDeal = deals.first;
-                    double bestDiscount = -1;
-                    for (final d in deals) {
-                      if (d.imageUrl.isEmpty) continue;
-                      if (d.originalPrice == null ||
-                          d.originalPrice! <= d.price) continue;
-                      final pct =
-                          (d.originalPrice! - d.price) / d.originalPrice!;
-                      if (pct > bestDiscount) {
-                        bestDiscount = pct;
-                        featuredDeal = d;
-                      }
-                    }
-                    final otherDeals = deals
-                        .where((d) => d.id != featuredDeal.id)
-                        .toList();
+                    return StreamBuilder<DocumentSnapshot>(
+                      // "Recommended for You" hero — three-tier picker:
+                      //
+                      //   1. TIME-OF-DAY ROTATION (preferred): if the doc has
+                      //      a `rotation` array, walk it and pick the entry
+                      //      whose [startHour, endHour) matches the user's
+                      //      current local hour. Wrap-around windows allowed
+                      //      (e.g., startHour:22, endHour:5 = 10pm–5am).
+                      //   2. ADMIN OVERRIDE: if no rotation matches but the
+                      //      doc has a `dealId`, use that.
+                      //   3. AUTO FALLBACK: highest-discount-with-image.
+                      //
+                      // Doc shape (Firebase Console editable, no rebuild):
+                      //   featured/current_recommended
+                      //     enabled: true
+                      //     rotation: [
+                      //       { dealId, badgeText, startHour, endHour }, ...
+                      //     ]
+                      //     dealId: <fallback if rotation misses>
+                      //     badgeText: <fallback badge>
+                      //
+                      // Strategy lives in memory/roadmap_visual_features.md.
+                      stream: FirebaseFirestore.instance
+                          .doc("featured/current_recommended")
+                          .snapshots(),
+                      builder: (context, recSnap) {
+                        Deal heroDeal = deals.first;
+                        bool isAdminCurated = false;
+                        String? badgeText;
 
-                    return SingleChildScrollView(
-                      padding: const EdgeInsets.all(16),
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          // ── Deal Count ──
-                          Text(
-                            "${deals.length} deals found today",
-                            style: TextStyle(
-                              fontSize: 13,
-                              color: Colors.grey.shade600,
-                              fontWeight: FontWeight.w500,
-                            ),
-                          ),
-                          const SizedBox(height: 12),
-                          // ── Featured Deal ──
-                          Text(
-                            "Featured Deal",
-                            style: Theme.of(context)
-                                .textTheme
-                                .titleLarge
-                                ?.copyWith(fontWeight: FontWeight.bold),
-                          ),
-                          const SizedBox(height: 12),
-                          DealCard(
-                            deal: featuredDeal,
-                            isInWishlist:
-                                wishlist.isWishlisted(featuredDeal.id),
-                            onWishlistToggle: () =>
-                                wishlist.toggleWishlist(featuredDeal),
-                            onTap: () => Navigator.pushNamed(
-                              context,
-                              "/deal-detail",
-                              arguments: featuredDeal,
-                            ),
-                          ),
-                          if (otherDeals.isNotEmpty) ...[
-                            const SizedBox(height: 24),
-                            Text(
-                              "More Deals",
-                              style: Theme.of(context)
-                                  .textTheme
-                                  .titleLarge
-                                  ?.copyWith(fontWeight: FontWeight.bold),
-                            ),
-                            const SizedBox(height: 12),
-                            GridView.builder(
-                              shrinkWrap: true,
-                              physics: const NeverScrollableScrollPhysics(),
-                              itemCount: otherDeals.length,
-                              gridDelegate:
-                                  const SliverGridDelegateWithFixedCrossAxisCount(
-                                crossAxisCount: 2,
-                                childAspectRatio: 0.72,
-                                crossAxisSpacing: 12,
-                                mainAxisSpacing: 12,
+                        if (recSnap.hasData && recSnap.data!.exists) {
+                          final data = recSnap.data!.data()
+                              as Map<String, dynamic>?;
+                          if (data != null && data["enabled"] == true) {
+                            String? pickedDealId;
+                            // 1. Try time-of-day rotation
+                            final rotation = data["rotation"] as List<dynamic>?;
+                            if (rotation != null && rotation.isNotEmpty) {
+                              final hour = DateTime.now().hour;
+                              for (final entry in rotation) {
+                                if (entry is! Map) continue;
+                                final m = entry as Map<dynamic, dynamic>;
+                                final s = (m["startHour"] as num?)?.toInt();
+                                final e = (m["endHour"] as num?)?.toInt();
+                                final id = m["dealId"] as String?;
+                                if (s == null || e == null || id == null) continue;
+                                final inWindow = s < e
+                                    ? (hour >= s && hour < e)
+                                    : (hour >= s || hour < e); // wrap-around
+                                if (inWindow) {
+                                  pickedDealId = id;
+                                  badgeText = m["badgeText"] as String?;
+                                  break;
+                                }
+                              }
+                            }
+                            // 2. Fall back to single dealId override
+                            pickedDealId ??= data["dealId"] as String?;
+                            badgeText ??= data["badgeText"] as String?;
+
+                            if (pickedDealId != null) {
+                              for (final d in deals) {
+                                if (d.id == pickedDealId) {
+                                  heroDeal = d;
+                                  isAdminCurated = true;
+                                  break;
+                                }
+                              }
+                            }
+                          }
+                        }
+
+                        if (!isAdminCurated) {
+                          // 3. Auto fallback — biggest discount % with image
+                          badgeText = null;
+                          double bestDiscount = -1;
+                          for (final d in deals) {
+                            if (d.imageUrl.isEmpty) continue;
+                            if (d.originalPrice == null ||
+                                d.originalPrice! <= d.price) continue;
+                            final pct = (d.originalPrice! - d.price) /
+                                d.originalPrice!;
+                            if (pct > bestDiscount) {
+                              bestDiscount = pct;
+                              heroDeal = d;
+                            }
+                          }
+                        }
+
+                        final otherDeals = deals
+                            .where((d) => d.id != heroDeal.id)
+                            .toList();
+
+                        return SingleChildScrollView(
+                          padding: const EdgeInsets.all(16),
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              // ── Deal Count ──
+                              Text(
+                                "${deals.length} deals found today",
+                                style: TextStyle(
+                                  fontSize: 13,
+                                  color: Colors.grey.shade600,
+                                  fontWeight: FontWeight.w500,
+                                ),
                               ),
-                              itemBuilder: (context, index) {
-                                final deal = otherDeals[index];
-                                return DealCard(
-                                  deal: deal,
-                                  isInWishlist:
-                                      wishlist.isWishlisted(deal.id),
-                                  onWishlistToggle: () =>
-                                      wishlist.toggleWishlist(deal),
-                                  onTap: () => Navigator.pushNamed(
-                                    context,
-                                    "/deal-detail",
-                                    arguments: deal,
+                              const SizedBox(height: 12),
+                              // ── Recommended for You ──
+                              Row(
+                                children: [
+                                  const Text("💡 ", style: TextStyle(fontSize: 22)),
+                                  Text(
+                                    "Recommended for You",
+                                    style: Theme.of(context)
+                                        .textTheme
+                                        .titleLarge
+                                        ?.copyWith(fontWeight: FontWeight.bold),
                                   ),
-                                );
-                              },
-                            ),
-                          ],
-                        ],
-                      ),
+                                  if (badgeText != null && badgeText.isNotEmpty) ...[
+                                    const SizedBox(width: 8),
+                                    Container(
+                                      padding: const EdgeInsets.symmetric(
+                                        horizontal: 8,
+                                        vertical: 4,
+                                      ),
+                                      decoration: BoxDecoration(
+                                        color: const Color(0xFFF5C518),
+                                        borderRadius: BorderRadius.circular(8),
+                                      ),
+                                      child: Text(
+                                        badgeText,
+                                        style: const TextStyle(
+                                          fontSize: 10,
+                                          fontWeight: FontWeight.w800,
+                                          color: Color(0xFF062245),
+                                        ),
+                                      ),
+                                    ),
+                                  ],
+                                ],
+                              ),
+                              const SizedBox(height: 2),
+                              Text(
+                                "Save today on what you'd buy anyway",
+                                style: TextStyle(
+                                  fontSize: 12,
+                                  color: Colors.grey.shade600,
+                                  fontStyle: FontStyle.italic,
+                                ),
+                              ),
+                              const SizedBox(height: 12),
+                              DealCard(
+                                deal: heroDeal,
+                                isInWishlist:
+                                    wishlist.isWishlisted(heroDeal.id),
+                                onWishlistToggle: () =>
+                                    wishlist.toggleWishlist(heroDeal),
+                                onTap: () => Navigator.pushNamed(
+                                  context,
+                                  "/deal-detail",
+                                  arguments: heroDeal,
+                                ),
+                              ),
+                              if (otherDeals.isNotEmpty) ...[
+                                const SizedBox(height: 24),
+                                Text(
+                                  "More Deals",
+                                  style: Theme.of(context)
+                                      .textTheme
+                                      .titleLarge
+                                      ?.copyWith(fontWeight: FontWeight.bold),
+                                ),
+                                const SizedBox(height: 12),
+                                GridView.builder(
+                                  shrinkWrap: true,
+                                  physics: const NeverScrollableScrollPhysics(),
+                                  itemCount: otherDeals.length,
+                                  gridDelegate:
+                                      const SliverGridDelegateWithFixedCrossAxisCount(
+                                    crossAxisCount: 2,
+                                    childAspectRatio: 0.72,
+                                    crossAxisSpacing: 12,
+                                    mainAxisSpacing: 12,
+                                  ),
+                                  itemBuilder: (context, index) {
+                                    final deal = otherDeals[index];
+                                    return DealCard(
+                                      deal: deal,
+                                      isInWishlist:
+                                          wishlist.isWishlisted(deal.id),
+                                      onWishlistToggle: () =>
+                                          wishlist.toggleWishlist(deal),
+                                      onTap: () => Navigator.pushNamed(
+                                        context,
+                                        "/deal-detail",
+                                        arguments: deal,
+                                      ),
+                                    );
+                                  },
+                                ),
+                              ],
+                            ],
+                          ),
+                        );
+                      },
                     );
                   },
                 );
