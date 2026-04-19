@@ -233,6 +233,29 @@ class _DealsScreenState extends State<DealsScreen> {
                 }
                 return Consumer<WishlistProvider>(
                   builder: (context, wishlist, _) {
+                    // Pick featured deal: biggest discount % among deals
+                    // that have a real product image AND a real discount.
+                    // Falls back to deals.first if nothing qualifies (e.g.,
+                    // all deals are missing images). This auto-rotates as
+                    // the underlying data changes — no more permanent green
+                    // KONG placeholder.
+                    Deal featuredDeal = deals.first;
+                    double bestDiscount = -1;
+                    for (final d in deals) {
+                      if (d.imageUrl.isEmpty) continue;
+                      if (d.originalPrice == null ||
+                          d.originalPrice! <= d.price) continue;
+                      final pct =
+                          (d.originalPrice! - d.price) / d.originalPrice!;
+                      if (pct > bestDiscount) {
+                        bestDiscount = pct;
+                        featuredDeal = d;
+                      }
+                    }
+                    final otherDeals = deals
+                        .where((d) => d.id != featuredDeal.id)
+                        .toList();
+
                     return SingleChildScrollView(
                       padding: const EdgeInsets.all(16),
                       child: Column(
@@ -258,17 +281,18 @@ class _DealsScreenState extends State<DealsScreen> {
                           ),
                           const SizedBox(height: 12),
                           DealCard(
-                            deal: deals.first,
-                            isInWishlist: wishlist.isWishlisted(deals.first.id),
+                            deal: featuredDeal,
+                            isInWishlist:
+                                wishlist.isWishlisted(featuredDeal.id),
                             onWishlistToggle: () =>
-                                wishlist.toggleWishlist(deals.first),
+                                wishlist.toggleWishlist(featuredDeal),
                             onTap: () => Navigator.pushNamed(
                               context,
                               "/deal-detail",
-                              arguments: deals.first,
+                              arguments: featuredDeal,
                             ),
                           ),
-                          if (deals.length > 1) ...[
+                          if (otherDeals.isNotEmpty) ...[
                             const SizedBox(height: 24),
                             Text(
                               "More Deals",
@@ -281,7 +305,7 @@ class _DealsScreenState extends State<DealsScreen> {
                             GridView.builder(
                               shrinkWrap: true,
                               physics: const NeverScrollableScrollPhysics(),
-                              itemCount: deals.length - 1,
+                              itemCount: otherDeals.length,
                               gridDelegate:
                                   const SliverGridDelegateWithFixedCrossAxisCount(
                                 crossAxisCount: 2,
@@ -290,7 +314,7 @@ class _DealsScreenState extends State<DealsScreen> {
                                 mainAxisSpacing: 12,
                               ),
                               itemBuilder: (context, index) {
-                                final deal = deals[index + 1];
+                                final deal = otherDeals[index];
                                 return DealCard(
                                   deal: deal,
                                   isInWishlist:
