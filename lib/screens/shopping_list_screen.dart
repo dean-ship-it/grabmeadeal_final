@@ -433,15 +433,33 @@ class _ShoppingListScreenState extends State<ShoppingListScreen> {
                     const Spacer(),
                     // Curbside button
                     if (_currentTab == 0)
-                      IconButton(
-                        icon: Image.asset(
-                          "assets/icons/curbside.png",
-                          width: 32,
-                          height: 32,
-                          fit: BoxFit.contain,
+                      InkWell(
+                        onTap: _showCurbsideSheet,
+                        borderRadius: BorderRadius.circular(10),
+                        child: Padding(
+                          padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 4),
+                          child: Column(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              Image.asset(
+                                "assets/icons/curbside.png",
+                                width: 40,
+                                height: 40,
+                                fit: BoxFit.contain,
+                              ),
+                              const SizedBox(height: 2),
+                              const Text(
+                                "Order Curbside",
+                                style: TextStyle(
+                                  color: Colors.white,
+                                  fontSize: 10,
+                                  fontWeight: FontWeight.w700,
+                                  letterSpacing: 0.2,
+                                ),
+                              ),
+                            ],
+                          ),
                         ),
-                        tooltip: "Order Curbside",
-                        onPressed: _showCurbsideSheet,
                       )
                     else
                       const SizedBox(width: 48),
