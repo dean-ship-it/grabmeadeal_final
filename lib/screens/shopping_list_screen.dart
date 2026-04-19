@@ -609,9 +609,10 @@ class _ShoppingListScreenState extends State<ShoppingListScreen> {
           // ── List Content ──
           Expanded(
             child: StreamBuilder<QuerySnapshot>(
+              // Single-field orderBy — no composite index required.
+              // Checked vs unchecked items get separated client-side below.
               stream: _listRef
-                  ?.orderBy("checked")
-                  .orderBy("addedAt", descending: true)
+                  ?.orderBy("addedAt", descending: true)
                   .snapshots(),
               builder: (context, snapshot) {
                 if (snapshot.connectionState == ConnectionState.waiting) {
