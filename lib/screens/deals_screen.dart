@@ -59,15 +59,60 @@ class _DealsScreenState extends State<DealsScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        centerTitle: true,
-        title: const Text(
-          "Grab Me A Deal",
-          style: TextStyle(
-            fontWeight: FontWeight.w800,
-            fontSize: 22,
-            color: Colors.white,
-            letterSpacing: 0.5,
-          ),
+        centerTitle: false,
+        titleSpacing: 12,
+        toolbarHeight: 64,
+        title: Row(
+          children: [
+            Container(
+              width: 44,
+              height: 44,
+              decoration: BoxDecoration(
+                borderRadius: BorderRadius.circular(10),
+                boxShadow: [
+                  BoxShadow(
+                    color: const Color(0xFFF5C518).withValues(alpha: 0.3),
+                    blurRadius: 8,
+                    offset: const Offset(0, 2),
+                  ),
+                ],
+              ),
+              child: ClipRRect(
+                borderRadius: BorderRadius.circular(10),
+                child: Image.asset(
+                  "assets/logo/launcher_v2_cropped.png",
+                  fit: BoxFit.cover,
+                ),
+              ),
+            ),
+            const SizedBox(width: 12),
+            const Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Text(
+                    "Grab Me A Deal",
+                    style: TextStyle(
+                      fontWeight: FontWeight.w800,
+                      fontSize: 18,
+                      color: Colors.white,
+                      letterSpacing: 0.3,
+                    ),
+                  ),
+                  Text(
+                    "Your Personal Shopping Engine",
+                    style: TextStyle(
+                      fontSize: 10,
+                      fontWeight: FontWeight.w400,
+                      color: Colors.white70,
+                      letterSpacing: 0.3,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ],
         ),
         backgroundColor: Theme.of(context).colorScheme.primary,
         elevation: 0,
@@ -188,83 +233,11 @@ class _DealsScreenState extends State<DealsScreen> {
                 }
                 return Consumer<WishlistProvider>(
                   builder: (context, wishlist, _) {
-                    // Calculate average savings per deal (not total — keeps it realistic)
-                    int dealsWithSavings = 0;
-                    double sumSavings = 0;
-                    for (final deal in deals) {
-                      if (deal.originalPrice != null && deal.originalPrice! > deal.price) {
-                        sumSavings += (deal.originalPrice! - deal.price);
-                        dealsWithSavings++;
-                      }
-                    }
-                    // Show savings for a typical 5-item shopping trip
-                    final avgSavingsPerDeal = dealsWithSavings > 0
-                        ? sumSavings / dealsWithSavings
-                        : 0.0;
-                    final totalSavings = (avgSavingsPerDeal * 5).clamp(0, 999);
                     return SingleChildScrollView(
                       padding: const EdgeInsets.all(16),
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          // ── Savings Banner ──
-                          if (totalSavings > 0)
-                            Container(
-                              margin: const EdgeInsets.only(bottom: 16),
-                              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-                              decoration: BoxDecoration(
-                                gradient: const LinearGradient(
-                                  colors: [Color(0xFF004A8D), Color(0xFF0075C9)],
-                                  begin: Alignment.centerLeft,
-                                  end: Alignment.centerRight,
-                                ),
-                                borderRadius: BorderRadius.circular(12),
-                              ),
-                              child: Row(
-                                children: [
-                                  const Text("💰", style: TextStyle(fontSize: 24)),
-                                  const SizedBox(width: 12),
-                                  Expanded(
-                                    child: Column(
-                                      crossAxisAlignment: CrossAxisAlignment.start,
-                                      children: [
-                                        const Text(
-                                          "Today's Total Savings",
-                                          style: TextStyle(
-                                            color: Colors.white70,
-                                            fontSize: 12,
-                                            fontWeight: FontWeight.w500,
-                                          ),
-                                        ),
-                                        Text(
-                                          "Save up to \$${totalSavings.toStringAsFixed(0)} on your next trip!",
-                                          style: const TextStyle(
-                                            color: Colors.white,
-                                            fontSize: 18,
-                                            fontWeight: FontWeight.w800,
-                                          ),
-                                        ),
-                                      ],
-                                    ),
-                                  ),
-                                  Container(
-                                    padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
-                                    decoration: BoxDecoration(
-                                      color: const Color(0xFFA6CE39),
-                                      borderRadius: BorderRadius.circular(20),
-                                    ),
-                                    child: const Text(
-                                      "Shop Now",
-                                      style: TextStyle(
-                                        color: Colors.black,
-                                        fontSize: 12,
-                                        fontWeight: FontWeight.w700,
-                                      ),
-                                    ),
-                                  ),
-                                ],
-                              ),
-                            ),
                           // ── Deal Count ──
                           Text(
                             "${deals.length} deals found today",
@@ -348,6 +321,8 @@ class _DealsScreenState extends State<DealsScreen> {
 }
 
 // ── Category Banner ──────────────────────────────────────────────────────────
+// Two-row grid: row 1 = first 6 categories, row 2 = remaining 5 + a "More" tile
+// linking to the full Categories screen.
 
 class _CategoryBanner extends StatelessWidget {
   const _CategoryBanner();
@@ -355,62 +330,146 @@ class _CategoryBanner extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final categories = DealCategory.values;
+    final row1 = categories.take(6).toList();
+    final row2 = categories.skip(6).toList(); // 5 categories
+
     return Container(
-      height: 90,
       color: const Color(0xFF0075C9),
-      child: ListView.builder(
-        scrollDirection: Axis.horizontal,
-        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
-        itemCount: categories.length,
-        itemBuilder: (context, index) {
-          final category = categories[index];
-          return Padding(
-            padding: const EdgeInsets.only(right: 10),
-            child: GestureDetector(
-              onTap: () => Navigator.push(
-                context,
-                MaterialPageRoute(
-                  builder: (_) => CategoryDealsScreen(category: category),
-                ),
-              ),
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  Container(
-                    width: 52,
-                    height: 52,
-                    decoration: BoxDecoration(
-                      color: const Color(0xFF004A8D),
-                      borderRadius: BorderRadius.circular(14),
-                      boxShadow: [
-                        BoxShadow(
-                          color: Colors.black.withOpacity(0.18),
-                          blurRadius: 4,
-                          offset: const Offset(0, 2),
-                        ),
-                      ],
+      padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 10),
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              for (final c in row1)
+                Expanded(child: _CategoryTile(category: c)),
+            ],
+          ),
+          const SizedBox(height: 8),
+          Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              for (final c in row2)
+                Expanded(child: _CategoryTile(category: c)),
+              const Expanded(child: _MoreTile()),
+            ],
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _CategoryTile extends StatelessWidget {
+  final DealCategory category;
+  const _CategoryTile({required this.category});
+
+  @override
+  Widget build(BuildContext context) {
+    return GestureDetector(
+      onTap: () => Navigator.push(
+        context,
+        MaterialPageRoute(
+          builder: (_) => CategoryDealsScreen(category: category),
+        ),
+      ),
+      child: Padding(
+        padding: const EdgeInsets.all(3),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            AspectRatio(
+              aspectRatio: 1,
+              child: Container(
+                decoration: BoxDecoration(
+                  color: const Color(0xFF004A8D),
+                  borderRadius: BorderRadius.circular(14),
+                  boxShadow: [
+                    BoxShadow(
+                      color: Colors.black.withOpacity(0.18),
+                      blurRadius: 4,
+                      offset: const Offset(0, 2),
                     ),
-                    child: Center(
+                  ],
+                ),
+                child: Padding(
+                  padding: const EdgeInsets.all(4),
+                  child: Image.asset(
+                    category.asset,
+                    fit: BoxFit.contain,
+                    errorBuilder: (context, error, stackTrace) => Center(
                       child: Text(
                         category.icon,
-                        style: const TextStyle(fontSize: 26),
+                        style: const TextStyle(fontSize: 28),
                       ),
                     ),
                   ),
-                  const SizedBox(height: 4),
-                  Text(
-                    category.label.split(" ").first,
-                    style: const TextStyle(
-                      fontSize: 10,
-                      fontWeight: FontWeight.w500,
-                      color: Colors.white,
-                    ),
-                  ),
-                ],
+                ),
               ),
             ),
-          );
-        },
+            const SizedBox(height: 3),
+            Text(
+              category.label.split(" ").first,
+              style: const TextStyle(
+                fontSize: 10,
+                fontWeight: FontWeight.w500,
+                color: Colors.white,
+              ),
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class _MoreTile extends StatelessWidget {
+  const _MoreTile();
+
+  @override
+  Widget build(BuildContext context) {
+    return GestureDetector(
+      onTap: () => Navigator.pushNamed(context, "/categories"),
+      child: Padding(
+        padding: const EdgeInsets.all(3),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            AspectRatio(
+              aspectRatio: 1,
+              child: Container(
+                decoration: BoxDecoration(
+                  color: const Color(0xFF004A8D),
+                  borderRadius: BorderRadius.circular(14),
+                  boxShadow: [
+                    BoxShadow(
+                      color: Colors.black.withOpacity(0.18),
+                      blurRadius: 4,
+                      offset: const Offset(0, 2),
+                    ),
+                  ],
+                ),
+                child: const Center(
+                  child: Icon(Icons.apps, color: Colors.white, size: 28),
+                ),
+              ),
+            ),
+            const SizedBox(height: 3),
+            const Text(
+              "More",
+              style: TextStyle(
+                fontSize: 10,
+                fontWeight: FontWeight.w500,
+                color: Colors.white,
+              ),
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
+            ),
+          ],
+        ),
       ),
     );
   }

@@ -1,7 +1,7 @@
 name: grabmeadeal_final
 description: A new Flutter project for deal discovery and wishlist management.
 publish_to: "none"
-version: 1.0.1+2
+version: 1.0.2+3
 
 environment:
   sdk: ">=3.8.0 <4.0.0"
@@ -53,3 +53,4 @@ flutter:
     - assets/icons/
     - assets/sounds/
     - assets/logo/
+    - assets/category_icons/

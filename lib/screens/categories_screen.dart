@@ -55,11 +55,22 @@ class _CategoryCard extends StatelessWidget {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Text(
-              category.icon,
-              style: const TextStyle(fontSize: 36),
+            Expanded(
+              child: Padding(
+                padding: const EdgeInsets.fromLTRB(8, 8, 8, 4),
+                child: Image.asset(
+                  category.asset,
+                  fit: BoxFit.contain,
+                  errorBuilder: (context, error, stackTrace) => Center(
+                    child: Text(
+                      category.icon,
+                      style: const TextStyle(fontSize: 56),
+                    ),
+                  ),
+                ),
+              ),
             ),
-            const SizedBox(height: 10),
+            const SizedBox(height: 4),
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: 8),
               child: Text(
