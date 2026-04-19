@@ -6,6 +6,7 @@
 import "package:cloud_firestore/cloud_firestore.dart";
 import "package:firebase_auth/firebase_auth.dart";
 import "package:flutter/material.dart";
+import "package:speech_to_text/speech_to_text.dart";
 import "package:url_launcher/url_launcher.dart";
 
 import "../services/barcode_lookup.dart";
@@ -79,6 +80,9 @@ class ShoppingListScreen extends StatefulWidget {
 class _ShoppingListScreenState extends State<ShoppingListScreen> {
   final _addController = TextEditingController();
   final _firestore = FirebaseFirestore.instance;
+  final SpeechToText _speech = SpeechToText();
+  bool _speechReady = false;
+  bool _isListening = false;
   String? _uid;
   int _currentTab = 0; // 0=Shopping, 1=Pantry, 2=To Do
   String _selectedList = "groceries";
@@ -87,10 +91,67 @@ class _ShoppingListScreenState extends State<ShoppingListScreen> {
   void initState() {
     super.initState();
     _uid = FirebaseAuth.instance.currentUser?.uid;
+    _initSpeech();
+  }
+
+  Future<void> _initSpeech() async {
+    try {
+      final available = await _speech.initialize(
+        onStatus: (status) {
+          // Called with "listening", "notListening", "done".
+          if (mounted && status == "notListening" && _isListening) {
+            setState(() => _isListening = false);
+          }
+        },
+        onError: (err) {
+          if (mounted) {
+            setState(() => _isListening = false);
+            ScaffoldMessenger.of(context).showSnackBar(
+              SnackBar(content: Text("Voice error: ${err.errorMsg}")),
+            );
+          }
+        },
+      );
+      if (mounted) setState(() => _speechReady = available);
+    } catch (_) {
+      // Device doesn't support it (e.g., some embedded browsers). Leave
+      // _speechReady = false; the mic button will show a polite snackbar.
+    }
+  }
+
+  Future<void> _toggleListening() async {
+    if (!_speechReady) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text("Voice input not supported on this device/browser")),
+      );
+      return;
+    }
+    if (_isListening) {
+      await _speech.stop();
+      setState(() => _isListening = false);
+      return;
+    }
+    setState(() => _isListening = true);
+    await _speech.listen(
+      onResult: (result) {
+        // Show the transcript live in the input field.
+        _addController.text = result.recognizedWords;
+        // When the user stops speaking, commit it.
+        if (result.finalResult && result.recognizedWords.trim().isNotEmpty) {
+          _addItem(result.recognizedWords);
+        }
+      },
+      listenOptions: SpeechListenOptions(
+        partialResults: true,
+        listenMode: ListenMode.confirmation,
+        cancelOnError: true,
+      ),
+    );
   }
 
   @override
   void dispose() {
+    _speech.stop();
     _addController.dispose();
     super.dispose();
   }
@@ -580,12 +641,15 @@ class _ShoppingListScreenState extends State<ShoppingListScreen> {
                               mainAxisSize: MainAxisSize.min,
                               children: [
                                 IconButton(
-                                  icon: Icon(Icons.mic_outlined, color: Colors.grey.shade500, size: 22),
-                                  onPressed: () {
-                                    ScaffoldMessenger.of(context).showSnackBar(
-                                      const SnackBar(content: Text("Voice input coming soon!")),
-                                    );
-                                  },
+                                  icon: Icon(
+                                    _isListening ? Icons.mic : Icons.mic_outlined,
+                                    color: _isListening
+                                        ? Colors.redAccent
+                                        : Colors.grey.shade500,
+                                    size: 22,
+                                  ),
+                                  tooltip: _isListening ? "Stop listening" : "Voice input",
+                                  onPressed: _toggleListening,
                                 ),
                                 IconButton(
                                   icon: Icon(Icons.qr_code_scanner, color: Colors.grey.shade500, size: 22),
