@@ -319,19 +319,35 @@ class _ShoppingListScreenState extends State<ShoppingListScreen> {
       return;
     }
     final query = items.take(5).join(" ");
+    final q = Uri.encodeComponent(query);
     Uri url;
+    // HEB and Costco are unmonetized goodwill — neither has a public
+    // affiliate program. The other four are affiliate targets and will
+    // get Rakuten/Impact/Amazon-Associates deep-link wrapping once each
+    // network approves the program. See reference_affiliate_accounts.md
+    // for account status.
     switch (store) {
       case "heb":
-        url = Uri.parse("https://www.heb.com/search/?q=${Uri.encodeComponent(query)}");
-        break;
-      case "walmart":
-        url = Uri.parse("https://www.walmart.com/search?q=${Uri.encodeComponent(query)}&cat_id=976759");
+        url = Uri.parse("https://www.heb.com/search/?q=$q");
         break;
       case "costco":
-        url = Uri.parse("https://www.costco.com/CatalogSearch?keyword=${Uri.encodeComponent(query)}");
+        url = Uri.parse("https://www.costco.com/CatalogSearch?keyword=$q");
+        break;
+      case "walmart":
+        // TODO: wrap in Rakuten deeplink once Walmart program approved (SID 4692019)
+        url = Uri.parse("https://www.walmart.com/search?q=$q&cat_id=976759");
         break;
       case "target":
-        url = Uri.parse("https://www.target.com/s?searchTerm=${Uri.encodeComponent(query)}&category=5xt1a");
+        // TODO: wrap in Impact deeplink once Brand→Publisher ticket resolves
+        url = Uri.parse("https://www.target.com/s?searchTerm=$q&category=5xt1a");
+        break;
+      case "amazon_fresh":
+        // TODO: append &tag=<amazon-associates-tag> once Amazon approval lands
+        url = Uri.parse("https://www.amazon.com/alm/search?k=$q");
+        break;
+      case "instacart":
+        // TODO: wrap in Impact deeplink once Brand→Publisher ticket resolves
+        url = Uri.parse("https://www.instacart.com/store/s?k=$q");
         break;
       default:
         return;
@@ -376,9 +392,13 @@ class _ShoppingListScreenState extends State<ShoppingListScreen> {
             const SizedBox(height: 8),
             _storeBtn("Walmart Pickup", "Free · No minimum order", const Color(0xFF0071DC), "🔵", () { Navigator.pop(ctx); _orderCurbside("walmart"); }),
             const SizedBox(height: 8),
-            _storeBtn("Costco Same-Day", "Order online · Warehouse pickup", const Color(0xFFE31837), "📦", () { Navigator.pop(ctx); _orderCurbside("costco"); }),
-            const SizedBox(height: 8),
             _storeBtn("Target Drive Up", "Free · Ready in 2 hours", const Color(0xFFCC0000), "🎯", () { Navigator.pop(ctx); _orderCurbside("target"); }),
+            const SizedBox(height: 8),
+            _storeBtn("Amazon Fresh", "Prime · Same-day delivery", const Color(0xFF232F3E), "📦", () { Navigator.pop(ctx); _orderCurbside("amazon_fresh"); }),
+            const SizedBox(height: 8),
+            _storeBtn("Instacart", "Multiple stores · 1-hour delivery", const Color(0xFF43B02A), "🛒", () { Navigator.pop(ctx); _orderCurbside("instacart"); }),
+            const SizedBox(height: 8),
+            _storeBtn("Costco Same-Day", "Members only · Warehouse pickup", const Color(0xFFE31837), "🏬", () { Navigator.pop(ctx); _orderCurbside("costco"); }),
           ],
         ),
       ),
