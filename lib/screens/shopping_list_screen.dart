@@ -469,64 +469,35 @@ class _ShoppingListScreenState extends State<ShoppingListScreen> {
                       Text(listLabel, style: const TextStyle(
                         color: Colors.white, fontWeight: FontWeight.w700, fontSize: 16)),
                     const Spacer(),
-                    // Quick actions — Curbside + Scan, stacked vertically
+                    // Curbside button
                     if (_currentTab == 0)
-                      Column(
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          InkWell(
-                            onTap: _showCurbsideSheet,
-                            borderRadius: BorderRadius.circular(10),
-                            child: Padding(
-                              padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
-                              child: Column(
-                                mainAxisSize: MainAxisSize.min,
-                                children: [
-                                  Image.asset(
-                                    "assets/icons/curbside.png",
-                                    width: 50,
-                                    height: 50,
-                                    fit: BoxFit.contain,
-                                  ),
-                                  const SizedBox(height: 2),
-                                  const Text(
-                                    "Order Curbside",
-                                    style: TextStyle(
-                                      color: Colors.white,
-                                      fontSize: 10,
-                                      fontWeight: FontWeight.w700,
-                                      letterSpacing: 0.2,
-                                    ),
-                                  ),
-                                ],
+                      InkWell(
+                        onTap: _showCurbsideSheet,
+                        borderRadius: BorderRadius.circular(10),
+                        child: Padding(
+                          padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                          child: Column(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              Image.asset(
+                                "assets/icons/curbside.png",
+                                width: 50,
+                                height: 50,
+                                fit: BoxFit.contain,
                               ),
-                            ),
-                          ),
-                          const SizedBox(height: 4),
-                          InkWell(
-                            onTap: _scanBarcode,
-                            borderRadius: BorderRadius.circular(10),
-                            child: Padding(
-                              padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
-                              child: Column(
-                                mainAxisSize: MainAxisSize.min,
-                                children: const [
-                                  Icon(Icons.qr_code_scanner, color: Colors.white, size: 40),
-                                  SizedBox(height: 2),
-                                  Text(
-                                    "Scan Barcode",
-                                    style: TextStyle(
-                                      color: Colors.white,
-                                      fontSize: 10,
-                                      fontWeight: FontWeight.w700,
-                                      letterSpacing: 0.2,
-                                    ),
-                                  ),
-                                ],
+                              const SizedBox(height: 2),
+                              const Text(
+                                "Order Curbside",
+                                style: TextStyle(
+                                  color: Colors.white,
+                                  fontSize: 10,
+                                  fontWeight: FontWeight.w700,
+                                  letterSpacing: 0.2,
+                                ),
                               ),
-                            ),
+                            ],
                           ),
-                        ],
+                        ),
                       )
                     else
                       const SizedBox(width: 48),
