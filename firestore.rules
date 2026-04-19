@@ -15,11 +15,12 @@ service cloud.firestore {
       allow write: if false;
     }
 
-    // Users — own data only
+    // Users — own data only, recursive match so all subcollections
+    // (shoppingList_*, pantryList, todoList, wants, etc.) are covered.
     match /users/{uid} {
       allow read, write: if request.auth != null && request.auth.uid == uid;
 
-      match /wants/{wantId} {
+      match /{document=**} {
         allow read, write: if request.auth != null && request.auth.uid == uid;
       }
     }
