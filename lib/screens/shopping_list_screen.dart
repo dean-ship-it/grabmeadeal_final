@@ -876,15 +876,17 @@ class _ShoppingListScreenState extends State<ShoppingListScreen> {
       onDismissed: (_) => _listRef?.doc(doc.id).delete(),
       child: Container(
         color: rowColor,
-        // Lime left-edge stripe when a deal is matched — the visual anchor that
-        // makes deal-matched rows pop down the length of a long list.
-        child: Row(
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: [
-            if (hasDeal)
-              Container(width: 4, color: const Color(0xFFA6CE39))
-            else
-              const SizedBox(width: 4),
+        // IntrinsicHeight gives the Row a concrete height derived from the
+        // tallest child, so the stretch-aligned left-edge stripe can fill
+        // that height instead of collapsing to zero.
+        child: IntrinsicHeight(
+          child: Row(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              if (hasDeal)
+                Container(width: 4, color: const Color(0xFFA6CE39))
+              else
+                const SizedBox(width: 4),
             Expanded(
               child: InkWell(
                 onTap: () => _toggleChecked(doc.id, isChecked),
@@ -1010,6 +1012,7 @@ class _ShoppingListScreenState extends State<ShoppingListScreen> {
               ),
             ),
           ],
+        ),
         ),
       ),
     );
