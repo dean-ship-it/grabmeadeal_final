@@ -73,7 +73,7 @@ class AnimatedCurbsidePickupIcon extends StatefulWidget {
     this.bounceHeight = 6,
     this.bounceDuration = const Duration(milliseconds: 900),
     this.pauseDuration = const Duration(milliseconds: 600),
-    this.pinAlignment = const Alignment(0.0, -0.45),
+    this.pinAlignment = const Alignment(0.0, -0.15),
     this.pinSizeRatio = 0.36,
     this.reduceMotion = false,
     this.semanticLabel = "Curbside pickup",
