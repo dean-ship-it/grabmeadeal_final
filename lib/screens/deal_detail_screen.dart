@@ -6,6 +6,7 @@ import "package:grabmeadeal_final/models/deal.dart";
 import "package:grabmeadeal_final/providers/puzzle_provider.dart";
 import "package:grabmeadeal_final/providers/want_list_provider.dart";
 import "package:grabmeadeal_final/providers/wishlist_provider.dart";
+import "package:grabmeadeal_final/utils/affiliate_links.dart";
 
 class DealDetailScreen extends StatelessWidget {
   final Deal? deal;
@@ -23,7 +24,8 @@ class DealDetailScreen extends StatelessWidget {
       }
     }
 
-    final uri = Uri.tryParse(url);
+    final wrapped = wrapAffiliate(url, customId: "app-dealdetail");
+    final uri = Uri.tryParse(wrapped);
     if (uri == null) {
       if (context.mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
