@@ -28,7 +28,12 @@ jobs:
         run: flutter analyze --no-fatal-infos
 
       - name: Run tests
-        run: flutter test --no-pub
+        run: |
+          if [ -d test ] && [ -n "$(ls -A test 2>/dev/null)" ]; then
+            flutter test --no-pub
+          else
+            echo "No tests to run — skipping."
+          fi
 
       - name: Build Android APK
         run: flutter build apk --release
