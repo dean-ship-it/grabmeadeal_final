@@ -1,8 +1,8 @@
 // lib/routes/app_routes.dart
 
 import "package:flutter/material.dart";
+import "package:grabmeadeal_final/screens/admin_deal_uploader_screen.dart";
 import "package:grabmeadeal_final/screens/admin_login_screen.dart";
-import "package:grabmeadeal_final/screens/admin_upload_screen.dart";
 import "package:grabmeadeal_final/screens/auth_gate.dart";
 import "package:grabmeadeal_final/screens/auth_screen.dart";
 import "package:grabmeadeal_final/screens/categories_screen.dart";
@@ -82,7 +82,7 @@ class AppRoutes {
         );
       case adminUpload:
         return MaterialPageRoute(
-          builder: (_) => const AdminUploadScreen(),
+          builder: (_) => const AdminDealUploaderScreen(),
         );
       case puzzle:
         return MaterialPageRoute(
