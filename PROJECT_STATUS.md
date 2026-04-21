@@ -202,7 +202,7 @@ lib/
 │   ├── search_results_screen.dart   # Full-text client-side search
 │   ├── notifications_screen.dart    # FCM notification history
 │   ├── puzzle_reward_screen.dart    # Puzzle + Spin-to-Win wheel
-│   ├── admin_upload_screen.dart     # Deal upload form
+│   ├── admin_deal_uploader_screen.dart  # Deal upload form (paste URL → Microlink auto-fill)
 │   └── admin_login_screen.dart      # Admin Google Sign-In + whitelist check
 ├── services/
 │   ├── notification_service.dart    # FCM singleton + local notifications

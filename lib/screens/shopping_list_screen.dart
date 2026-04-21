@@ -10,6 +10,7 @@ import "package:flutter/services.dart";
 import "package:speech_to_text/speech_to_text.dart";
 import "package:url_launcher/url_launcher.dart";
 
+import "../services/amazon_affiliate.dart";
 import "../services/barcode_lookup.dart";
 import "../widgets/animated_curbside_pickup_icon.dart";
 import "barcode_scanner_screen.dart";
@@ -420,8 +421,9 @@ class _ShoppingListScreenState extends State<ShoppingListScreen> {
         url = Uri.parse("https://www.target.com/s?searchTerm=$q&category=5xt1a");
         break;
       case "amazon_fresh":
-        // TODO: append &tag=<amazon-associates-tag> once Amazon approval lands
-        url = Uri.parse("https://www.amazon.com/alm/search?k=$q");
+        url = Uri.parse(addAmazonAffiliateTag(
+          "https://www.amazon.com/alm/search?k=$q",
+        ));
         break;
       case "instacart":
         // TODO: wrap in Impact deeplink once Brand→Publisher ticket resolves

@@ -6,6 +6,7 @@ import "package:grabmeadeal_final/models/deal.dart";
 import "package:grabmeadeal_final/providers/puzzle_provider.dart";
 import "package:grabmeadeal_final/providers/want_list_provider.dart";
 import "package:grabmeadeal_final/providers/wishlist_provider.dart";
+import "package:grabmeadeal_final/services/amazon_affiliate.dart";
 
 class DealDetailScreen extends StatelessWidget {
   final Deal? deal;
@@ -23,7 +24,10 @@ class DealDetailScreen extends StatelessWidget {
       }
     }
 
-    final uri = Uri.tryParse(url);
+    // Tag Amazon URLs with our Associates ID so click-throughs earn
+    // commission. No-op for non-Amazon hosts.
+    final taggedUrl = addAmazonAffiliateTag(url);
+    final uri = Uri.tryParse(taggedUrl);
     if (uri == null) {
       if (context.mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
