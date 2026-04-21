@@ -23,7 +23,7 @@ class PuzzleProgress {
     "electronics",
     "furniture",
     "tools",
-    "gaming",
+    "sports",
     "beauty",
     "petSupplies",
     "apparel",

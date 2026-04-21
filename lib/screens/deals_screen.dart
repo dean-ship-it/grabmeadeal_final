@@ -262,7 +262,7 @@ class _DealsScreenState extends State<DealsScreen> {
                               final hour = DateTime.now().hour;
                               for (final entry in rotation) {
                                 if (entry is! Map) continue;
-                                final m = entry as Map<dynamic, dynamic>;
+                                final m = entry;
                                 final s = (m["startHour"] as num?)?.toInt();
                                 final e = (m["endHour"] as num?)?.toInt();
                                 final id = m["dealId"] as String?;

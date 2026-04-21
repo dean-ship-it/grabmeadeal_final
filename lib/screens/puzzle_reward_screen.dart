@@ -15,7 +15,7 @@ const _pieceColors = [
   Color(0xFF1565C0), // Electronics
   Color(0xFF6D4C41), // Furniture
   Color(0xFF455A64), // Tools
-  Color(0xFF7B1FA2), // Gaming
+  Color(0xFF7B1FA2), // Sports
   Color(0xFFD81B60), // Beauty
   Color(0xFF2E7D32), // Pet Supplies
   Color(0xFFEF6C00), // Apparel
@@ -275,7 +275,7 @@ class _PuzzleRewardScreenState extends State<PuzzleRewardScreen>
       final int n;
       final bool complete;
       if (_kDemoMode) {
-        unlocked = {"electronics", "furniture", "tools", "gaming",
+        unlocked = {"electronics", "furniture", "tools", "sports",
                      "beauty", "petSupplies", "apparel", "automotive"};
         n = 8;
         complete = true;
