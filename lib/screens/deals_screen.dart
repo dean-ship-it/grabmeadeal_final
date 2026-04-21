@@ -56,6 +56,19 @@ class _DealsScreenState extends State<DealsScreen> {
             .toList());
   }
 
+  // Vendors whose product images block hot-linking from other origins.
+  // Their images 403 when CachedNetworkImage tries to fetch them from
+  // our web app, which collapses the hero to the placeholder tag icon
+  // and looks like the card is broken. Match is case-insensitive
+  // substring so "Poshmark", "poshmark.com", "Posh Mark Seller" all hit.
+  // These deals still render in the More Deals grid — a 120-pixel
+  // fallback thumbnail reads as far less broken than a 220-pixel hero.
+  static const Set<String> _heroVendorBlocklist = {
+    "poshmark",
+    "ebay",
+    "craigslist",
+  };
+
   // Guard for the auto-pick hero fallback. We want the hero slot to always
   // look like a real, trustworthy deal — so we reject anything that would
   // render as junk (the SAVE $88,863 / 100% OFF empty-card case):
@@ -64,8 +77,10 @@ class _DealsScreenState extends State<DealsScreen> {
   //   - price must be > 0 (free items produce nonsensical 100% OFF badges)
   //   - must have a real sale (originalPrice > price)
   //   - discount pct must be believable (≤ 95%)
-  //   - savings amount sanity: no more than 20× the current price
-  //     (catches bad originalPrice data like $88,863 off a $1 item)
+  //   - savings amount sanity: no more than 10× the current price
+  //     (catches bad originalPrice data like $88,863 off a $1 item,
+  //     or the $1000→$53 Poshmark "Sale Bundles" kind of noise)
+  //   - vendor must not be a known hot-link-blocker (hero renders blank)
   static bool _isHeroEligible(Deal d) {
     if (d.title.trim().isEmpty) return false;
     if (d.imageUrl.isEmpty) return false;
@@ -75,7 +90,11 @@ class _DealsScreenState extends State<DealsScreen> {
     final savings = op - d.price;
     final pct = savings / op;
     if (pct > 0.95) return false;
-    if (savings > d.price * 20) return false;
+    if (savings > d.price * 10) return false;
+    final vendor = d.vendor.toLowerCase();
+    for (final bad in _heroVendorBlocklist) {
+      if (vendor.contains(bad)) return false;
+    }
     return true;
   }
 

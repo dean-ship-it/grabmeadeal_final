@@ -2,6 +2,7 @@
 
 import "dart:async";
 import "package:firebase_core/firebase_core.dart";
+import "package:flutter/gestures.dart";
 import "package:flutter/material.dart";
 import "package:provider/provider.dart";
 import "package:grabmeadeal_final/firebase_options.dart";
@@ -47,6 +48,10 @@ class GrabMeADealApp extends StatelessWidget {
         debugShowCheckedModeBanner: false,
         initialRoute: AppRoutes.root,
         onGenerateRoute: AppRoutes.onGenerate,
+        // Enable mouse + trackpad drag-to-scroll on web/desktop. Default
+        // MaterialScrollBehavior only registers touch + stylus, which
+        // leaves laptop visitors unable to scroll the deal grid.
+        scrollBehavior: const _AppScrollBehavior(),
         // Constrain to phone-width on wide screens (web/desktop) so the
         // mobile-first layout doesn't stretch awkwardly. On phones this
         // is a no-op (screen width < maxWidth).
@@ -77,4 +82,16 @@ class GrabMeADealApp extends StatelessWidget {
       ),
     );
   }
+}
+
+class _AppScrollBehavior extends MaterialScrollBehavior {
+  const _AppScrollBehavior();
+
+  @override
+  Set<PointerDeviceKind> get dragDevices => const {
+        PointerDeviceKind.touch,
+        PointerDeviceKind.stylus,
+        PointerDeviceKind.mouse,
+        PointerDeviceKind.trackpad,
+      };
 }
