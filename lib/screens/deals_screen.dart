@@ -56,6 +56,29 @@ class _DealsScreenState extends State<DealsScreen> {
             .toList());
   }
 
+  // Guard for the auto-pick hero fallback. We want the hero slot to always
+  // look like a real, trustworthy deal — so we reject anything that would
+  // render as junk (the SAVE $88,863 / 100% OFF empty-card case):
+  //   - title must exist (unnamed items look broken)
+  //   - image must exist (the hero is image-led)
+  //   - price must be > 0 (free items produce nonsensical 100% OFF badges)
+  //   - must have a real sale (originalPrice > price)
+  //   - discount pct must be believable (≤ 95%)
+  //   - savings amount sanity: no more than 20× the current price
+  //     (catches bad originalPrice data like $88,863 off a $1 item)
+  static bool _isHeroEligible(Deal d) {
+    if (d.title.trim().isEmpty) return false;
+    if (d.imageUrl.isEmpty) return false;
+    if (d.price <= 0) return false;
+    final op = d.originalPrice;
+    if (op == null || op <= d.price) return false;
+    final savings = op - d.price;
+    final pct = savings / op;
+    if (pct > 0.95) return false;
+    if (savings > d.price * 20) return false;
+    return true;
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -247,7 +270,7 @@ class _DealsScreenState extends State<DealsScreen> {
                           .doc("featured/current_recommended")
                           .snapshots(),
                       builder: (context, recSnap) {
-                        Deal heroDeal = deals.first;
+                        Deal? heroDeal;
                         bool isAdminCurated = false;
                         String? badgeText;
 
@@ -294,13 +317,14 @@ class _DealsScreenState extends State<DealsScreen> {
                         }
 
                         if (!isAdminCurated) {
-                          // 3. Auto fallback — biggest discount % with image
+                          // 3. Auto fallback — pick highest-discount deal that
+                          // passes sanity checks. If nothing qualifies, leave
+                          // heroDeal null and we hide the Recommended section
+                          // entirely rather than showing a junk card.
                           badgeText = null;
                           double bestDiscount = -1;
                           for (final d in deals) {
-                            if (d.imageUrl.isEmpty) continue;
-                            if (d.originalPrice == null ||
-                                d.originalPrice! <= d.price) continue;
+                            if (!_isHeroEligible(d)) continue;
                             final pct = (d.originalPrice! - d.price) /
                                 d.originalPrice!;
                             if (pct > bestDiscount) {
@@ -310,9 +334,9 @@ class _DealsScreenState extends State<DealsScreen> {
                           }
                         }
 
-                        final otherDeals = deals
-                            .where((d) => d.id != heroDeal.id)
-                            .toList();
+                        final otherDeals = heroDeal == null
+                            ? deals
+                            : deals.where((d) => d.id != heroDeal!.id).toList();
 
                         return SingleChildScrollView(
                           padding: const EdgeInsets.all(16),
@@ -329,62 +353,64 @@ class _DealsScreenState extends State<DealsScreen> {
                                 ),
                               ),
                               const SizedBox(height: 12),
-                              // ── Recommended for You ──
-                              Row(
-                                children: [
-                                  const Text("💡 ", style: TextStyle(fontSize: 22)),
-                                  Text(
-                                    "Recommended for You",
-                                    style: Theme.of(context)
-                                        .textTheme
-                                        .titleLarge
-                                        ?.copyWith(fontWeight: FontWeight.bold),
-                                  ),
-                                  if (badgeText != null && badgeText.isNotEmpty) ...[
-                                    const SizedBox(width: 8),
-                                    Container(
-                                      padding: const EdgeInsets.symmetric(
-                                        horizontal: 8,
-                                        vertical: 4,
-                                      ),
-                                      decoration: BoxDecoration(
-                                        color: const Color(0xFFF5C518),
-                                        borderRadius: BorderRadius.circular(8),
-                                      ),
-                                      child: Text(
-                                        badgeText,
-                                        style: const TextStyle(
-                                          fontSize: 10,
-                                          fontWeight: FontWeight.w800,
-                                          color: Color(0xFF062245),
+                              if (heroDeal != null) ...[
+                                // ── Recommended for You ──
+                                Row(
+                                  children: [
+                                    const Text("💡 ", style: TextStyle(fontSize: 22)),
+                                    Text(
+                                      "Recommended for You",
+                                      style: Theme.of(context)
+                                          .textTheme
+                                          .titleLarge
+                                          ?.copyWith(fontWeight: FontWeight.bold),
+                                    ),
+                                    if (badgeText != null && badgeText.isNotEmpty) ...[
+                                      const SizedBox(width: 8),
+                                      Container(
+                                        padding: const EdgeInsets.symmetric(
+                                          horizontal: 8,
+                                          vertical: 4,
+                                        ),
+                                        decoration: BoxDecoration(
+                                          color: const Color(0xFFF5C518),
+                                          borderRadius: BorderRadius.circular(8),
+                                        ),
+                                        child: Text(
+                                          badgeText,
+                                          style: const TextStyle(
+                                            fontSize: 10,
+                                            fontWeight: FontWeight.w800,
+                                            color: Color(0xFF062245),
+                                          ),
                                         ),
                                       ),
-                                    ),
+                                    ],
                                   ],
-                                ],
-                              ),
-                              const SizedBox(height: 2),
-                              Text(
-                                "Save today on what you'd buy anyway",
-                                style: TextStyle(
-                                  fontSize: 12,
-                                  color: Colors.grey.shade600,
-                                  fontStyle: FontStyle.italic,
                                 ),
-                              ),
-                              const SizedBox(height: 12),
-                              HeroDealCard(
-                                deal: heroDeal,
-                                isInWishlist:
-                                    wishlist.isWishlisted(heroDeal.id),
-                                onWishlistToggle: () =>
-                                    wishlist.toggleWishlist(heroDeal),
-                                onTap: () => Navigator.pushNamed(
-                                  context,
-                                  "/deal-detail",
-                                  arguments: heroDeal,
+                                const SizedBox(height: 2),
+                                Text(
+                                  "Save today on what you'd buy anyway",
+                                  style: TextStyle(
+                                    fontSize: 12,
+                                    color: Colors.grey.shade600,
+                                    fontStyle: FontStyle.italic,
+                                  ),
                                 ),
-                              ),
+                                const SizedBox(height: 12),
+                                HeroDealCard(
+                                  deal: heroDeal,
+                                  isInWishlist:
+                                      wishlist.isWishlisted(heroDeal.id),
+                                  onWishlistToggle: () =>
+                                      wishlist.toggleWishlist(heroDeal!),
+                                  onTap: () => Navigator.pushNamed(
+                                    context,
+                                    "/deal-detail",
+                                    arguments: heroDeal,
+                                  ),
+                                ),
+                              ],
                               if (otherDeals.isNotEmpty) ...[
                                 const SizedBox(height: 24),
                                 Text(

@@ -37,12 +37,16 @@ class HeroDealCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final hasSavings =
-        deal.originalPrice != null && deal.originalPrice! > deal.price;
-    final savingsAmount = hasSavings ? deal.originalPrice! - deal.price : 0.0;
-    final savingsPct = hasSavings
-        ? ((savingsAmount / deal.originalPrice!) * 100).round()
-        : 0;
+    // Only show SAVE badge when the savings are both real and believable.
+    // Free items (price ≤ 0) would otherwise render as "100% OFF" with a
+    // huge savings amount pulled from a stale/bad originalPrice; and pct
+    // over 95 is almost always bad data, not a deal.
+    final hasRealPrice = deal.price > 0;
+    final op = deal.originalPrice;
+    final hasSavings = hasRealPrice && op != null && op > deal.price;
+    final savingsAmount = hasSavings ? op - deal.price : 0.0;
+    final savingsPct = hasSavings ? ((savingsAmount / op) * 100).round() : 0;
+    final showSaveBadge = hasSavings && savingsPct <= 95;
 
     return Container(
       decoration: BoxDecoration(
@@ -81,7 +85,7 @@ class HeroDealCard extends StatelessWidget {
                         : _fallback(),
                   ),
                   // Gold "SAVE $X" badge (top right) — the splash element
-                  if (hasSavings)
+                  if (showSaveBadge)
                     Positioned(
                       top: 12,
                       right: 12,
@@ -197,7 +201,7 @@ class HeroDealCard extends StatelessWidget {
                     Row(
                       crossAxisAlignment: CrossAxisAlignment.end,
                       children: [
-                        if (deal.price > 0) ...[
+                        if (hasRealPrice) ...[
                           Text(
                             "\$${deal.price.toStringAsFixed(2)}",
                             style: TextStyle(
@@ -207,12 +211,12 @@ class HeroDealCard extends StatelessWidget {
                               height: 1.0,
                             ),
                           ),
-                          if (hasSavings) ...[
+                          if (showSaveBadge) ...[
                             const SizedBox(width: 8),
                             Padding(
                               padding: const EdgeInsets.only(bottom: 2),
                               child: Text(
-                                "\$${deal.originalPrice!.toStringAsFixed(0)}",
+                                "\$${op.toStringAsFixed(0)}",
                                 style: TextStyle(
                                   decoration: TextDecoration.lineThrough,
                                   color: Colors.grey.shade500,
