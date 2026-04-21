@@ -432,6 +432,7 @@ class _ShoppingListScreenState extends State<ShoppingListScreen> {
       default:
         return;
     }
+    debugPrint("[Affiliate] Launching ($store): $url");
     try {
       final launched = await launchUrl(url, mode: LaunchMode.platformDefault);
       if (!launched && mounted) {

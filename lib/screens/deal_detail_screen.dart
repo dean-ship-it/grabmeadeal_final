@@ -37,6 +37,7 @@ class DealDetailScreen extends StatelessWidget {
       return;
     }
 
+    debugPrint("[Affiliate] Launching: $taggedUrl");
     if (!await launchUrl(uri, mode: LaunchMode.externalApplication)) {
       if (context.mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
