@@ -16,7 +16,7 @@ class PuzzleProvider extends ChangeNotifier {
     {"category": "electronics", "icon": "💻", "label": "Electronics"},
     {"category": "furniture", "icon": "🛋", "label": "Furniture"},
     {"category": "tools", "icon": "🛠", "label": "Tools"},
-    {"category": "gaming", "icon": "🎮", "label": "Gaming"},
+    {"category": "sports", "icon": "🏈", "label": "Sports"},
     {"category": "beauty", "icon": "💄", "label": "Beauty"},
     {"category": "petSupplies", "icon": "🐾", "label": "Pet Supplies"},
     {"category": "apparel", "icon": "👕", "label": "Apparel"},
@@ -45,7 +45,20 @@ class PuzzleProvider extends ChangeNotifier {
           .doc(uid)
           .get();
       if (doc.exists) {
-        _progress = PuzzleProgress.fromMap(doc.data()!);
+        var loaded = PuzzleProgress.fromMap(doc.data()!);
+        // Migration: gaming piece retired 2026-04-19, replaced by sports.
+        // Preserve the user's unlock count by swapping the key.
+        if (loaded.unlockedCategories.contains("gaming")) {
+          final migrated = {...loaded.unlockedCategories}
+            ..remove("gaming")
+            ..add("sports");
+          loaded = loaded.copyWith(unlockedCategories: migrated);
+          await FirebaseFirestore.instance
+              .collection("puzzle_progress")
+              .doc(uid)
+              .set(loaded.toMap());
+        }
+        _progress = loaded;
       } else {
         _progress = PuzzleProgress.empty(uid);
       }
