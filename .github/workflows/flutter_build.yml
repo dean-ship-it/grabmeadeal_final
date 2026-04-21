@@ -49,7 +49,10 @@ jobs:
 
       - name: Build Android APK
         id: android_build
-        run: flutter build apk --release -v 2>&1 | tee /tmp/flutter_build.log
+        shell: bash
+        run: |
+          set -eo pipefail
+          flutter build apk --release -v 2>&1 | tee /tmp/flutter_build.log
 
       - name: Show gradle failure details
         if: failure() && steps.android_build.outcome == 'failure'
