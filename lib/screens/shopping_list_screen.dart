@@ -11,6 +11,7 @@ import "package:speech_to_text/speech_to_text.dart";
 import "package:url_launcher/url_launcher.dart";
 
 import "../services/barcode_lookup.dart";
+import "../utils/affiliate_links.dart";
 import "../widgets/animated_curbside_pickup_icon.dart";
 import "barcode_scanner_screen.dart";
 
@@ -420,8 +421,10 @@ class _ShoppingListScreenState extends State<ShoppingListScreen> {
         url = Uri.parse("https://www.target.com/s?searchTerm=$q&category=5xt1a");
         break;
       case "amazon_fresh":
-        // TODO: append &tag=<amazon-associates-tag> once Amazon approval lands
-        url = Uri.parse("https://www.amazon.com/alm/search?k=$q");
+        url = Uri.parse(wrapAffiliate(
+          "https://www.amazon.com/alm/search?k=$q",
+          customId: "app-curbside",
+        ));
         break;
       case "instacart":
         // TODO: wrap in Impact deeplink once Brand→Publisher ticket resolves
@@ -493,6 +496,12 @@ class _ShoppingListScreenState extends State<ShoppingListScreen> {
             _storeBtn("Instacart", "Multiple stores · 1-hour delivery", const Color(0xFF43B02A), "🛒", () { Navigator.pop(ctx); _orderCurbside("instacart"); }),
             const SizedBox(height: 8),
             _storeBtn("Costco Same-Day", "Members only · Warehouse pickup", const Color(0xFFE31837), "🏬", () { Navigator.pop(ctx); _orderCurbside("costco"); }),
+            const SizedBox(height: 16),
+            Text(
+              "As an Amazon Associate we earn from qualifying purchases. Other store links may also earn us a commission at no cost to you.",
+              textAlign: TextAlign.center,
+              style: TextStyle(fontSize: 11, color: Colors.grey.shade600, height: 1.35),
+            ),
           ],
         ),
       ),
@@ -744,11 +753,26 @@ class _ShoppingListScreenState extends State<ShoppingListScreen> {
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
                         if (_currentTab == 0)
-                          Image.asset(
-                            "assets/category_icons/grocery.png",
-                            width: 96,
-                            height: 96,
-                            fit: BoxFit.contain,
+                          TweenAnimationBuilder<double>(
+                            duration: const Duration(milliseconds: 900),
+                            curve: Curves.bounceOut,
+                            tween: Tween<double>(begin: 0.0, end: 1.0),
+                            builder: (BuildContext context, double value,
+                                Widget? child) {
+                              return Opacity(
+                                opacity: value.clamp(0.0, 1.0),
+                                child: Transform.translate(
+                                  offset: Offset(0, -60 * (1 - value)),
+                                  child: child,
+                                ),
+                              );
+                            },
+                            child: Image.asset(
+                              "assets/logo/launcher_v2_cropped.png",
+                              width: 140,
+                              height: 140,
+                              fit: BoxFit.contain,
+                            ),
                           )
                         else
                           Text(
@@ -761,7 +785,7 @@ class _ShoppingListScreenState extends State<ShoppingListScreen> {
                               ? "Track what you have at home"
                               : _currentTab == 2
                                   ? "Add tasks to your to-do list"
-                                  : "Start adding items!",
+                                  : "Ready to grab some deals?",
                           style: TextStyle(fontSize: 16, color: Colors.grey.shade600),
                         ),
                         const SizedBox(height: 4),

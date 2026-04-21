@@ -166,12 +166,34 @@ class _SavedDealsTab extends StatelessWidget {
         padding: const EdgeInsets.symmetric(horizontal: 32),
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Icon(Icons.favorite_border_rounded,
-                size: 80, color: Colors.grey.shade400),
+          children: <Widget>[
+            TweenAnimationBuilder<double>(
+              duration: const Duration(milliseconds: 850),
+              curve: Curves.elasticOut,
+              tween: Tween<double>(begin: 0.0, end: 1.0),
+              builder: (BuildContext context, double value, Widget? child) {
+                final double clamped = value.clamp(0.0, 1.0);
+                return Opacity(
+                  opacity: clamped,
+                  child: Transform.scale(
+                    scale: 0.4 + (value * 0.6),
+                    child: Transform.rotate(
+                      angle: (1 - clamped) * 0.18,
+                      child: child,
+                    ),
+                  ),
+                );
+              },
+              child: Image.asset(
+                "assets/logo/launcher_v2_cropped.png",
+                width: 180,
+                height: 180,
+                fit: BoxFit.contain,
+              ),
+            ),
             const SizedBox(height: 20),
             const Text(
-              "No saved deals yet.\nTap the heart on any deal to save it!",
+              "No saved deals yet.\nTap the heart on any deal to grab it!",
               textAlign: TextAlign.center,
               style: TextStyle(
                   fontSize: 16, color: Colors.black54, height: 1.5),

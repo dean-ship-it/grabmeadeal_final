@@ -5,11 +5,16 @@ import "package:flutter/material.dart";
 import "package:provider/provider.dart";
 import "package:grabmeadeal_final/models/deal.dart";
 import "package:grabmeadeal_final/models/deal_category.dart";
+import "package:grabmeadeal_final/models/ticketmaster_event.dart";
 import "package:grabmeadeal_final/providers/wishlist_provider.dart";
 import "package:grabmeadeal_final/screens/category_deals_screen.dart";
 import "package:grabmeadeal_final/services/deal_detective_service.dart";
+import "package:grabmeadeal_final/services/ticketmaster_service.dart";
+import "package:grabmeadeal_final/utils/affiliate_links.dart";
 import "package:grabmeadeal_final/widgets/deal_card.dart";
 import "package:grabmeadeal_final/widgets/hero_deal_card.dart";
+import "package:grabmeadeal_final/widgets/ticketmaster_featured_card.dart";
+import "package:url_launcher/url_launcher.dart";
 
 class DealsScreen extends StatefulWidget {
   const DealsScreen({super.key});
@@ -20,6 +25,20 @@ class DealsScreen extends StatefulWidget {
 
 class _DealsScreenState extends State<DealsScreen> {
   bool _detectiveActive = false;
+  late final Future<TicketmasterEvent?> _featuredEventFuture;
+
+  @override
+  void initState() {
+    super.initState();
+    _featuredEventFuture = TicketmasterService.fetchFeaturedEvent();
+  }
+
+  Future<void> _launchEventUrl(String url) async {
+    final String wrapped = wrapAffiliate(url, customId: "app-featured-tm");
+    final Uri? uri = Uri.tryParse(wrapped);
+    if (uri == null) return;
+    await launchUrl(uri, mode: LaunchMode.externalApplication);
+  }
 
   void _toggleDetective() async {
     final detective = DealDetectiveService.instance;
@@ -373,17 +392,30 @@ class _DealsScreenState extends State<DealsScreen> {
                                 ),
                               ),
                               const SizedBox(height: 12),
-                              HeroDealCard(
-                                deal: heroDeal,
-                                isInWishlist:
-                                    wishlist.isWishlisted(heroDeal.id),
-                                onWishlistToggle: () =>
-                                    wishlist.toggleWishlist(heroDeal),
-                                onTap: () => Navigator.pushNamed(
-                                  context,
-                                  "/deal-detail",
-                                  arguments: heroDeal,
-                                ),
+                              FutureBuilder<TicketmasterEvent?>(
+                                future: _featuredEventFuture,
+                                builder: (BuildContext context,
+                                    AsyncSnapshot<TicketmasterEvent?> snap) {
+                                  final TicketmasterEvent? event = snap.data;
+                                  if (event != null) {
+                                    return TicketmasterFeaturedCard(
+                                      event: event,
+                                      onTap: () => _launchEventUrl(event.url),
+                                    );
+                                  }
+                                  return HeroDealCard(
+                                    deal: heroDeal,
+                                    isInWishlist:
+                                        wishlist.isWishlisted(heroDeal.id),
+                                    onWishlistToggle: () =>
+                                        wishlist.toggleWishlist(heroDeal),
+                                    onTap: () => Navigator.pushNamed(
+                                      context,
+                                      "/deal-detail",
+                                      arguments: heroDeal,
+                                    ),
+                                  );
+                                },
                               ),
                               if (otherDeals.isNotEmpty) ...[
                                 const SizedBox(height: 24),

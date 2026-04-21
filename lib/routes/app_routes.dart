@@ -8,6 +8,7 @@ import "package:grabmeadeal_final/screens/auth_screen.dart";
 import "package:grabmeadeal_final/screens/categories_screen.dart";
 import "package:grabmeadeal_final/screens/deal_detail_screen.dart";
 import "package:grabmeadeal_final/screens/deals_screen.dart";
+import "package:grabmeadeal_final/screens/events_screen.dart";
 import "package:grabmeadeal_final/screens/main_tab_controller.dart";
 import "package:grabmeadeal_final/screens/notifications_screen.dart";
 import "package:grabmeadeal_final/screens/search_results_screen.dart";
@@ -24,6 +25,7 @@ class AppRoutes {
   static const String home          = "/home";
   static const String auth          = "/auth";
   static const String deals         = "/deals";
+  static const String events        = "/events";
   static const String wishlist      = "/wishlist";
   static const String wishlistDeals = "/wishlist";
   static const String notifications = "/notifications";
@@ -49,6 +51,10 @@ class AppRoutes {
       case deals:
         return MaterialPageRoute(
           builder: (_) => const DealsScreen(),
+        );
+      case events:
+        return MaterialPageRoute(
+          builder: (_) => const EventsScreen(),
         );
       case wishlist:
         return MaterialPageRoute(

@@ -3,6 +3,7 @@
 import "package:flutter/material.dart";
 import "package:grabmeadeal_final/screens/categories_screen.dart";
 import "package:grabmeadeal_final/screens/deals_screen.dart";
+import "package:grabmeadeal_final/screens/events_screen.dart";
 import "package:grabmeadeal_final/screens/wishlist_screen.dart";
 
 class MainTabController extends StatefulWidget {
@@ -15,8 +16,9 @@ class MainTabController extends StatefulWidget {
 class _MainTabControllerState extends State<MainTabController> {
   int _currentIndex = 0;
 
-  static const _screens = [
+  static const List<Widget> _screens = <Widget>[
     DealsScreen(),
+    EventsScreen(),
     WishlistScreen(),
     CategoriesScreen(),
   ];
@@ -27,11 +29,16 @@ class _MainTabControllerState extends State<MainTabController> {
       body: _screens[_currentIndex],
       bottomNavigationBar: BottomNavigationBar(
         currentIndex: _currentIndex,
-        onTap: (index) => setState(() => _currentIndex = index),
-        items: const [
+        type: BottomNavigationBarType.fixed,
+        onTap: (int index) => setState(() => _currentIndex = index),
+        items: const <BottomNavigationBarItem>[
           BottomNavigationBarItem(
             icon: Icon(Icons.local_offer),
             label: "Deals",
+          ),
+          BottomNavigationBarItem(
+            icon: Icon(Icons.confirmation_num_outlined),
+            label: "Events",
           ),
           BottomNavigationBarItem(
             icon: Icon(Icons.favorite),
