@@ -16,18 +16,6 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
 
-      - name: Add swap (Android build is memory-hungry on 7GB runners)
-        # Firebase + Flutter's DEX merge (mergeDexRelease) pushes the
-        # ubuntu-latest runner past 7GB RAM and gets OOM-killed.
-        # Add 6GB of additional swap on /mnt (Azure ephemeral disk) —
-        # the default /swapfile is already in use and can't be resized.
-        run: |
-          sudo fallocate -l 6G /mnt/swapfile
-          sudo chmod 600 /mnt/swapfile
-          sudo mkswap /mnt/swapfile
-          sudo swapon /mnt/swapfile
-          free -h
-
       - name: Set up Flutter
         uses: subosito/flutter-action@v2
         with:
@@ -48,21 +36,7 @@ jobs:
           fi
 
       - name: Build Android APK
-        id: android_build
-        shell: bash
-        run: |
-          set -eo pipefail
-          flutter build apk --release -v 2>&1 | tee /tmp/flutter_build.log
-
-      - name: Show gradle failure details
-        if: failure() && steps.android_build.outcome == 'failure'
-        run: |
-          echo "========== last 400 lines of flutter build log =========="
-          tail -n 400 /tmp/flutter_build.log || true
-          echo "========== gradle daemon logs =========="
-          find ~/.gradle/daemon -name "daemon-*.out.log" -exec tail -n 200 {} \; 2>/dev/null || true
-          echo "========== android/build reports =========="
-          find android/build -name "*.txt" -path "*reports*" 2>/dev/null | head -20 | xargs -I {} sh -c 'echo "--- {} ---"; cat {}' 2>/dev/null || true
+        run: flutter build apk --release
 
       - name: Upload Android artifact
         uses: actions/upload-artifact@v4
