@@ -19,12 +19,13 @@ jobs:
       - name: Add swap (Android build is memory-hungry on 7GB runners)
         # Firebase + Flutter's DEX merge (mergeDexRelease) pushes the
         # ubuntu-latest runner past 7GB RAM and gets OOM-killed.
-        # 6GB of swap absorbs the peak without slowing the common path.
+        # Add 6GB of additional swap on /mnt (Azure ephemeral disk) —
+        # the default /swapfile is already in use and can't be resized.
         run: |
-          sudo fallocate -l 6G /swapfile
-          sudo chmod 600 /swapfile
-          sudo mkswap /swapfile
-          sudo swapon /swapfile
+          sudo fallocate -l 6G /mnt/swapfile
+          sudo chmod 600 /mnt/swapfile
+          sudo mkswap /mnt/swapfile
+          sudo swapon /mnt/swapfile
           free -h
 
       - name: Set up Flutter
