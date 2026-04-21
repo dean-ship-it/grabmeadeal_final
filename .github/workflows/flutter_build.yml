@@ -48,7 +48,18 @@ jobs:
           fi
 
       - name: Build Android APK
-        run: flutter build apk --release
+        id: android_build
+        run: flutter build apk --release -v 2>&1 | tee /tmp/flutter_build.log
+
+      - name: Show gradle failure details
+        if: failure() && steps.android_build.outcome == 'failure'
+        run: |
+          echo "========== last 400 lines of flutter build log =========="
+          tail -n 400 /tmp/flutter_build.log || true
+          echo "========== gradle daemon logs =========="
+          find ~/.gradle/daemon -name "daemon-*.out.log" -exec tail -n 200 {} \; 2>/dev/null || true
+          echo "========== android/build reports =========="
+          find android/build -name "*.txt" -path "*reports*" 2>/dev/null | head -20 | xargs -I {} sh -c 'echo "--- {} ---"; cat {}' 2>/dev/null || true
 
       - name: Upload Android artifact
         uses: actions/upload-artifact@v4
