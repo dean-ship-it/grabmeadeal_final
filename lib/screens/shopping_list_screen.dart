@@ -425,6 +425,14 @@ class _ShoppingListScreenState extends State<ShoppingListScreen> {
           "https://www.amazon.com/alm/search?k=$q",
         ));
         break;
+      case "whole_foods":
+        // Whole Foods is owned by Amazon; the `i=wholefoods` scope narrows
+        // Amazon search to the Whole Foods catalog. Hosted on amazon.com
+        // so the existing Associates tagger attaches grabmeadeal-20.
+        url = Uri.parse(addAmazonAffiliateTag(
+          "https://www.amazon.com/s?k=$q&i=wholefoods",
+        ));
+        break;
       case "instacart":
         // TODO: wrap in Impact deeplink once Brand→Publisher ticket resolves
         url = Uri.parse("https://www.instacart.com/store/s?k=$q");
@@ -492,6 +500,8 @@ class _ShoppingListScreenState extends State<ShoppingListScreen> {
             _storeBtn("Target Drive Up", "Free · Ready in 2 hours", const Color(0xFFCC0000), "🎯", () { Navigator.pop(ctx); _orderCurbside("target"); }),
             const SizedBox(height: 8),
             _storeBtn("Amazon Fresh", "Prime · Same-day delivery", const Color(0xFF232F3E), "📦", () { Navigator.pop(ctx); _orderCurbside("amazon_fresh"); }),
+            const SizedBox(height: 8),
+            _storeBtn("Whole Foods", "Prime · Organic · 2-hour delivery", const Color(0xFF00674B), "🥬", () { Navigator.pop(ctx); _orderCurbside("whole_foods"); }),
             const SizedBox(height: 8),
             _storeBtn("Instacart", "Multiple stores · 1-hour delivery", const Color(0xFF43B02A), "🛒", () { Navigator.pop(ctx); _orderCurbside("instacart"); }),
             const SizedBox(height: 8),
