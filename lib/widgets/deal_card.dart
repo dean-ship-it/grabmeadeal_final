@@ -3,6 +3,7 @@
 import "package:cached_network_image/cached_network_image.dart";
 import "package:flutter/material.dart";
 import "package:grabmeadeal_final/models/deal.dart";
+import "package:grabmeadeal_final/services/deal_sanity.dart";
 
 class DealCard extends StatelessWidget {
   final Deal deal;
@@ -20,7 +21,10 @@ class DealCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final hasSavings = deal.originalPrice != null && deal.originalPrice! > deal.price;
+    // Only show the -XX% badge when the underlying savings look real.
+    // Shared predicate in deal_sanity.dart keeps grid tiles consistent
+    // with the hero card and hero auto-picker.
+    final hasSavings = hasBelievableSavings(deal);
     final savings = hasSavings ? deal.originalPrice! - deal.price : 0.0;
     final savingsPct = hasSavings
         ? ((savings / deal.originalPrice!) * 100).round()

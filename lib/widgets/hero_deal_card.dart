@@ -16,6 +16,7 @@
 import "package:cached_network_image/cached_network_image.dart";
 import "package:flutter/material.dart";
 import "package:grabmeadeal_final/models/deal.dart";
+import "package:grabmeadeal_final/services/deal_sanity.dart";
 
 class HeroDealCard extends StatelessWidget {
   final Deal deal;
@@ -38,15 +39,14 @@ class HeroDealCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     // Only show SAVE badge when the savings are both real and believable.
-    // Free items (price ≤ 0) would otherwise render as "100% OFF" with a
-    // huge savings amount pulled from a stale/bad originalPrice; and pct
-    // over 95 is almost always bad data, not a deal.
+    // Shared predicate in deal_sanity.dart keeps this in sync with the
+    // hero auto-picker and the grid tile -XX% badge.
     final hasRealPrice = deal.price > 0;
     final op = deal.originalPrice;
     final hasSavings = hasRealPrice && op != null && op > deal.price;
     final savingsAmount = hasSavings ? op - deal.price : 0.0;
     final savingsPct = hasSavings ? ((savingsAmount / op) * 100).round() : 0;
-    final showSaveBadge = hasSavings && savingsPct <= 95;
+    final showSaveBadge = hasBelievableSavings(deal);
 
     return Container(
       decoration: BoxDecoration(

@@ -8,6 +8,7 @@ import "package:grabmeadeal_final/models/deal_category.dart";
 import "package:grabmeadeal_final/providers/wishlist_provider.dart";
 import "package:grabmeadeal_final/screens/category_deals_screen.dart";
 import "package:grabmeadeal_final/services/deal_detective_service.dart";
+import "package:grabmeadeal_final/services/deal_sanity.dart";
 import "package:grabmeadeal_final/widgets/deal_card.dart";
 import "package:grabmeadeal_final/widgets/hero_deal_card.dart";
 
@@ -71,26 +72,17 @@ class _DealsScreenState extends State<DealsScreen> {
 
   // Guard for the auto-pick hero fallback. We want the hero slot to always
   // look like a real, trustworthy deal — so we reject anything that would
-  // render as junk (the SAVE $88,863 / 100% OFF empty-card case):
+  // render as junk (the SAVE $88,863 / 100% OFF empty-card case). The
+  // pricing/savings sanity check lives in deal_sanity.dart so the hero
+  // SAVE badge and the grid tile -XX% badge agree on what's "believable".
+  // Hero-only checks stay here:
   //   - title must exist (unnamed items look broken)
   //   - image must exist (the hero is image-led)
-  //   - price must be > 0 (free items produce nonsensical 100% OFF badges)
-  //   - must have a real sale (originalPrice > price)
-  //   - discount pct must be believable (≤ 95%)
-  //   - savings amount sanity: no more than 10× the current price
-  //     (catches bad originalPrice data like $88,863 off a $1 item,
-  //     or the $1000→$53 Poshmark "Sale Bundles" kind of noise)
   //   - vendor must not be a known hot-link-blocker (hero renders blank)
   static bool _isHeroEligible(Deal d) {
     if (d.title.trim().isEmpty) return false;
     if (d.imageUrl.isEmpty) return false;
-    if (d.price <= 0) return false;
-    final op = d.originalPrice;
-    if (op == null || op <= d.price) return false;
-    final savings = op - d.price;
-    final pct = savings / op;
-    if (pct > 0.95) return false;
-    if (savings > d.price * 10) return false;
+    if (!hasBelievableSavings(d)) return false;
     final vendor = d.vendor.toLowerCase();
     for (final bad in _heroVendorBlocklist) {
       if (vendor.contains(bad)) return false;
