@@ -27,8 +27,8 @@ const int kRakutenPublisherSid = 4692019;
 /// Look up a retailer's MID by opening their card on the dashboard — the
 /// header shows "MID 12345" right under the advertiser name.
 const Map<String, int> _rakutenAdvertisers = <String, int>{
-  // 'bestbuy.com': 0, // TODO: add MID once approved (Rakuten-confirmed)
-  // 'lowes.com': 0,   // TODO: add MID once approved (Rakuten-confirmed)
+  // Empty until advertiser approvals land. Add one line per approved
+  // retailer, e.g.:  'retailer.com': 12345,
 };
 
 /// Wrap a retailer URL in a Rakuten deeplink if we have an approved
